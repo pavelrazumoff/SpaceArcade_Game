@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Main App">
+      <UniqueIdentifier>{daabbebf-8eba-4ebc-8b8f-d9168872e592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{858bdf40-d7e2-4add-9c64-4fc89fe05062}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{90e89f50-3da0-4337-bc0b-5444c590e687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Miscellaneous">
+      <UniqueIdentifier>{ae5522d7-138f-47a7-a6fb-7a33696a172a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Miscellaneous">
+      <UniqueIdentifier>{2b997d4f-838f-4f4f-bcd0-a0445de25aab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Main App">
+      <UniqueIdentifier>{628fd7d9-f2a2-49fc-9937-10a60ecf3168}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{94af6002-ae9a-4857-b5cd-208da4bdb8de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Basic">
+      <UniqueIdentifier>{71de7419-bc20-4a18-ba77-8cb3eb192e56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Basic\SSAO">
+      <UniqueIdentifier>{dc784c0d-b13b-4e2a-87b1-34f49ea35f25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Blur">
+      <UniqueIdentifier>{85e47af9-9a82-4e17-971d-44fb39c16675}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Font">
+      <UniqueIdentifier>{07a40f52-05b7-467d-bc48-7b42afa6d0e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Lamp">
+      <UniqueIdentifier>{ef2b7918-bfa0-4f09-ba4d-41e34990d5a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Screen">
+      <UniqueIdentifier>{dbf1673f-b529-4809-a0a2-8b2de0856f26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SkyBox">
+      <UniqueIdentifier>{0395c177-4e2f-42a6-bf57-6676a4c9aaf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SSAO">
+      <UniqueIdentifier>{a9a221b9-80f8-49a7-a457-0db31814287b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\MainApp.h">
+      <Filter>Header Files\Main App</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Shaders\Shader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Miscellaneous\Camera.h">
+      <Filter>Header Files\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\MainData.h">
+      <Filter>Header Files\Main App</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Shaders\Shader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Miscellaneous\Camera.cpp">
+      <Filter>Source Files\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Miscellaneous\Utility.cpp">
+      <Filter>Source Files\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\MainApp.cpp">
+      <Filter>Source Files\Main App</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Input.cpp">
+      <Filter>Source Files\Main App</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\InitData.cpp">
+      <Filter>Source Files\Main App</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\DrawData.cpp">
+      <Filter>Source Files\Main App</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\LoadData.cpp">
+      <Filter>Source Files\Main App</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\BuffersData.cpp">
+      <Filter>Source Files\Main App</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Basic\SSAO\SsaoShaderFS.glsl">
+      <Filter>Shaders\Basic\SSAO</Filter>
+    </None>
+    <None Include="Shaders\Basic\SSAO\SsaoShaderVS.glsl">
+      <Filter>Shaders\Basic\SSAO</Filter>
+    </None>
+    <None Include="Shaders\Basic\FragmentShader.glsl">
+      <Filter>Shaders\Basic</Filter>
+    </None>
+    <None Include="Shaders\Basic\GeometryShader.glsl">
+      <Filter>Shaders\Basic</Filter>
+    </None>
+    <None Include="Shaders\Basic\ShadowDepthFS.glsl">
+      <Filter>Shaders\Basic</Filter>
+    </None>
+    <None Include="Shaders\Basic\ShadowDepthVS.glsl">
+      <Filter>Shaders\Basic</Filter>
+    </None>
+    <None Include="Shaders\Basic\VertexShader.glsl">
+      <Filter>Shaders\Basic</Filter>
+    </None>
+    <None Include="Shaders\Blur\BlurShaderFS.glsl">
+      <Filter>Shaders\Blur</Filter>
+    </None>
+    <None Include="Shaders\Blur\BlurShaderVS.glsl">
+      <Filter>Shaders\Blur</Filter>
+    </None>
+    <None Include="Shaders\Font\FontShaderFS.glsl">
+      <Filter>Shaders\Font</Filter>
+    </None>
+    <None Include="Shaders\Font\FontShaderVS.glsl">
+      <Filter>Shaders\Font</Filter>
+    </None>
+    <None Include="Shaders\Lamp\LampFS.glsl">
+      <Filter>Shaders\Lamp</Filter>
+    </None>
+    <None Include="Shaders\Lamp\LampVS.glsl">
+      <Filter>Shaders\Lamp</Filter>
+    </None>
+    <None Include="Shaders\SSAO\SsaoBlurFS.glsl">
+      <Filter>Shaders\SSAO</Filter>
+    </None>
+    <None Include="Shaders\SSAO\SsaoFS.glsl">
+      <Filter>Shaders\SSAO</Filter>
+    </None>
+    <None Include="Shaders\SSAO\SsaoVS.glsl">
+      <Filter>Shaders\SSAO</Filter>
+    </None>
+    <None Include="Shaders\Skybox\SkyboxShaderFS.glsl">
+      <Filter>Shaders\SkyBox</Filter>
+    </None>
+    <None Include="Shaders\Skybox\SkyboxShaderVS.glsl">
+      <Filter>Shaders\SkyBox</Filter>
+    </None>
+    <None Include="Shaders\Screen\FinalShaderFS.glsl">
+      <Filter>Shaders\Screen</Filter>
+    </None>
+    <None Include="Shaders\Screen\ScreenShaderFS.glsl">
+      <Filter>Shaders\Screen</Filter>
+    </None>
+    <None Include="Shaders\Screen\ScreenShaderVS.glsl">
+      <Filter>Shaders\Screen</Filter>
+    </None>
+  </ItemGroup>
+</Project>
