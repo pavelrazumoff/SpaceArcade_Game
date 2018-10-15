@@ -2,7 +2,7 @@
 
 SpriteRenderer::SpriteRenderer(Shader shader, int screenWidth, int screenHeight)
 {
-	init(shader, initialScreenWidth, initialScreenHeight);
+	init(shader, screenWidth, screenHeight);
 }
 
 SpriteRenderer::~SpriteRenderer()
@@ -13,18 +13,36 @@ SpriteRenderer::~SpriteRenderer()
 void SpriteRenderer::init(Shader shader, int screenWidth, int screenHeight)
 {
 	this->shader = shader;
-	this->initialScreenWidth = screenWidth;
-	this->initialScreenHeight = screenHeight;
+	this->prevScreenWidth = screenWidth;
+	this->prevScreenHeight = screenHeight;
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
+	this->initialScreenWidth = screenWidth;
+	this->initialScreenHeight = screenHeight;
+
+	screenRatio = glm::vec2(1.0f, 1.0f);
 
 	this->initRenderData();
 }
 
 void SpriteRenderer::resize(int screenWidth, int screenHeight)
 {
+	this->prevScreenWidth = this->screenWidth;
+	this->prevScreenHeight = this->screenHeight;
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
+
+	screenRatio = glm::vec2((float)screenWidth / (float)prevScreenWidth, (float)screenHeight / (float)prevScreenHeight);
+}
+
+glm::vec2 SpriteRenderer::getPrevScreenDimensions()
+{
+	return glm::vec2(prevScreenWidth, prevScreenHeight);
+}
+
+glm::vec2 SpriteRenderer::getCurrentScreenDimensions()
+{
+	return glm::vec2(screenWidth, screenHeight);
 }
 
 glm::vec2 SpriteRenderer::getInitialScreenDimensions()
@@ -32,9 +50,9 @@ glm::vec2 SpriteRenderer::getInitialScreenDimensions()
 	return glm::vec2(initialScreenWidth, initialScreenHeight);
 }
 
-glm::vec2 SpriteRenderer::getCurrentScreenDimensions()
+glm::vec2 SpriteRenderer::getScreenRatio()
 {
-	return glm::vec2(screenWidth, screenHeight);
+	return screenRatio;
 }
 
 void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2 size, GLfloat rotate)

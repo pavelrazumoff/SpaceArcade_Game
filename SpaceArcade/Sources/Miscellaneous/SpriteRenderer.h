@@ -16,15 +16,19 @@ public:
 	// Renders a defined quad textured with given sprite
 	void DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2 size = glm::vec2(10, 10), GLfloat rotate = 0.0f);
 
-	glm::vec2 getInitialScreenDimensions();
+	glm::vec2 getPrevScreenDimensions();
 	glm::vec2 getCurrentScreenDimensions();
+	glm::vec2 getInitialScreenDimensions();
+	glm::vec2 getScreenRatio();
 
 private:
 	// Render state
 	Shader shader;
 	GLuint quadVAO;
 	int screenWidth, screenHeight;
+	int prevScreenWidth, prevScreenHeight;
 	int initialScreenWidth, initialScreenHeight;
+	glm::vec2 screenRatio;
 
 	// Initializes and configures the quad's buffer and vertex attributes
 	void initRenderData();

@@ -1,18 +1,16 @@
 #include "GameLevel.h"
 
-void GameLevel::init(Texture2D cubemap, Shader cubemapShader)
+void GameLevel::init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* renderer)
 {
 	this->backgroundCubemap = cubemap;
 	this->cubemapShader = cubemapShader;
+	this->renderer = renderer;
+
+	spacecraft.setLevelPointer(this);
 }
 
-void GameLevel::Draw(SpriteRenderer &renderer)
+void GameLevel::Draw()
 {
-	glm::vec2 initialScreen = renderer.getInitialScreenDimensions();
-	glm::vec2 currentScreen = renderer.getCurrentScreenDimensions();
-
-	glm::vec2 screenRatio = glm::vec2(currentScreen.x / initialScreen.x, currentScreen.y / initialScreen.y);
-
 	// draw skybox as last.
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content.
 
@@ -31,12 +29,32 @@ void GameLevel::Draw(SpriteRenderer &renderer)
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS); // set depth function back to default.
 
-	spacecraft.Draw(renderer, screenRatio);
+	spacecraft.Draw();
+}
+
+void GameLevel::resize()
+{
+	spacecraft.resize();
 }
 
 void GameLevel::handleInput(GLFWwindow *window, float delta)
 {
 	spacecraft.handleInput(window, delta);
+}
+
+void GameLevel::setScreenIndents(glm::vec4 indents)
+{
+	screenIndents = indents;
+}
+
+glm::vec4 GameLevel::getScreenIndents()
+{
+	return screenIndents;
+}
+
+SpriteRenderer* GameLevel::getRenderer()
+{
+	return renderer;
 }
 
 GLboolean GameLevel::IsCompleted()

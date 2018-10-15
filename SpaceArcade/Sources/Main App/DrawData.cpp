@@ -30,7 +30,7 @@ void MainApp::render()
 	// skybox cube
 	glBindVertexArray(skyboxVAO);
 
-	base_level.Draw(renderer);
+	base_level.Draw();
 
 	// second render framebuffer as texture for post-processing.
 	// blit multisampled buffer(s) to normal colorbuffer of intermediate FBO. Image is stored in screenTexture.

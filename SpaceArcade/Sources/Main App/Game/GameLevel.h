@@ -9,18 +9,27 @@ public:
 	// Constructor
 	GameLevel() { }
 
-	void      init(Texture2D cubemap, Shader cubemapShader);
+	void			init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* renderer);
+	void			resize();
 	// Render level
-	void      Draw(SpriteRenderer &renderer);
+	void			Draw();
 
-	void	  handleInput(GLFWwindow *window, float delta);
+	void			handleInput(GLFWwindow *window, float delta);
+
+	void			setScreenIndents(glm::vec4 indents);
+	glm::vec4		getScreenIndents();
+
+	SpriteRenderer* getRenderer();
 
 	// Check if the level is completed (all non-solid tiles are destroyed)
-	GLboolean IsCompleted();
+	GLboolean		IsCompleted();
 public:
-	GameObject spacecraft;
+	GameObject		spacecraft;
 
 private:
-	Texture2D backgroundCubemap;
-	Shader cubemapShader;
+	Texture2D		backgroundCubemap;
+	Shader			cubemapShader;
+
+	SpriteRenderer* renderer = NULL;
+	glm::vec4		screenIndents;
 };

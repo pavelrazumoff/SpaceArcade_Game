@@ -71,6 +71,9 @@ void MainApp::initBuffers()
 
 void MainApp::initScene()
 {
-	base_level.init(res_manager.GetCubemap("BlueSpace"), res_manager.GetShader("Skybox"));
-	base_level.spacecraft.init(glm::vec2(screenWidth / 2 - 50, screenHeight - 200), glm::vec2(100, 100), res_manager.GetTexture("spacecraft"), glm::vec2(200.0f, 100.0f));
+	base_level.init(res_manager.GetCubemap("BlueSpace"), res_manager.GetShader("Skybox"), &renderer);
+	base_level.setScreenIndents(glm::vec4(10, 10, 10, 10));
+	base_level.spacecraft.init(glm::vec2(screenWidth / 2 - 50, screenHeight - 200), glm::vec2(100, 100), res_manager.GetTexture("spacecraft"), glm::vec2(400.0f, 200.0f));
+
+	base_level.resize();
 }

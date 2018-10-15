@@ -106,6 +106,7 @@ void MainApp::resize(int width, int height)
 		resizeFramebuffer(pingpongFBO[i], pingpongColorbuffers[i], -1, false, useHDR, false);
 
 	renderer.resize(screenWidth, screenHeight);
+	base_level.resize();
 }
 
 void MainApp::clearBuffers()
