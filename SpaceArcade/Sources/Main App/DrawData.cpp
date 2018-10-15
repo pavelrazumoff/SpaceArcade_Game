@@ -21,16 +21,6 @@ void MainApp::render()
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we’re not using the stencil buffer now.
 
-	// draw skybox as last.
-	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content.
-
-	skybox_shader.use();
-
-	modelMat = glm::mat4();
-	modelMat = glm::rotate(modelMat, -(float)glfwGetTime() / 10, glm::vec3(1.0f, 0.0f, 0.0f));
-	modelMat = glm::rotate(modelMat, -(float)glfwGetTime() / 100, glm::vec3(0.0f, 1.0f, 0.0f));
-
-	skybox_shader.setMat4("model", modelMat);
 	view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix.
 
 	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -39,13 +29,8 @@ void MainApp::render()
 
 	// skybox cube
 	glBindVertexArray(skyboxVAO);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	glBindVertexArray(0);
-	glDepthFunc(GL_LESS); // set depth function back to default.
+	base_level.Draw(renderer);
 
 	// second render framebuffer as texture for post-processing.
 	// blit multisampled buffer(s) to normal colorbuffer of intermediate FBO. Image is stored in screenTexture.
@@ -59,11 +44,11 @@ void MainApp::render()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Here we have to render to final fbo with two outputs.
-	final_shader.use();
+	res_manager.Shaders["Final"].use();
 	glBindVertexArray(quadVAO);
 	glDisable(GL_DEPTH_TEST);
 
-	final_shader.setInt("screenTexture", 0);
+	res_manager.Shaders["Final"].setInt("screenTexture", 0);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, screenTexture);
@@ -80,13 +65,13 @@ void MainApp::render()
 	if (useBloom)
 	{
 		unsigned int amount = 10;
-		shaderBlur.use();
+		res_manager.Shaders["Blur"].use();
 
 		for (unsigned int i = 0; i < amount; i++)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-			shaderBlur.setInt("horizontal", horizontal);
-			shaderBlur.setInt("image", 0);
+			res_manager.Shaders["Blur"].setInt("horizontal", horizontal);
+			res_manager.Shaders["Blur"].setInt("image", 0);
 			glBindTexture(GL_TEXTURE_2D, first_iteration ? finalTextures[1] : pingpongColorbuffers[!horizontal]);  // bind texture of other framebuffer (or scene if first iteration)
 
 			glBindVertexArray(quadVAO);
@@ -102,15 +87,15 @@ void MainApp::render()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	screen_shader.use();
-	screen_shader.setBool("gammaCorrection", useGammaCorrection);
-	screen_shader.setBool("useHDR", useHDR);
-	screen_shader.setInt("useBloom", useBloom);
-	screen_shader.setFloat("exposure", 1.0f);
+	res_manager.Shaders["Screen"].use();
+	res_manager.Shaders["Screen"].setBool("gammaCorrection", useGammaCorrection);
+	res_manager.Shaders["Screen"].setBool("useHDR", useHDR);
+	res_manager.Shaders["Screen"].setInt("useBloom", useBloom);
+	res_manager.Shaders["Screen"].setFloat("exposure", 1.0f);
 
-	screen_shader.setInt("screenTexture", 0);
-	screen_shader.setInt("bloomTexture", 1);
-	screen_shader.setInt("ssaoTexture", 2);
+	res_manager.Shaders["Screen"].setInt("screenTexture", 0);
+	res_manager.Shaders["Screen"].setInt("bloomTexture", 1);
+	res_manager.Shaders["Screen"].setInt("ssaoTexture", 2);
 
 	glBindVertexArray(quadVAO);
 
@@ -169,25 +154,25 @@ void MainApp::drawTextData()
 			out_text = " - disable ";
 		else
 			out_text = " - enable ";
-		RenderText(font_shader, std::to_string(i + 1) + out_text + textArray[i], 25.0f, screenHeight - 100.0f - i * 25.0f, 1.0f, glm::vec3(0.0, 0.68f, 1.0f));
+		RenderText("SansNarrow", std::to_string(i + 1) + out_text + textArray[i], 25.0f, screenHeight - 100.0f - i * 25.0f, 1.0f, glm::vec3(0.0, 0.68f, 1.0f));
 	}
 
 	glBlendFunc(GL_SRC_ALPHA, prevBlendFunc);
 	glDisable(GL_BLEND);
 }
 
-void MainApp::RenderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
+void MainApp::RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
 {
 	// Activate corresponding render state
-	s.use();
-	glUniform3f(glGetUniformLocation(s.getShaderProgram(), "textColor"), color.x, color.y, color.z);
+	font_shader.use();
+	glUniform3f(glGetUniformLocation(font_shader.getShaderProgram(), "textColor"), color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(fontVAO);
 	// Iterate through all characters
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); c++)
 	{
-		Character ch = Characters[*c];
+		Character ch = res_manager.Fonts[fontType][*c];
 		GLfloat xpos = x + ch.Bearing.x * scale;
 		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 		GLfloat w = ch.Size.x * scale;

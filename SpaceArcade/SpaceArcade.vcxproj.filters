@@ -37,17 +37,11 @@
     <Filter Include="Shaders\Basic">
       <UniqueIdentifier>{71de7419-bc20-4a18-ba77-8cb3eb192e56}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Basic\SSAO">
-      <UniqueIdentifier>{dc784c0d-b13b-4e2a-87b1-34f49ea35f25}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\Blur">
       <UniqueIdentifier>{85e47af9-9a82-4e17-971d-44fb39c16675}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders\Font">
       <UniqueIdentifier>{07a40f52-05b7-467d-bc48-7b42afa6d0e9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\Lamp">
-      <UniqueIdentifier>{ef2b7918-bfa0-4f09-ba4d-41e34990d5a0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders\Screen">
       <UniqueIdentifier>{dbf1673f-b529-4809-a0a2-8b2de0856f26}</UniqueIdentifier>
@@ -55,8 +49,14 @@
     <Filter Include="Shaders\SkyBox">
       <UniqueIdentifier>{0395c177-4e2f-42a6-bf57-6676a4c9aaf7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\SSAO">
-      <UniqueIdentifier>{a9a221b9-80f8-49a7-a457-0db31814287b}</UniqueIdentifier>
+    <Filter Include="Shaders\Sprite">
+      <UniqueIdentifier>{a69e5a3a-07e0-4956-9b57-68c100692b5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Main App\Game">
+      <UniqueIdentifier>{24d6bec4-dc45-480a-bc01-a94dca64162b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Main App\Game">
+      <UniqueIdentifier>{949671ed-7265-4ad9-ae02-e5d7985da354}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +77,21 @@
     </ClInclude>
     <ClInclude Include="Sources\Main App\MainData.h">
       <Filter>Header Files\Main App</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Miscellaneous\SpriteRenderer.h">
+      <Filter>Header Files\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Miscellaneous\Texture.h">
+      <Filter>Header Files\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Miscellaneous\ResourceManager.h">
+      <Filter>Header Files\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\GameObject.h">
+      <Filter>Header Files\Main App\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\GameLevel.h">
+      <Filter>Header Files\Main App\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -116,24 +131,24 @@
     <ClCompile Include="Sources\Main App\BuffersData.cpp">
       <Filter>Source Files\Main App</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Miscellaneous\Texture.cpp">
+      <Filter>Source Files\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Miscellaneous\SpriteRenderer.cpp">
+      <Filter>Source Files\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Miscellaneous\ResourceManager.cpp">
+      <Filter>Source Files\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\GameObject.cpp">
+      <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\GameLevel.cpp">
+      <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Basic\SSAO\SsaoShaderFS.glsl">
-      <Filter>Shaders\Basic\SSAO</Filter>
-    </None>
-    <None Include="Shaders\Basic\SSAO\SsaoShaderVS.glsl">
-      <Filter>Shaders\Basic\SSAO</Filter>
-    </None>
     <None Include="Shaders\Basic\FragmentShader.glsl">
-      <Filter>Shaders\Basic</Filter>
-    </None>
-    <None Include="Shaders\Basic\GeometryShader.glsl">
-      <Filter>Shaders\Basic</Filter>
-    </None>
-    <None Include="Shaders\Basic\ShadowDepthFS.glsl">
-      <Filter>Shaders\Basic</Filter>
-    </None>
-    <None Include="Shaders\Basic\ShadowDepthVS.glsl">
       <Filter>Shaders\Basic</Filter>
     </None>
     <None Include="Shaders\Basic\VertexShader.glsl">
@@ -151,21 +166,6 @@
     <None Include="Shaders\Font\FontShaderVS.glsl">
       <Filter>Shaders\Font</Filter>
     </None>
-    <None Include="Shaders\Lamp\LampFS.glsl">
-      <Filter>Shaders\Lamp</Filter>
-    </None>
-    <None Include="Shaders\Lamp\LampVS.glsl">
-      <Filter>Shaders\Lamp</Filter>
-    </None>
-    <None Include="Shaders\SSAO\SsaoBlurFS.glsl">
-      <Filter>Shaders\SSAO</Filter>
-    </None>
-    <None Include="Shaders\SSAO\SsaoFS.glsl">
-      <Filter>Shaders\SSAO</Filter>
-    </None>
-    <None Include="Shaders\SSAO\SsaoVS.glsl">
-      <Filter>Shaders\SSAO</Filter>
-    </None>
     <None Include="Shaders\Skybox\SkyboxShaderFS.glsl">
       <Filter>Shaders\SkyBox</Filter>
     </None>
@@ -180,6 +180,12 @@
     </None>
     <None Include="Shaders\Screen\ScreenShaderVS.glsl">
       <Filter>Shaders\Screen</Filter>
+    </None>
+    <None Include="Shaders\Sprite\SpriteShaderVS.glsl">
+      <Filter>Shaders\Sprite</Filter>
+    </None>
+    <None Include="Shaders\Sprite\SpriteShaderFS.glsl">
+      <Filter>Shaders\Sprite</Filter>
     </None>
   </ItemGroup>
 </Project>

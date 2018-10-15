@@ -60,13 +60,17 @@ void MainApp::init()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
-	//uncomment it if not using models loading.
+	//uncomment it if don't load skyboxes.
 	//stbi_set_flip_vertically_on_load(true);
+
+	res_manager.init();
 
 	loadShaders();
 	loadTextures();
 	loadFonts();
 	initBuffers();
+
+	renderer.init(res_manager.GetShader("Sprite"), screenWidth, screenHeight);
 
 	// Initialize some constant shader values, such as light, that will be used in scene.
 	initScene();
@@ -74,53 +78,7 @@ void MainApp::init()
 
 void MainApp::loadFonts()
 {
-	// Initialize FreeType library.
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-
-	// Load specific font.
-	FT_Face face;
-	if (FT_New_Face(ft, "Fonts/PT Sans Narrow.ttf", 0, &face))
-		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-
-	// Set font size.
-	FT_Set_Pixel_Sizes(face, 0, 18);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
-
-	// Load font for 128 characters.
-	for (GLubyte c = 0; c < 128; c++)
-	{
-		// Load character glyph
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		{
-			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-			continue;
-		}
-		// Generate texture
-		GLuint texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0,
-			GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
-		// Set texture options
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Now store character for later use
-		Character character = {
-			texture,
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
-		};
-		Characters.insert(std::pair<GLchar, Character>(c, character));
-	}
-
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
+	res_manager.loadFont("Fonts/PT Sans Narrow.ttf", "SansNarrow", 18);
 }
 
 void MainApp::update()
@@ -146,6 +104,8 @@ void MainApp::resize(int width, int height)
 	resizeBloomFramebuffer(finalFBO, finalTextures, finalRBO, useHDR);
 	for (int i = 0; i < 2; ++i)
 		resizeFramebuffer(pingpongFBO[i], pingpongColorbuffers[i], -1, false, useHDR, false);
+
+	renderer.resize(screenWidth, screenHeight);
 }
 
 void MainApp::clearBuffers()

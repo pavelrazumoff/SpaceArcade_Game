@@ -19,6 +19,24 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#if defined(DEBUG) || defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
+
+//#define m_new new
+
+#if defined(DEBUG) || defined(_DEBUG)
+#ifndef DBG_NEW
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+#define new DBG_NEW
+#endif
+#endif  // _DEBUG
+
+#if defined(DEBUG) || defined(_DEBUG)
+#define m_free(A) _dbgfree( __FILE__, __LINE__, (A) )
+#endif  // _DEBUG
+
 struct Character {
 	GLuint TextureID; // ID handle of the glyph texture
 	glm::ivec2 Size; // Size of glyph
@@ -26,6 +44,4 @@ struct Character {
 	GLuint Advance; // Offset to advance to next glyph
 };
 
-unsigned int loadCubemap(std::vector<std::string> faces, bool gamma = false);
-unsigned int TextureFromFile(std::string directory, bool gamma = false);
 float lerp(float a, float b, float f);

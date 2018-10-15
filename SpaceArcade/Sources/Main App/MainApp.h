@@ -1,6 +1,8 @@
 #pragma once
 #include "../Shaders/Shader.h"
 #include "../Miscellaneous/Camera.h"
+#include "../Miscellaneous/ResourceManager.h"
+#include "Game/GameLevel.h"
 #include "MainData.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -32,7 +34,7 @@ public:
 	void resize(int width, int height);
 
 	void drawScene(Shader shader, bool finalDraw);
-	void RenderText(Shader &s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+	void RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 
 	// input.
 	void processInput(GLFWwindow *window);
@@ -54,15 +56,11 @@ public:
 
 	GLFWwindow* getWindow();
 
-	Shader screen_shader;
-	Shader skybox_shader;
-	Shader final_shader;
-	Shader shaderBlur;
-
-	//Font.
 	Shader font_shader;
-
 	Camera camera;
+
+	// Game Data.
+	GameLevel base_level;
 
 private:
 	GLFWwindow* window = NULL;
@@ -83,8 +81,6 @@ private:
 
 	GLuint fontVAO, fontVBO;
 
-	unsigned int cubemapTexture;
-
 	unsigned int uboMatrices;
 
 	float deltaTime = 0.0f; // Time between current frame and last frame
@@ -99,6 +95,6 @@ private:
 	bool useHDR = true;
 	bool useBloom = true;
 
-	// Fonts.
-	std::map<GLchar, Character> Characters;
+	ResourceManager res_manager;
+	SpriteRenderer renderer;
 };

@@ -2,10 +2,14 @@
 
 void MainApp::loadShaders()
 {
-	screen_shader.load("Shaders//Screen//ScreenShaderVS.glsl", "Shaders//Screen//ScreenShaderFS.glsl");
-	skybox_shader.load("Shaders//Skybox//SkyboxShaderVS.glsl", "Shaders//Skybox//SkyboxShaderFS.glsl");
-	final_shader.load("Shaders//Screen//ScreenShaderVS.glsl", "Shaders//Screen//FinalShaderFS.glsl");
-	shaderBlur.load("Shaders//Blur//BlurShaderVS.glsl", "Shaders//Blur//BlurShaderFS.glsl");
+	res_manager.LoadShader("Shaders//Screen//ScreenShaderVS.glsl", "Shaders//Screen//ScreenShaderFS.glsl", "Screen");
+	res_manager.LoadShader("Shaders//Skybox//SkyboxShaderVS.glsl", "Shaders//Skybox//SkyboxShaderFS.glsl", "Skybox");
+	res_manager.LoadShader("Shaders//Screen//ScreenShaderVS.glsl", "Shaders//Screen//FinalShaderFS.glsl", "Final");
+	res_manager.LoadShader("Shaders//Blur//BlurShaderVS.glsl", "Shaders//Blur//BlurShaderFS.glsl", "Blur");
+	res_manager.LoadShader("Shaders//Sprite//SpriteShaderVS.glsl", "Shaders//Sprite//SpriteShaderFS.glsl", "Sprite");
+
+	//textures.
+	res_manager.LoadTexture("Images//SpaceShip.png", "spacecraft", useGammaCorrection);
 
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");
@@ -13,7 +17,7 @@ void MainApp::loadShaders()
 
 void MainApp::loadTextures()
 {
-	std::vector<std::string> faces = {
+	std::vector<const GLchar*> faces = {
 		"Images//Skybox//blue//bkg1_right.png",
 		"Images//Skybox//blue//bkg1_left.png",
 		"Images//Skybox//blue//bkg1_top.png",
@@ -22,5 +26,5 @@ void MainApp::loadTextures()
 		"Images//Skybox//blue//bkg1_back.png"
 	};
 
-	cubemapTexture = loadCubemap(faces, useGammaCorrection);
+	res_manager.LoadCubemap(faces, "BlueSpace", useGammaCorrection);
 }
