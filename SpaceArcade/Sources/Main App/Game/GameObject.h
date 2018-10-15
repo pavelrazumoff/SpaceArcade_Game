@@ -2,24 +2,24 @@
 #include "../../Miscellaneous/SpriteRenderer.h"
 
 // Container object for holding all state relevant for a single
-// game object entity. Each object in the game likely needs the
-// minimal of state as described within GameObject.
+// game object entity.
 class GameLevel;
 
 class GameObject
 {
 public:
-	// Constructor(s)
 	GameObject();
+	~GameObject();
 
-	void init(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec2 velocity = glm::vec2(0.0f, 0.0f));
-	void resize();
+	virtual void init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec2 velocity = glm::vec2(0.0f, 0.0f));
+	virtual void resize();
+	virtual void clear();
+
 	// Draw sprite
 	virtual void Draw();
+	virtual void update(float delta);
 
-	void handleInput(GLFWwindow *window, float delta);
-
-	void setLevelPointer(GameLevel* level);
+	void setVisible(bool visible);
 
 	// Object state
 	glm::vec2   Position, Size, Velocity;
@@ -27,6 +27,7 @@ public:
 	// Render state
 	Texture2D   Sprite;
 
-private:
+protected:
 	GameLevel* pLevel = NULL;
+	bool visible = true;
 };

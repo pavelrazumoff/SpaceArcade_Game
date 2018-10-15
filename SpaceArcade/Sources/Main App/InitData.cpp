@@ -73,7 +73,12 @@ void MainApp::initScene()
 {
 	base_level.init(res_manager.GetCubemap("BlueSpace"), res_manager.GetShader("Skybox"), &renderer);
 	base_level.setScreenIndents(glm::vec4(10, 10, 10, 10));
-	base_level.spacecraft.init(glm::vec2(screenWidth / 2 - 50, screenHeight - 200), glm::vec2(100, 100), res_manager.GetTexture("spacecraft"), glm::vec2(400.0f, 200.0f));
+
+	SpacecraftObject* pSpaceCraft = base_level.spacecraft;
+	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
+
+	pSpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 50, screenHeight - 200), glm::vec2(100, 100), res_manager.GetTexture("spacecraft"), glm::vec2(400.0f, 200.0f));
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(64, 64), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, 500.0f));
 
 	base_level.resize();
 }

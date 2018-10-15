@@ -40,6 +40,8 @@ void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, 
 	{
 		key_pressed = false;
 	}
+
+	base_level.processKey(key, action, &key_pressed);
 }
 
 void MainApp::processMouseMove(GLFWwindow* window, double xpos, double ypos)

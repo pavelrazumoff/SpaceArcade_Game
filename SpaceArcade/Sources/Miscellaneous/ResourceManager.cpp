@@ -1,5 +1,10 @@
 #include "ResourceManager.h"
 
+ResourceManager::~ResourceManager()
+{
+	clear();
+}
+
 void ResourceManager::init()
 {
 	// Initialize FreeType library.
@@ -96,7 +101,7 @@ Texture2D ResourceManager::GetCubemap(std::string name)
 	return Cubemaps[name];
 }
 
-void ResourceManager::Clear()
+void ResourceManager::clear()
 {
 	// (Properly) delete all shaders	
 	for (auto iter : Shaders)

@@ -87,6 +87,8 @@ void MainApp::update()
 	float currentFrame = glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
+
+	base_level.update(deltaTime);
 }
 
 void MainApp::resize(int width, int height)

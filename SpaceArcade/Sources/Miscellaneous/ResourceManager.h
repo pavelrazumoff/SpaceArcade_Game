@@ -12,6 +12,7 @@ class ResourceManager
 {
 public:
 	ResourceManager() { }
+	~ResourceManager();
 
 	void init();
 
@@ -29,7 +30,7 @@ public:
 	Texture2D GetTexture(std::string name);
 	Texture2D GetCubemap(std::string name);
 	// Properly de-allocates all loaded resources
-	void Clear();
+	void clear();
 
 	// Resource storage
 	std::map<std::string, Shader>    Shaders;

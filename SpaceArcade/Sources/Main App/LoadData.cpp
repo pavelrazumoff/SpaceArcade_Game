@@ -10,6 +10,7 @@ void MainApp::loadShaders()
 
 	//textures.
 	res_manager.LoadTexture("Images//SpaceShip.png", "spacecraft", useGammaCorrection);
+	res_manager.LoadTexture("Images//laser_ray.png", "laserRay", useGammaCorrection);
 
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");

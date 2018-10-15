@@ -1,35 +1,38 @@
 #pragma once
-#include "GameObject.h"
+#include "SpacecraftObject.h"
 
-// GameLevel holds all Tiles as part of a Breakout level and 
-// hosts functionality to Load/render levels from the harddisk.
 class GameLevel
 {
 public:
 	// Constructor
 	GameLevel() { }
+	~GameLevel();
 
-	void			init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* renderer);
-	void			resize();
+	void				init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* renderer);
+	void				resize();
+	void				clear();
+
 	// Render level
-	void			Draw();
+	void				Draw();
+	void				update(float delta);
 
-	void			handleInput(GLFWwindow *window, float delta);
+	void				handleInput(GLFWwindow *window, float delta);
+	void				processKey(int key, int action, bool* key_pressed);
 
-	void			setScreenIndents(glm::vec4 indents);
-	glm::vec4		getScreenIndents();
+	void				setScreenIndents(glm::vec4 indents);
+	glm::vec4			getScreenIndents();
 
-	SpriteRenderer* getRenderer();
+	SpriteRenderer*		getRenderer();
 
-	// Check if the level is completed (all non-solid tiles are destroyed)
-	GLboolean		IsCompleted();
+	// Check if the level is completed.
+	GLboolean			IsCompleted();
 public:
-	GameObject		spacecraft;
+	SpacecraftObject*	spacecraft = NULL;
 
 private:
-	Texture2D		backgroundCubemap;
-	Shader			cubemapShader;
+	Texture2D			backgroundCubemap;
+	Shader				cubemapShader;
 
-	SpriteRenderer* renderer = NULL;
-	glm::vec4		screenIndents;
+	SpriteRenderer*		renderer = NULL;
+	glm::vec4			screenIndents;
 };
