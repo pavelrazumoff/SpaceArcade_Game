@@ -8,31 +8,41 @@ public:
 	GameLevel() { }
 	~GameLevel();
 
-	void				init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* renderer);
-	void				resize();
-	void				clear();
+	void						init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* renderer);
+	void						resize();
+	void						clear();
 
 	// Render level
-	void				Draw();
-	void				update(float delta);
+	void						Draw();
+	void						update(float delta);
 
-	void				handleInput(GLFWwindow *window, float delta);
-	void				processKey(int key, int action, bool* key_pressed);
+	void						handleInput(GLFWwindow *window, float delta);
+	void						processKey(int key, int action, bool* key_pressed);
 
-	void				setScreenIndents(glm::vec4 indents);
-	glm::vec4			getScreenIndents();
+	void						doCollisions();
 
-	SpriteRenderer*		getRenderer();
+	void						addNewObject(GameObject* obj);
+	void						removeObject(GameObject* obj);
+
+	void						setScreenIndents(glm::vec4 indents);
+	glm::vec4					getScreenIndents();
+
+	SpriteRenderer*				getRenderer();
 
 	// Check if the level is completed.
-	GLboolean			IsCompleted();
+	GLboolean					IsCompleted();
 public:
-	SpacecraftObject*	spacecraft = NULL;
+	SpacecraftObject*			spacecraft = NULL;
+	std::vector<GameObject*>	asteroids;
+
+	int							numOfAsteroids = 10;
 
 private:
-	Texture2D			backgroundCubemap;
-	Shader				cubemapShader;
+	std::vector<GameObject*>	objects;
 
-	SpriteRenderer*		renderer = NULL;
-	glm::vec4			screenIndents;
+	Texture2D					backgroundCubemap;
+	Shader						cubemapShader;
+
+	SpriteRenderer*				renderer = NULL;
+	glm::vec4					screenIndents;
 };

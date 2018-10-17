@@ -12,11 +12,23 @@ void GameLevel::init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* re
 	this->renderer = renderer;
 
 	spacecraft = new SpacecraftObject();
+
+	for (int i = 0; i < numOfAsteroids; ++i)
+	{
+		asteroids.push_back(new GameObject());
+		asteroids.back()->setHealth(20.0f);
+		asteroids.back()->setDamage(30.0f);
+	}
 }
 
 void GameLevel::update(float delta)
 {
-	spacecraft->update(delta);
+	if(spacecraft)
+		spacecraft->update(delta);
+	for (int i = 0; i < asteroids.size(); ++i)
+		asteroids[i]->update(delta);
+
+	doCollisions();
 }
 
 void GameLevel::Draw()
@@ -40,23 +52,93 @@ void GameLevel::Draw()
 	glDepthFunc(GL_LESS); // set depth function back to default.
 
 	glDisable(GL_DEPTH_TEST);
-	spacecraft->Draw();
+
+	if(spacecraft)
+		spacecraft->Draw();
+	for (int i = 0; i < asteroids.size(); ++i)
+		asteroids[i]->Draw();
+
 	glEnable(GL_DEPTH_TEST);
 }
 
 void GameLevel::resize()
 {
-	spacecraft->resize();
+	if (spacecraft)
+		spacecraft->resize();
+	for (int i = 0; i < asteroids.size(); ++i)
+		asteroids[i]->resize();
 }
 
 void GameLevel::handleInput(GLFWwindow *window, float delta)
 {
-	spacecraft->handleInput(window, delta);
+	if (spacecraft)
+		spacecraft->handleInput(window, delta);
 }
 
 void GameLevel::processKey(int key, int action, bool* key_pressed)
 {
-	spacecraft->processKey(key, action, key_pressed);
+	if (spacecraft)
+		spacecraft->processKey(key, action, key_pressed);
+}
+
+void GameLevel::doCollisions()
+{
+	for (int i = 0; i < objects.size(); ++i)
+	{
+		for (int j = i + 1; j < objects.size(); ++j)
+		{
+			// check if two objects can do damage (exclude cases when damaging object collides with stars for example)
+			// and also check collision for two objects.
+			if (objects[i]->isDamagingObject() && objects[j]->isDamagingObject() &&
+				objects[i]->checkCollision(objects[j]))
+			{
+				objects[i]->makeCollision(objects[j]);
+				objects[i]->makeReaction();
+				objects[j]->makeReaction();
+			}
+		}
+	}
+
+	for (int i = 0; i < objects.size(); ++i)
+		if (objects[i]->getReadyForDeath())
+		{
+			GameObject* parentObj = objects[i]->getParentObject();
+			if (parentObj)
+				parentObj->notify(objects[i], NotifyCode::Destroyed);
+			else
+			{
+				GameObject* obj = objects[i];
+				removeObject(obj);
+				delete obj;
+			}
+
+			i--;
+		}
+}
+
+void GameLevel::addNewObject(GameObject* obj)
+{
+	objects.push_back(obj);
+}
+
+void GameLevel::removeObject(GameObject* obj)
+{
+	std::vector<GameObject*>::iterator it;
+
+	it = find(objects.begin(), objects.end(), obj);
+	if (it != objects.end())
+		objects.erase(it);
+
+	// also remove from specific objects of current level.
+	it = find(asteroids.begin(), asteroids.end(), obj);
+	if (it != asteroids.end())
+	{
+		asteroids.erase(it);
+		return;
+	}
+
+	if (obj == spacecraft)
+		spacecraft = NULL;
 }
 
 void GameLevel::setScreenIndents(glm::vec4 indents)
@@ -86,4 +168,8 @@ void GameLevel::clear()
 		delete spacecraft;
 		spacecraft = NULL;
 	}
+
+	for (int i = 0; i < asteroids.size(); ++i)
+		delete asteroids[i];
+	asteroids.clear();
 }

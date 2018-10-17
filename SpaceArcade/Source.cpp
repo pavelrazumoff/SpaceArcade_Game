@@ -9,6 +9,8 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+	srand(time(0));
+
 	// GLFW initialization.
 	// Used to create window, context and manage user input as well.
 	glfwInit();
