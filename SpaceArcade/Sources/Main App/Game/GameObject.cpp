@@ -31,7 +31,7 @@ GameObject* GameObject::clone()
 	return newObject;
 }
 
-void GameObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec2 velocity, bool addToLevel)
+void GameObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity, bool addToLevel)
 {
 	this->Position = pos;
 	this->Size = size;
@@ -45,17 +45,43 @@ void GameObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D
 
 void GameObject::update(float delta)
 {
-	
+	if (health <= 0.0f)
+	{
+		if (explosionTime > 0.0f)
+		{
+			explosionTime -= delta;
+			currentExplosionFrame = ExplosionSprite->numOfFrames - explosionTime / explosionTimeStep;
+		}
+		if (explosionTime <= 0.0f)
+			readyForDeath = true;
+	}
 }
 
 void GameObject::Draw()
 {
-	if(visible)
+	if(visible && health > 0.0f)
 		pLevel->getRenderer()->DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation);
+	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
+		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->Position, this->Size, this->Rotation, currentExplosionFrame);
 }
 
 void GameObject::resize()
 {
+	glm::vec4 indents = pLevel->getScreenIndents();
+
+	glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = pLevel->getRenderer()->getScreenRatio();
+
+	Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
+
+	if (Position.x < indents.x)
+		Position.x = indents.x;
+	if (Position.x + Size.x > dimensions.x - indents.x)
+		Position.x = dimensions.x - indents.x - Size.x;
+	if (Position.y < indents.y)
+		Position.y = indents.y;
+	if (Position.y + Size.y > dimensions.y - indents.y)
+		Position.y = dimensions.y - indents.y - Size.y;
 }
 
 void GameObject::handleInput(GLFWwindow *window, float delta)
@@ -92,7 +118,7 @@ void GameObject::makeCollision(GameObject* obj)
 
 void GameObject::makeReaction()
 {
-	if (health <= 0.0f)
+	if (health <= 0.0f && explosionTime <= 0.0f)
 		readyForDeath = true;
 }
 
@@ -108,6 +134,13 @@ GameObject* GameObject::getParentObject()
 
 void GameObject::notify(GameObject* notifiedObject, NotifyCode code)
 {
+}
+
+void GameObject::setExplosionSprite(Texture2D* sprite)
+{
+	ExplosionSprite = sprite;
+	if (sprite)
+		explosionTimeStep = explosionTime / sprite->numOfFrames;
 }
 
 void GameObject::setVisible(bool visible)
@@ -128,6 +161,11 @@ void GameObject::setDamage(float damage)
 void GameObject::setHealth(float hp)
 {
 	health = hp;
+}
+
+void GameObject::setExplosionTime(float time)
+{
+	explosionTime = time;
 }
 
 bool GameObject::isVisible()
@@ -153,6 +191,11 @@ float GameObject::getHealth()
 bool GameObject::getReadyForDeath()
 {
 	return readyForDeath;
+}
+
+float GameObject::getExplosionTime()
+{
+	return explosionTime;
 }
 
 void GameObject::clear()

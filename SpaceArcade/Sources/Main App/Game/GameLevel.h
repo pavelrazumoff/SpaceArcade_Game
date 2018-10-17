@@ -8,7 +8,7 @@ public:
 	GameLevel() { }
 	~GameLevel();
 
-	void						init(Texture2D cubemap, Shader cubemapShader, SpriteRenderer* renderer);
+	void						init(Texture2D* cubemap, Shader cubemapShader, SpriteRenderer* renderer);
 	void						resize();
 	void						clear();
 
@@ -31,16 +31,11 @@ public:
 
 	// Check if the level is completed.
 	GLboolean					IsCompleted();
-public:
-	SpacecraftObject*			spacecraft = NULL;
-	std::vector<GameObject*>	asteroids;
-
-	int							numOfAsteroids = 10;
 
 private:
 	std::vector<GameObject*>	objects;
 
-	Texture2D					backgroundCubemap;
+	Texture2D*					backgroundCubemap;
 	Shader						cubemapShader;
 
 	SpriteRenderer*				renderer = NULL;

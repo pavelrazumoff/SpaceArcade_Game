@@ -17,7 +17,7 @@ public:
 	GameObject(bool createChildren);
 	virtual ~GameObject();
 
-	virtual void init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec2 velocity = glm::vec2(0.0f, 0.0f), bool addToLevel = true);
+	virtual void init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity = glm::vec2(0.0f, 0.0f), bool addToLevel = true);
 	virtual void resize();
 	virtual void clear();
 
@@ -35,15 +35,19 @@ public:
 
 	virtual void notify(GameObject* notifiedObject, NotifyCode code);
 
+	void setExplosionSprite(Texture2D* sprite);
+
 	void setVisible(bool visible);
 	void setIsDamagingObject(bool damaging);
 	void setDamage(float damage);
 	void setHealth(float hp);
+	void setExplosionTime(float time);
 
 	bool isVisible();
 	bool isDamagingObject();
 	float getDamage();
 	float getHealth();
+	float getExplosionTime();
 
 	bool getReadyForDeath();
 
@@ -55,7 +59,8 @@ public:
 	glm::vec2   Position, Size, Velocity;
 	GLfloat     Rotation;
 	// Render state
-	Texture2D   Sprite;
+	Texture2D*   Sprite;
+	Texture2D*	ExplosionSprite;
 
 protected:
 	GameLevel* pLevel = NULL;
@@ -65,6 +70,9 @@ protected:
 	bool damagingObject = true;
 	float damage = 1.0f;
 	float health = 100.0f;
+	float explosionTime = 0.0f;
 
+	int currentExplosionFrame = 0;
+	float explosionTimeStep = 0.0f;
 	bool readyForDeath = false;
 };

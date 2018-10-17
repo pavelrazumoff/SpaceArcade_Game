@@ -12,6 +12,12 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//SpaceShip.png", "spacecraft", useGammaCorrection);
 	res_manager.LoadTexture("Images//laser_ray.png", "laserRay", useGammaCorrection);
 	res_manager.LoadTexture("Images//asteroid.png", "asteroid", useGammaCorrection);
+	res_manager.LoadTexture("Images//explosion.png", "explosion", useGammaCorrection);
+
+	Texture2D* tex = res_manager.GetTexture("explosion");
+	tex->numOfColumns = 8;
+	tex->numOfRows = 4;
+	tex->numOfFrames = 32;
 
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");

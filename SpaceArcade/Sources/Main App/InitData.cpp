@@ -74,15 +74,25 @@ void MainApp::initScene()
 	base_level.init(res_manager.GetCubemap("BlueSpace"), res_manager.GetShader("Skybox"), &renderer);
 	base_level.setScreenIndents(glm::vec4(10, 10, 10, 10));
 
-	SpacecraftObject* pSpaceCraft = base_level.spacecraft;
+	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
 	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
 
 	pSpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, screenHeight - 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(400.0f, 200.0f));
+	pSpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
+
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 64), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, 500.0f), false);
 
-	for (int i = 0; i < base_level.asteroids.size(); ++i)
-		base_level.asteroids[i]->init(&base_level, glm::vec2(rand() % (screenWidth - 40 + 1) + 20, rand() % (screenHeight / 3 - 10 + 1) + 10),
+	for (int i = 0; i < 10; ++i)
+	{
+		GameObject* asteroid = new GameObject();
+		asteroid->setHealth(20.0f);
+		asteroid->setDamage(30.0f);
+		asteroid->setExplosionTime(1.0f);
+		asteroid->setExplosionSprite(res_manager.GetTexture("explosion"));
+
+		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 40 + 1) + 20, rand() % (screenHeight / 3 - 10 + 1) + 10),
 			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(0.0f, 0.0f));
+	}
 
 	base_level.resize();
 }

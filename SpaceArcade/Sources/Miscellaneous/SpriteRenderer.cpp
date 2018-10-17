@@ -55,7 +55,7 @@ glm::vec2 SpriteRenderer::getScreenRatio()
 	return screenRatio;
 }
 
-void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2 size, GLfloat rotate)
+void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec2 size, GLfloat rotate, int frame)
 {
 	// Prepare transformations
 	this->shader.use();
@@ -71,6 +71,10 @@ void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2
 	this->shader.setInt("image", 0);
 	this->shader.setMat4("projection", projection);
 
+	this->shader.setInt("frame", frame);
+	this->shader.setInt("numOfColumns", texture->numOfColumns);
+	this->shader.setInt("numOfRows", texture->numOfRows);
+
 	glm::mat4 model;
 	model = glm::translate(model, glm::vec3(position, 0.0f));  // First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
 
@@ -83,7 +87,7 @@ void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2
 	this->shader.setMat4("model", model);
 
 	glActiveTexture(GL_TEXTURE0);
-	texture.BindTexture();
+	texture->BindTexture();
 
 	glBindVertexArray(this->quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);

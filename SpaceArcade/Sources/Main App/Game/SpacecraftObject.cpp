@@ -4,6 +4,7 @@
 SpacecraftObject::SpacecraftObject()
 {
 	damage = 30.0f;
+	explosionTime = 1.5f;
 
 	laser_ray = new GameObject();
 	laser_ray->setIsDamagingObject(true);
@@ -33,15 +34,17 @@ GameObject* SpacecraftObject::clone()
 	return newObject;
 }
 
-void SpacecraftObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec2 velocity)
+void SpacecraftObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity)
 {
 	GameObject::init(level, pos, size, sprite, velocity);
 }
 
 void SpacecraftObject::update(float delta)
 {
+	GameObject::update(delta);
 	for(int i = 0; i < laser_rays.size(); ++i)
 	{
+		laser_rays[i]->update(delta);
 		if(laser_rays[i]->Position.y + laser_rays[i]->Size.y > 0)
 			laser_rays[i]->Position.y -= delta * laser_rays[i]->Velocity.y;
 		else
@@ -86,6 +89,9 @@ void SpacecraftObject::resize()
 
 void SpacecraftObject::handleInput(GLFWwindow *window, float delta)
 {
+	if (health <= 0.0f)
+		return;
+
 	glm::vec4 indents = pLevel->getScreenIndents();
 	glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();

@@ -6,6 +6,8 @@
 class Texture2D
 {
 public:
+	// Constructor (sets default texture modes)
+	Texture2D();
 	// Holds the ID of the texture object, used for all texture operations to reference to this particlar texture
 	GLuint ID;
 	// Texture image dimensions
@@ -19,12 +21,14 @@ public:
 	GLuint Wrap_R; // Wrapping mode on R axis
 	GLuint Filter_Min; // Filtering mode if texture pixels < screen pixels
 	GLuint Filter_Max; // Filtering mode if texture pixels > screen pixels
-	// Constructor (sets default texture modes)
-	Texture2D();
 	// Generates texture from image data
 	void GenerateTexture(const GLchar *file, bool gamma);
 	void GenerateCubemap(std::vector<const GLchar*> faces, bool gamma);
 	// Binds the texture as the current active GL_TEXTURE_2D texture object
 	void BindTexture() const;
 	void BindCubemap() const;
+
+	int numOfColumns = 1;
+	int numOfRows = 1;
+	int numOfFrames = 1;
 };

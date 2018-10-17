@@ -8,7 +8,7 @@ public:
 	SpacecraftObject(bool createChildren);
 	virtual ~SpacecraftObject();
 
-	virtual void init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec2 velocity = glm::vec2(0.0f, 0.0f));
+	virtual void init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity = glm::vec2(0.0f, 0.0f));
 
 	virtual void resize();
 	virtual void clear();

@@ -20,19 +20,19 @@ Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fSha
 	return Shaders[name];
 }
 
-Texture2D ResourceManager::LoadTexture(const GLchar *file, std::string name, bool gamma)
+Texture2D* ResourceManager::LoadTexture(const GLchar *file, std::string name, bool gamma)
 {
-	Texture2D texture;
-	texture.GenerateTexture(file, gamma);
+	Texture2D* texture = new Texture2D();
+	texture->GenerateTexture(file, gamma);
 	Textures[name] = texture;
 	return Textures[name];
 }
 
-Texture2D ResourceManager::LoadCubemap(std::vector<const GLchar*> faces, std::string name, bool gamma)
+Texture2D* ResourceManager::LoadCubemap(std::vector<const GLchar*> faces, std::string name, bool gamma)
 {
-	Texture2D cubemap;
-	cubemap.Filter_Min = GL_LINEAR;
-	cubemap.GenerateCubemap(faces, gamma);
+	Texture2D* cubemap = new Texture2D();
+	cubemap->Filter_Min = GL_LINEAR;
+	cubemap->GenerateCubemap(faces, gamma);
 	Cubemaps[name] = cubemap;
 	return Cubemaps[name];
 }
@@ -91,12 +91,12 @@ Shader ResourceManager::GetShader(std::string name)
 	return Shaders[name];
 }
 
-Texture2D ResourceManager::GetTexture(std::string name)
+Texture2D* ResourceManager::GetTexture(std::string name)
 {
 	return Textures[name];
 }
 
-Texture2D ResourceManager::GetCubemap(std::string name)
+Texture2D* ResourceManager::GetCubemap(std::string name)
 {
 	return Cubemaps[name];
 }
@@ -108,9 +108,15 @@ void ResourceManager::clear()
 		glDeleteProgram(iter.second.getShaderProgram());
 	// (Properly) delete all textures
 	for (auto iter : Textures)
-		glDeleteTextures(1, &iter.second.ID);
+	{
+		glDeleteTextures(1, &iter.second->ID);
+		delete iter.second;
+	}
 	for (auto iter : Cubemaps)
-		glDeleteTextures(1, &iter.second.ID);
+	{
+		glDeleteTextures(1, &iter.second->ID);
+		delete iter.second;
+	}
 
 	FT_Done_FreeType(ft);
 }
