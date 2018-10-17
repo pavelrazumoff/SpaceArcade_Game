@@ -45,9 +45,7 @@ void SpacecraftObject::update(float delta)
 	for(int i = 0; i < laser_rays.size(); ++i)
 	{
 		laser_rays[i]->update(delta);
-		if(laser_rays[i]->Position.y + laser_rays[i]->Size.y > 0)
-			laser_rays[i]->Position.y -= delta * laser_rays[i]->Velocity.y;
-		else
+		if(laser_rays[i]->Position.y + laser_rays[i]->Size.y <= 0)
 		{
 			GameObject* laser = laser_rays[i];
 			pLevel->removeObject(laser);
@@ -96,7 +94,7 @@ void SpacecraftObject::handleInput(GLFWwindow *window, float delta)
 	glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 
-	glm::vec2 shift = glm::vec2(delta * Velocity.x * initialScreenRatio.x, delta * Velocity.y * initialScreenRatio.y);
+	glm::vec2 shift = glm::vec2(delta * VelocityScale.x * initialScreenRatio.x, delta * VelocityScale.y * initialScreenRatio.y);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{

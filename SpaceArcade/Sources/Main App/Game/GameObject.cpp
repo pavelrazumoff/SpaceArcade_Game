@@ -2,13 +2,13 @@
 #include "GameLevel.h"
 
 GameObject::GameObject()
-	: Position(0, 0), Size(1, 1), Velocity(0.0f), Rotation(0.0f)
+	: Position(0, 0), Size(1, 1), Velocity(0.0f), InitialRotation(0.0f), Rotation(0.0f)
 { 
 
 }
 
 GameObject::GameObject(bool createChildren)
-	: Position(0, 0), Size(1, 1), Velocity(0.0f), Rotation(0.0f)
+	: Position(0, 0), Size(1, 1), Velocity(0.0f), InitialRotation(0.0f), Rotation(0.0f)
 {
 	
 }
@@ -22,11 +22,14 @@ GameObject* GameObject::clone()
 {
 	GameObject* newObject = new GameObject();
 	newObject->init(this->pLevel, this->Position, this->Size, this->Sprite, this->Velocity);
-	newObject->Rotation = this->Rotation;
+	newObject->InitialRotation = this->InitialRotation;
+	newObject->setObjectType(this->getObjectType());
 	newObject->setIsDamagingObject(this->isDamagingObject());
 	newObject->setDamage(this->getDamage());
 	newObject->setHealth(this->getHealth());
 	newObject->setParentObject(this->getParentObject());
+	newObject->setExplosionTime(this->explosionTime);
+	newObject->setExplosionSprite(this->ExplosionSprite);
 
 	return newObject;
 }
@@ -55,33 +58,28 @@ void GameObject::update(float delta)
 		if (explosionTime <= 0.0f)
 			readyForDeath = true;
 	}
+
+	Position.x += Velocity.x * delta;
+	Position.y += Velocity.y * delta;
+	InitialRotation += Rotation * delta;
+
+	if (InitialRotation >= 360.0f || InitialRotation <= -360.0f)
+		InitialRotation = 0.0f;
 }
 
 void GameObject::Draw()
 {
 	if(visible && health > 0.0f)
-		pLevel->getRenderer()->DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation);
+		pLevel->getRenderer()->DrawSprite(this->Sprite, this->Position, this->Size, this->InitialRotation);
 	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
-		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->Position, this->Size, this->Rotation, currentExplosionFrame);
+		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->Position, this->Size, this->InitialRotation, currentExplosionFrame);
 }
 
 void GameObject::resize()
 {
-	glm::vec4 indents = pLevel->getScreenIndents();
-
-	glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getScreenRatio();
 
 	Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
-
-	if (Position.x < indents.x)
-		Position.x = indents.x;
-	if (Position.x + Size.x > dimensions.x - indents.x)
-		Position.x = dimensions.x - indents.x - Size.x;
-	if (Position.y < indents.y)
-		Position.y = indents.y;
-	if (Position.y + Size.y > dimensions.y - indents.y)
-		Position.y = dimensions.y - indents.y - Size.y;
 }
 
 void GameObject::handleInput(GLFWwindow *window, float delta)
@@ -109,7 +107,8 @@ bool GameObject::checkCollision(GameObject* obj)
 
 void GameObject::makeCollision(GameObject* obj)
 {
-	if (this->readyForDeath || obj->getReadyForDeath())
+	if (this->readyForDeath || obj->getReadyForDeath() ||
+		(this->objectType != -1 && this->objectType == obj->getObjectType()))
 		return;
 
 	this->health -= obj->getDamage();
@@ -143,6 +142,11 @@ void GameObject::setExplosionSprite(Texture2D* sprite)
 		explosionTimeStep = explosionTime / sprite->numOfFrames;
 }
 
+void GameObject::setObjectType(int type)
+{
+	objectType = type;
+}
+
 void GameObject::setVisible(bool visible)
 {
 	this->visible = visible;
@@ -166,6 +170,11 @@ void GameObject::setHealth(float hp)
 void GameObject::setExplosionTime(float time)
 {
 	explosionTime = time;
+}
+
+int GameObject::getObjectType()
+{
+	return objectType;
 }
 
 bool GameObject::isVisible()

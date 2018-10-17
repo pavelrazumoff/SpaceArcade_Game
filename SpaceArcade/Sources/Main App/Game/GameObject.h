@@ -37,12 +37,14 @@ public:
 
 	void setExplosionSprite(Texture2D* sprite);
 
+	void setObjectType(int type);
 	void setVisible(bool visible);
 	void setIsDamagingObject(bool damaging);
 	void setDamage(float damage);
 	void setHealth(float hp);
 	void setExplosionTime(float time);
 
+	int getObjectType();
 	bool isVisible();
 	bool isDamagingObject();
 	float getDamage();
@@ -57,15 +59,17 @@ public:
 
 	// Object state
 	glm::vec2   Position, Size, Velocity;
-	GLfloat     Rotation;
+	glm::vec2	VelocityScale;
+	GLfloat     InitialRotation, Rotation;
 	// Render state
-	Texture2D*   Sprite;
-	Texture2D*	ExplosionSprite;
+	Texture2D*   Sprite = NULL;
+	Texture2D*	ExplosionSprite = NULL;
 
 protected:
 	GameLevel* pLevel = NULL;
 	GameObject* parentObject = NULL;
 
+	int objectType = -1;
 	bool visible = true;
 	bool damagingObject = true;
 	float damage = 1.0f;

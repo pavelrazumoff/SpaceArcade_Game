@@ -77,12 +77,14 @@ void MainApp::initScene()
 	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
 	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
 
-	pSpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, screenHeight - 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(400.0f, 200.0f));
+	pSpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, screenHeight - 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
+	pSpaceCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
 	pSpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
 
-	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 64), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, 500.0f), false);
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, -500.0f), false);
+	pLaserRay->setObjectType(1);
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 30; ++i)
 	{
 		GameObject* asteroid = new GameObject();
 		asteroid->setHealth(20.0f);
@@ -90,8 +92,10 @@ void MainApp::initScene()
 		asteroid->setExplosionTime(1.0f);
 		asteroid->setExplosionSprite(res_manager.GetTexture("explosion"));
 
-		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 40 + 1) + 20, rand() % (screenHeight / 3 - 10 + 1) + 10),
-			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(0.0f, 0.0f));
+		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 400 + 1) - 400),
+			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));
+		asteroid->InitialRotation = rand() % 360;
+		asteroid->Rotation = 0.2f;
 	}
 
 	base_level.resize();
