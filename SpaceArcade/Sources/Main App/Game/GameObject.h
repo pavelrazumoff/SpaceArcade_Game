@@ -22,6 +22,7 @@ public:
 	virtual void clear();
 
 	virtual GameObject* clone();
+	virtual void cloneParams(GameObject* obj);
 
 	// Draw sprite
 	virtual void Draw();
@@ -43,6 +44,7 @@ public:
 	void setDamage(float damage);
 	void setHealth(float hp);
 	void setExplosionTime(float time);
+	void setUsePhysics(bool physics);
 
 	int getObjectType();
 	bool isVisible();
@@ -50,12 +52,14 @@ public:
 	float getDamage();
 	float getHealth();
 	float getExplosionTime();
+	bool isUsePhysics();
 
 	bool getReadyForDeath();
 
-	virtual bool checkCollision(GameObject* obj);
+	virtual bool checkCollision(GameObject* obj, glm::vec2& difference);
+
 	virtual void makeCollision(GameObject* obj);
-	virtual void makeReaction();
+	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 
 	// Object state
 	glm::vec2   Position, Size, Velocity;
@@ -75,8 +79,11 @@ protected:
 	float damage = 1.0f;
 	float health = 100.0f;
 	float explosionTime = 0.0f;
+	bool usePhysics = false;
 
 	int currentExplosionFrame = 0;
 	float explosionTimeStep = 0.0f;
 	bool readyForDeath = false;
+
+	float impulseFactor = 200;
 };

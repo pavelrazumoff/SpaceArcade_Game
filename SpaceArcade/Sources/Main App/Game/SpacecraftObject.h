@@ -14,6 +14,7 @@ public:
 	virtual void clear();
 
 	virtual GameObject* clone();
+	virtual void cloneParams(GameObject* obj);
 
 	virtual void Draw();
 	virtual void update(float delta);
@@ -25,6 +26,8 @@ public:
 
 	void setLaserRay(GameObject* laser);
 	GameObject* getLaserRay();
+
+	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 
 protected:
 	GameObject* laser_ray;

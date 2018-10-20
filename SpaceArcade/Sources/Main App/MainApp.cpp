@@ -12,7 +12,7 @@ int MainApp::initWindow()
 	//glfwWindowHint(GLFW_SAMPLES, 4);
 
 	// Create basic window.
-	window = glfwCreateWindow(screenWidth, screenHeight, "LearnOpenGL", NULL, NULL);
+	window = glfwCreateWindow(screenWidth, screenHeight, "Space Arcade", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;

@@ -88,9 +88,10 @@ void MainApp::initScene()
 	{
 		GameObject* asteroid = new GameObject();
 		asteroid->setHealth(20.0f);
-		asteroid->setDamage(30.0f);
+		asteroid->setDamage(10.0f);
 		asteroid->setExplosionTime(1.0f);
 		asteroid->setExplosionSprite(res_manager.GetTexture("explosion"));
+		asteroid->setUsePhysics(true);
 
 		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 400 + 1) - 400),
 			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));

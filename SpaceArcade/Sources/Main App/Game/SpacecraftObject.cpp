@@ -3,13 +3,15 @@
 
 SpacecraftObject::SpacecraftObject()
 {
-	damage = 30.0f;
+	damage = 10.0f;
 	explosionTime = 1.5f;
+	usePhysics = true;
 
 	laser_ray = new GameObject();
 	laser_ray->setIsDamagingObject(true);
 	laser_ray->setDamage(10.0f);
 	laser_ray->setHealth(1.0f); // destroys momentally.
+	laser_ray->setUsePhysics(false);
 	laser_ray->setParentObject(this);
 }
 
@@ -28,10 +30,17 @@ GameObject* SpacecraftObject::clone()
 {
 	SpacecraftObject* newObject = new SpacecraftObject(false);
 	newObject->init(this->pLevel, this->Position, this->Size, this->Sprite, this->Velocity);
-	newObject->Rotation = this->Rotation;
-	newObject->setLaserRay(this->getLaserRay()->clone());
+	this->cloneParams(newObject);
 
 	return newObject;
+}
+
+void SpacecraftObject::cloneParams(GameObject* obj)
+{
+	GameObject::cloneParams(obj);
+
+	SpacecraftObject* spacecraft = (SpacecraftObject*)obj;
+	spacecraft->setLaserRay(this->getLaserRay()->clone());
 }
 
 void SpacecraftObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity)
@@ -42,6 +51,19 @@ void SpacecraftObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Tex
 void SpacecraftObject::update(float delta)
 {
 	GameObject::update(delta);
+	if (health > 0.0f && (abs(Velocity.x) > 0 || abs(Velocity.y) > 0))
+	{
+		if (abs(Velocity.x) > 0)
+			Velocity.x = glm::sign(Velocity.x) * (abs(Velocity.x) - (impulseFactor * 1.5) * delta);
+		if (abs(Velocity.y) > 0)
+			Velocity.y = glm::sign(Velocity.y) * (abs(Velocity.y) - (impulseFactor * 1.5) * delta);
+
+		if (abs(Velocity.x) < 10)
+			Velocity.x = 0;
+		if (abs(Velocity.y) < 10)
+			Velocity.y = 0;
+	}
+
 	for(int i = 0; i < laser_rays.size(); ++i)
 	{
 		laser_rays[i]->update(delta);
@@ -87,7 +109,7 @@ void SpacecraftObject::resize()
 
 void SpacecraftObject::handleInput(GLFWwindow *window, float delta)
 {
-	if (health <= 0.0f)
+	if (health <= 0.0f || abs(Velocity.x) > (impulseFactor / 2) || abs(Velocity.y) > (impulseFactor / 2))
 		return;
 
 	glm::vec4 indents = pLevel->getScreenIndents();
@@ -160,6 +182,21 @@ void SpacecraftObject::setLaserRay(GameObject* laser)
 GameObject* SpacecraftObject::getLaserRay()
 {
 	return laser_ray;
+}
+
+void SpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
+{
+	GameObject::makeReaction(difference, otherObj, collisionChecker);
+
+	if (!otherObj->isUsePhysics())
+		return;
+
+	// Collision resolution
+	glm::vec2 normalizedDiff = glm::normalize(difference);
+	if (!collisionChecker)
+		normalizedDiff = -normalizedDiff;
+	
+	Velocity = normalizedDiff * glm::vec2(impulseFactor);
 }
 
 void SpacecraftObject::clear()

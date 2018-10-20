@@ -80,11 +80,15 @@ void GameLevel::doCollisions()
 			// check if two objects can do damage (exclude cases when damaging object collides with stars for example)
 			// and also check collision for two objects.
 			if (objects[i]->isDamagingObject() && objects[j]->isDamagingObject() &&
-				objects[i]->getHealth() > 0.0f && objects[j]->getHealth() > 0.0f && objects[i]->checkCollision(objects[j]))
+				objects[i]->getHealth() > 0.0f && objects[j]->getHealth() > 0.0f)
 			{
-				objects[i]->makeCollision(objects[j]);
-				objects[i]->makeReaction();
-				objects[j]->makeReaction();
+				glm::vec2 diff;
+				if (objects[i]->checkCollision(objects[j], diff))
+				{
+					objects[i]->makeCollision(objects[j]);
+					objects[i]->makeReaction(diff, objects[j], true);
+					objects[j]->makeReaction(diff, objects[i], false);
+				}
 			}
 		}
 	}
