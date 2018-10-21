@@ -54,6 +54,9 @@ void GameLevel::Draw()
 
 void GameLevel::resize()
 {
+	glm::vec2 screenRatio = renderer->getScreenRatio();
+	playerRestrictionHeight = playerRestrictionHeight * screenRatio.y;
+
 	for (int i = 0; i < objects.size(); ++i)
 		if(!objects[i]->getParentObject())
 			objects[i]->resize();
@@ -62,13 +65,15 @@ void GameLevel::resize()
 void GameLevel::handleInput(GLFWwindow *window, float delta)
 {
 	for (int i = 0; i < objects.size(); ++i)
-		objects[i]->handleInput(window, delta);
+		if(!objects[i]->isAIControlled() && objects[i]->getHealth() > 0)
+			objects[i]->handleInput(window, delta);
 }
 
 void GameLevel::processKey(int key, int action, bool* key_pressed)
 {
 	for (int i = 0; i < objects.size(); ++i)
-		objects[i]->processKey(key, action, key_pressed);
+		if (!objects[i]->isAIControlled() && objects[i]->getHealth() > 0)
+			objects[i]->processKey(key, action, key_pressed);
 }
 
 void GameLevel::doCollisions()
@@ -129,9 +134,19 @@ void GameLevel::setScreenIndents(glm::vec4 indents)
 	screenIndents = indents;
 }
 
+void GameLevel::setPlayerRestrictionHeight(float height)
+{
+	playerRestrictionHeight = height;
+}
+
 glm::vec4 GameLevel::getScreenIndents()
 {
 	return screenIndents;
+}
+
+float GameLevel::getPlayerRestrictionHeight()
+{
+	return playerRestrictionHeight;
 }
 
 SpriteRenderer* GameLevel::getRenderer()

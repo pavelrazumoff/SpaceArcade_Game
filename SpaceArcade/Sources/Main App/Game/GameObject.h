@@ -45,7 +45,10 @@ public:
 	void setHealth(float hp);
 	void setExplosionTime(float time);
 	void setUsePhysics(bool physics);
+	void setUseAI(bool useAI);
+	virtual void setControlVelocityByRotation(bool control);
 
+	GameLevel* getLevel();
 	int getObjectType();
 	bool isVisible();
 	bool isDamagingObject();
@@ -53,7 +56,10 @@ public:
 	float getHealth();
 	float getExplosionTime();
 	bool isUsePhysics();
+	bool isAIControlled();
+	bool isControlVelocityByRotation();
 
+	bool isOffTheScreen(glm::vec2 screenDimensions);
 	bool getReadyForDeath();
 
 	virtual bool checkCollision(GameObject* obj, glm::vec2& difference);
@@ -80,6 +86,8 @@ protected:
 	float health = 100.0f;
 	float explosionTime = 0.0f;
 	bool usePhysics = false;
+	bool controlledByAI = true;
+	bool controlVelocityByRot = false;
 
 	int currentExplosionFrame = 0;
 	float explosionTimeStep = 0.0f;

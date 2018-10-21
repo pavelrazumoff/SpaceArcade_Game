@@ -73,6 +73,7 @@ void MainApp::initScene()
 {
 	base_level.init(res_manager.GetCubemap("BlueSpace"), res_manager.GetShader("Skybox"), &renderer);
 	base_level.setScreenIndents(glm::vec4(10, 10, 10, 10));
+	base_level.setPlayerRestrictionHeight(screenHeight / 3);
 
 	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
 	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
@@ -80,10 +81,11 @@ void MainApp::initScene()
 	pSpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, screenHeight - 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
 	pSpaceCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
 	pSpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
+	pSpaceCraft->setUseAI(false);
 
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(1);
-
+	/*
 	for (int i = 0; i < 30; ++i)
 	{
 		GameObject* asteroid = new GameObject();
@@ -97,7 +99,20 @@ void MainApp::initScene()
 			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));
 		asteroid->InitialRotation = rand() % 360;
 		asteroid->Rotation = 0.2f;
-	}
+	}*/
+
+	SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
+	enemySpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
+	enemySpaceCraft->InitialRotation = 180.0f;
+	enemySpaceCraft->VelocityScale = glm::vec2(200.0f, 100.0f);
+	enemySpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
+	enemySpaceCraft->setUseAI(true);
+	enemySpaceCraft->setControlVelocityByRotation(true);
+	enemySpaceCraft->setTargetEnemy(pSpaceCraft);
+
+	pLaserRay = enemySpaceCraft->getLaserRay();
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, -500.0f), false);
+	pLaserRay->setObjectType(1);
 
 	base_level.resize();
 }

@@ -39,6 +39,8 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->setExplosionTime(this->explosionTime);
 	obj->setExplosionSprite(this->ExplosionSprite);
 	obj->setUsePhysics(this->isUsePhysics());
+	obj->setUseAI(this->isAIControlled());
+	obj->setControlVelocityByRotation(this->isControlVelocityByRotation());
 }
 
 void GameObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity, bool addToLevel)
@@ -68,9 +70,26 @@ void GameObject::update(float delta)
 
 	if (health > 0.0f)
 	{
-		Position.x += Velocity.x * delta;
-		Position.y += Velocity.y * delta;
 		InitialRotation += Rotation * delta;
+
+		glm::vec2 currentVelocity = Velocity;
+
+		if (controlVelocityByRot)
+		{
+			glm::mat4 model;
+			model = glm::rotate(model, glm::radians(InitialRotation), glm::vec3(0.0f, 0.0f, 1.0f));
+			currentVelocity = model * glm::vec4(currentVelocity, 0.0f, 1.0f);
+		}
+
+		Position.x += currentVelocity.x * delta;
+		Position.y += currentVelocity.y * delta;
+
+		if (!controlledByAI)
+		{
+			float restrZone = pLevel->getRenderer()->getCurrentScreenDimensions().y - pLevel->getPlayerRestrictionHeight();
+			if (Position.y < restrZone)
+				Position.y = restrZone;
+		}
 
 		if (InitialRotation >= 360.0f || InitialRotation <= -360.0f)
 			InitialRotation = 0.0f;
@@ -140,6 +159,14 @@ void GameObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool c
 	}
 }
 
+bool GameObject::isOffTheScreen(glm::vec2 screenDimensions)
+{
+	if (Position.x + Size.x < 0.0f || Position.y + Size.y < 0.0f ||
+		Position.x > screenDimensions.x || Position.y > screenDimensions.y)
+		return true;
+	return false;
+}
+
 void GameObject::setParentObject(GameObject* parent)
 {
 	parentObject = parent;
@@ -196,6 +223,21 @@ void GameObject::setUsePhysics(bool physics)
 	usePhysics = physics;
 }
 
+void GameObject::setUseAI(bool useAI)
+{
+	controlledByAI = useAI;
+}
+
+void GameObject::setControlVelocityByRotation(bool control)
+{
+	controlVelocityByRot = control;
+}
+
+GameLevel* GameObject::getLevel()
+{
+	return pLevel;
+}
+
 int GameObject::getObjectType()
 {
 	return objectType;
@@ -234,6 +276,16 @@ float GameObject::getExplosionTime()
 bool GameObject::isUsePhysics()
 {
 	return usePhysics;
+}
+
+bool GameObject::isAIControlled()
+{
+	return controlledByAI;
+}
+
+bool GameObject::isControlVelocityByRotation()
+{
+	return controlVelocityByRot;
 }
 
 void GameObject::clear()

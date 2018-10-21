@@ -25,7 +25,10 @@ public:
 	void						removeObject(GameObject* obj);
 
 	void						setScreenIndents(glm::vec4 indents);
+	void						setPlayerRestrictionHeight(float height);
+
 	glm::vec4					getScreenIndents();
+	float						getPlayerRestrictionHeight();
 
 	SpriteRenderer*				getRenderer();
 
@@ -40,4 +43,5 @@ private:
 
 	SpriteRenderer*				renderer = NULL;
 	glm::vec4					screenIndents;
+	float						playerRestrictionHeight;
 };
