@@ -58,6 +58,12 @@
     <Filter Include="Source Files\Main App\Game">
       <UniqueIdentifier>{949671ed-7265-4ad9-ae02-e5d7985da354}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Main App\GUI">
+      <UniqueIdentifier>{c9d93c10-98cf-4fcd-89b6-6097558522a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Main App\GUI">
+      <UniqueIdentifier>{8e19af70-3893-46c1-8e0e-770e3fb97194}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -95,6 +101,15 @@
     </ClInclude>
     <ClInclude Include="Sources\Main App\Game\SpacecraftObject.h">
       <Filter>Header Files\Main App\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\GUI\GUIObject.h">
+      <Filter>Header Files\Main App\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\GUI\GUIButton.h">
+      <Filter>Header Files\Main App\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\GUI\GUILayout.h">
+      <Filter>Header Files\Main App\GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +166,15 @@
     </ClCompile>
     <ClCompile Include="Sources\Main App\Game\SpacecraftObject.cpp">
       <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\GUI\GUIObject.cpp">
+      <Filter>Source Files\Main App\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\GUI\GUIButton.cpp">
+      <Filter>Source Files\Main App\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\GUI\GUILayout.cpp">
+      <Filter>Source Files\Main App\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

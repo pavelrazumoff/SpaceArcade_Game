@@ -125,6 +125,9 @@
     <ClInclude Include="Sources\Main App\Game\GameLevel.h" />
     <ClInclude Include="Sources\Main App\Game\GameObject.h" />
     <ClInclude Include="Sources\Main App\Game\SpacecraftObject.h" />
+    <ClInclude Include="Sources\Main App\GUI\GUIButton.h" />
+    <ClInclude Include="Sources\Main App\GUI\GUILayout.h" />
+    <ClInclude Include="Sources\Main App\GUI\GUIObject.h" />
     <ClInclude Include="Sources\Main App\MainApp.h" />
     <ClInclude Include="Sources\Main App\MainData.h" />
     <ClInclude Include="Sources\Miscellaneous\Camera.h" />
@@ -142,6 +145,9 @@
     <ClCompile Include="Sources\Main App\Game\GameLevel.cpp" />
     <ClCompile Include="Sources\Main App\Game\GameObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\SpacecraftObject.cpp" />
+    <ClCompile Include="Sources\Main App\GUI\GUIButton.cpp" />
+    <ClCompile Include="Sources\Main App\GUI\GUILayout.cpp" />
+    <ClCompile Include="Sources\Main App\GUI\GUIObject.cpp" />
     <ClCompile Include="Sources\Main App\InitData.cpp" />
     <ClCompile Include="Sources\Main App\Input.cpp" />
     <ClCompile Include="Sources\Main App\LoadData.cpp" />

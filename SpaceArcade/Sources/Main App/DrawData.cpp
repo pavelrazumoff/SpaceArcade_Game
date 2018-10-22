@@ -2,11 +2,13 @@
 
 void MainApp::render()
 {
-	float near_plane = 10.0f, far_plane = 100.0f;
-	glm::mat4 lightSpaceMatrix;
+	// Draw scene as normal.
+	// first render scene in specific framebuffer.
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we’re not using the stencil buffer now.
 
-	glm::mat4 modelMat;
-	glm::mat4 view = camera.GetViewMatrix();
+	glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix.
 	glm::mat4 projection = glm::perspective(glm::radians(camera.getZoom()), (float)screenWidth / (float)screenHeight, 0.1f, 5000.0f);
 
 	// Store uniform buffer data.
@@ -15,22 +17,11 @@ void MainApp::render()
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	// Draw scene as normal.
-	// first render scene in specific framebuffer.
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we’re not using the stencil buffer now.
-
-	view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix.
-
-	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
 	// skybox cube
 	glBindVertexArray(skyboxVAO);
 
-	base_level.Draw();
+	if (!startPage)
+		drawScene();
 
 	// second render framebuffer as texture for post-processing.
 	// blit multisampled buffer(s) to normal colorbuffer of intermediate FBO. Image is stored in screenTexture.
@@ -110,14 +101,24 @@ void MainApp::render()
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	if (startPage)
+		drawStartPage();
+
 	// Draw text.
 	drawTextData();
 
 	glEnable(GL_DEPTH_TEST);
 }
 
-void MainApp::drawScene(Shader shader, bool finalDraw)
+void MainApp::drawScene()
 {
+	base_level.Draw();
+}
+
+void MainApp::drawStartPage()
+{
+	for (int i = 0; i < gui_objects.size(); ++i)
+		gui_objects[i]->draw();
 }
 
 void MainApp::drawTextData()

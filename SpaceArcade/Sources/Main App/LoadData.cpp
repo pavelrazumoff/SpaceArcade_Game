@@ -14,6 +14,19 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//asteroid.png", "asteroid", useGammaCorrection);
 	res_manager.LoadTexture("Images//explosion.png", "explosion", useGammaCorrection);
 
+	// gui.
+	res_manager.LoadTexture("Images//Interface//playGameButton.png", "playGameButton", false);
+	res_manager.LoadTexture("Images//Interface//playGameButtonHovered.png", "playGameButtonHovered", false);
+	res_manager.LoadTexture("Images//Interface//playGameButtonPressed.png", "playGameButtonPressed", false);
+
+	res_manager.LoadTexture("Images//Interface//settingsButton.png", "settingsButton", false);
+	res_manager.LoadTexture("Images//Interface//settingsButtonHovered.png", "settingsButtonHovered", false);
+	res_manager.LoadTexture("Images//Interface//settingsButtonPressed.png", "settingsButtonPressed", false);
+
+	res_manager.LoadTexture("Images//Interface//quitButton.png", "quitButton", false);
+	res_manager.LoadTexture("Images//Interface//quitButtonHovered.png", "quitButtonHovered", false);
+	res_manager.LoadTexture("Images//Interface//quitButtonPressed.png", "quitButtonPressed", false);
+
 	Texture2D* tex = res_manager.GetTexture("explosion");
 	tex->numOfColumns = 8;
 	tex->numOfRows = 4;

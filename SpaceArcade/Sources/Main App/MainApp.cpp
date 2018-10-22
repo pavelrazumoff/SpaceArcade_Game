@@ -72,7 +72,7 @@ void MainApp::init()
 
 	renderer.init(res_manager.GetShader("Sprite"), screenWidth, screenHeight);
 
-	// Initialize some constant shader values, such as light, that will be used in scene.
+	initGUI();
 	initScene();
 }
 
@@ -88,7 +88,8 @@ void MainApp::update()
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 
-	base_level.update(deltaTime);
+	if(!startPage)
+		base_level.update(deltaTime);
 }
 
 void MainApp::resize(int width, int height)
@@ -108,11 +109,19 @@ void MainApp::resize(int width, int height)
 		resizeFramebuffer(pingpongFBO[i], pingpongColorbuffers[i], -1, false, useHDR, false);
 
 	renderer.resize(screenWidth, screenHeight);
+	for (int i = 0; i < gui_objects.size(); ++i)
+		gui_objects[i]->resize();
+
 	base_level.resize();
 }
 
 void MainApp::clearBuffers()
 {
+	for (int i = 0; i < gui_objects.size(); ++i)
+		delete gui_objects[i];
+
+	gui_objects.clear();
+
 	for (int i = 0; i < 2; ++i)
 		glDeleteFramebuffers(1, &pingpongFBO[i]);
 

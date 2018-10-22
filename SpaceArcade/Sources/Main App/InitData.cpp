@@ -69,11 +69,55 @@ void MainApp::initBuffers()
 	generateFontBuffers();
 }
 
+void MainApp::initGUI()
+{
+	GUILayout* mainLayout = new GUILayout(&renderer);
+	gui_objects.push_back(mainLayout);
+
+	glm::vec2 layoutSize = glm::vec2(270, 342);
+	mainLayout->init(NULL, glm::vec2(screenWidth / 2 - layoutSize.x / 2, screenHeight / 2 - layoutSize.y / 2), layoutSize, true);
+	mainLayout->setSpace(30);
+	mainLayout->setAlignment(GUILayout_Alignment::Vertical);
+
+	GUIButton* playGameButton = new GUIButton(&renderer);
+	mainLayout->addChild(playGameButton);
+
+	glm::vec2 spriteSize = glm::vec2(270, 84);
+	playGameButton->init(res_manager.GetTexture("playGameButton"), glm::vec2(screenWidth / 2 - spriteSize.x / 2, screenHeight / 3 - spriteSize.y / 2), spriteSize, true);
+	playGameButton->setHoveredTexture(res_manager.GetTexture("playGameButtonHovered"));
+	playGameButton->setPressedTexture(res_manager.GetTexture("playGameButtonPressed"));
+	playGameButton->resize();
+
+	playGameButton->setActionCallback(showScene);
+
+	GUIButton* settingsButton = new GUIButton(&renderer);
+	mainLayout->addChild(settingsButton);
+
+	spriteSize = glm::vec2(270, 84);
+	settingsButton->init(res_manager.GetTexture("settingsButton"), glm::vec2(screenWidth / 2 - spriteSize.x / 2, screenHeight / 2 - spriteSize.y / 2), spriteSize, true);
+	settingsButton->setHoveredTexture(res_manager.GetTexture("settingsButtonHovered"));
+	settingsButton->setPressedTexture(res_manager.GetTexture("settingsButtonPressed"));
+	settingsButton->resize();
+
+	GUIButton* quitButton = new GUIButton(&renderer);
+	mainLayout->addChild(quitButton);
+
+	spriteSize = glm::vec2(270, 84);
+	quitButton->init(res_manager.GetTexture("quitButton"), glm::vec2(screenWidth / 2 - spriteSize.x / 2, (2 * screenHeight) / 3 - spriteSize.y / 2), spriteSize, true);
+	quitButton->setHoveredTexture(res_manager.GetTexture("quitButtonHovered"));
+	quitButton->setPressedTexture(res_manager.GetTexture("quitButtonPressed"));
+	quitButton->resize();
+
+	quitButton->setActionCallback(quitGame);
+
+	mainLayout->resize();
+}
+
 void MainApp::initScene()
 {
 	base_level.init(res_manager.GetCubemap("BlueSpace"), res_manager.GetShader("Skybox"), &renderer);
 	base_level.setScreenIndents(glm::vec4(10, 10, 10, 10));
-	base_level.setPlayerRestrictionHeight(screenHeight / 3);
+	base_level.setPlayerRestrictionHeight(screenHeight / 2.5f);
 
 	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
 	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
@@ -85,7 +129,7 @@ void MainApp::initScene()
 
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(1);
-	/*
+	
 	for (int i = 0; i < 30; ++i)
 	{
 		GameObject* asteroid = new GameObject();
@@ -98,8 +142,8 @@ void MainApp::initScene()
 		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 400 + 1) - 400),
 			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));
 		asteroid->InitialRotation = rand() % 360;
-		asteroid->Rotation = 0.2f;
-	}*/
+		asteroid->Rotation = 5.0f;
+	}
 
 	SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
 	enemySpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));

@@ -3,6 +3,8 @@
 #include "../Miscellaneous/Camera.h"
 #include "../Miscellaneous/ResourceManager.h"
 #include "Game/GameLevel.h"
+#include "GUI/GUIButton.h"
+#include "GUI/GUILayout.h"
 #include "MainData.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -11,6 +13,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_click_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+void showScene();
+void quitGame();
 
 class MainApp
 {
@@ -22,18 +27,25 @@ public:
 
 	int initWindow();
 	void init();
+	void initGUI();
 	void initScene();
+	void initBuffers();
+
 	void loadShaders();
 	void loadTextures();
 	void loadFonts();
-	void initBuffers();
+
 	void clearBuffers();
+
 	void update();
-	void render();
-	void drawTextData();
+
 	void resize(int width, int height);
 
-	void drawScene(Shader shader, bool finalDraw);
+	void render();
+	void drawTextData();
+	void drawScene();
+	void drawStartPage();
+
 	void RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 
 	// input.
@@ -59,8 +71,13 @@ public:
 	Shader font_shader;
 	Camera camera;
 
+	// GUI.
+	std::vector<GUIObject*> gui_objects;
+
 	// Game Data.
 	GameLevel base_level;
+
+	bool startPage = true;
 
 private:
 	GLFWwindow* window = NULL;

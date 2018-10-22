@@ -53,6 +53,9 @@ void MainApp::processMouseMove(GLFWwindow* window, double xpos, double ypos)
 		firstMouseUse = false;
 	}
 
+	for (int i = 0; i < gui_objects.size(); ++i)
+		gui_objects[i]->processMouseMove(window, xpos, ypos);
+
 	/*
 	if (lbutton_down)
 	{
@@ -74,6 +77,9 @@ void MainApp::processMouseClick(GLFWwindow* window, int button, int action, int 
 		else if (action == GLFW_RELEASE)
 			lbutton_down = false;
 	}
+
+	for (int i = 0; i < gui_objects.size(); ++i)
+		gui_objects[i]->processMouseClick(window, button, action, lastMouseX, lastMouseY);
 }
 
 void MainApp::processMouseScroll(GLFWwindow* window, double xoffset, double yoffset)

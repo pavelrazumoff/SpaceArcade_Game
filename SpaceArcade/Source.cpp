@@ -78,3 +78,13 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	app.processMouseScroll(window, xoffset, yoffset);
 }
+
+void showScene()
+{
+	app.startPage = false;
+}
+
+void quitGame()
+{
+	glfwSetWindowShouldClose(app.getWindow(), true);
+}
