@@ -57,6 +57,9 @@ glm::vec2 SpriteRenderer::getScreenRatio()
 
 void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec2 size, GLfloat rotate, int frame)
 {
+	if (!texture)
+		return;
+
 	// Prepare transformations
 	this->shader.use();
 	

@@ -71,46 +71,69 @@ void MainApp::initBuffers()
 
 void MainApp::initGUI()
 {
-	GUILayout* mainLayout = new GUILayout(&renderer);
-	gui_objects.push_back(mainLayout);
+	GUILayout* windowLayout = new GUILayout(&renderer);
+	gui_objects.push_back(windowLayout);
+
+	windowLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	windowLayout->setSpace(0);
+	windowLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	windowLayout->setAlignment(GUILayout_Alignment::Center);
+
+	GUIObject* fillObjects[2];
+	for (int i = 0; i < 2; ++i)
+	{
+		fillObjects[i] = new GUIObject(&renderer);
+		fillObjects[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		fillObjects[i]->setLayoutFillPercent(3);
+	}
+
+	windowLayout->addChild(fillObjects[0]);
+
+	GUILayout* menuLayout = new GUILayout(&renderer);
+	windowLayout->addChild(menuLayout);
 
 	glm::vec2 layoutSize = glm::vec2(270, 342);
-	mainLayout->init(NULL, glm::vec2(screenWidth / 2 - layoutSize.x / 2, screenHeight / 2 - layoutSize.y / 2), layoutSize, true);
-	mainLayout->setSpace(30);
-	mainLayout->setAlignment(GUILayout_Alignment::Vertical);
+	menuLayout->init(NULL, glm::vec2(screenWidth / 2 - layoutSize.x / 2, screenHeight / 2 - layoutSize.y / 2), layoutSize, true);
+	menuLayout->setLayoutFillPercent(2);
+	menuLayout->setSpace(30);
+	menuLayout->setTypeLayout(GUILayout_Type::Vertical);
+	menuLayout->setAlignment(GUILayout_Alignment::Center);
+
+	windowLayout->addChild(fillObjects[1]);
 
 	GUIButton* playGameButton = new GUIButton(&renderer);
-	mainLayout->addChild(playGameButton);
+	menuLayout->addChild(playGameButton);
 
 	glm::vec2 spriteSize = glm::vec2(270, 84);
-	playGameButton->init(res_manager.GetTexture("playGameButton"), glm::vec2(screenWidth / 2 - spriteSize.x / 2, screenHeight / 3 - spriteSize.y / 2), spriteSize, true);
+	playGameButton->init(res_manager.GetTexture("playGameButton"), glm::vec2(0.0f, 0.0f), spriteSize, true);
+	playGameButton->setSizeRatio(spriteSize.x / spriteSize.y, true);
+	playGameButton->setMinimumSize(glm::vec2(193, 60));
 	playGameButton->setHoveredTexture(res_manager.GetTexture("playGameButtonHovered"));
 	playGameButton->setPressedTexture(res_manager.GetTexture("playGameButtonPressed"));
-	playGameButton->resize();
 
 	playGameButton->setActionCallback(showScene);
 
 	GUIButton* settingsButton = new GUIButton(&renderer);
-	mainLayout->addChild(settingsButton);
+	menuLayout->addChild(settingsButton);
 
-	spriteSize = glm::vec2(270, 84);
-	settingsButton->init(res_manager.GetTexture("settingsButton"), glm::vec2(screenWidth / 2 - spriteSize.x / 2, screenHeight / 2 - spriteSize.y / 2), spriteSize, true);
+	settingsButton->init(res_manager.GetTexture("settingsButton"), glm::vec2(0.0f, 0.0f), spriteSize, true);
+	settingsButton->setSizeRatio(spriteSize.x / spriteSize.y, true);
+	settingsButton->setMinimumSize(glm::vec2(193, 60));
 	settingsButton->setHoveredTexture(res_manager.GetTexture("settingsButtonHovered"));
 	settingsButton->setPressedTexture(res_manager.GetTexture("settingsButtonPressed"));
-	settingsButton->resize();
 
 	GUIButton* quitButton = new GUIButton(&renderer);
-	mainLayout->addChild(quitButton);
+	menuLayout->addChild(quitButton);
 
-	spriteSize = glm::vec2(270, 84);
-	quitButton->init(res_manager.GetTexture("quitButton"), glm::vec2(screenWidth / 2 - spriteSize.x / 2, (2 * screenHeight) / 3 - spriteSize.y / 2), spriteSize, true);
+	quitButton->init(res_manager.GetTexture("quitButton"), glm::vec2(0.0f, 0.0f), spriteSize, true);
+	quitButton->setSizeRatio(spriteSize.x / spriteSize.y, true);
+	quitButton->setMinimumSize(glm::vec2(193, 60));
 	quitButton->setHoveredTexture(res_manager.GetTexture("quitButtonHovered"));
 	quitButton->setPressedTexture(res_manager.GetTexture("quitButtonPressed"));
-	quitButton->resize();
 
 	quitButton->setActionCallback(quitGame);
 
-	mainLayout->resize();
+	windowLayout->resize();
 }
 
 void MainApp::initScene()
@@ -142,7 +165,7 @@ void MainApp::initScene()
 		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 400 + 1) - 400),
 			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));
 		asteroid->InitialRotation = rand() % 360;
-		asteroid->Rotation = 5.0f;
+		asteroid->Rotation = 10.0f;
 	}
 
 	SpacecraftObject* enemySpaceCraft = new SpacecraftObject();

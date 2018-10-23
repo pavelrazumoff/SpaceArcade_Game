@@ -5,7 +5,8 @@ void MainApp::processInput(GLFWwindow *window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 	
-	base_level.handleInput(window, deltaTime);
+	if(!startPage)
+		base_level.handleInput(window, deltaTime);
 }
 
 void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -41,7 +42,13 @@ void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, 
 		key_pressed = false;
 	}
 
-	base_level.processKey(key, action, &key_pressed);
+	if (!startPage)
+		base_level.processKey(key, action, &key_pressed);
+	else
+	{
+		for (int i = 0; i < gui_objects.size(); ++i)
+			gui_objects[i]->processKey(key, action);
+	}
 }
 
 void MainApp::processMouseMove(GLFWwindow* window, double xpos, double ypos)
@@ -53,17 +60,11 @@ void MainApp::processMouseMove(GLFWwindow* window, double xpos, double ypos)
 		firstMouseUse = false;
 	}
 
-	for (int i = 0; i < gui_objects.size(); ++i)
-		gui_objects[i]->processMouseMove(window, xpos, ypos);
-
-	/*
-	if (lbutton_down)
+	if (startPage)
 	{
-		float xoffset = xpos - lastMouseX;
-		float yoffset = lastMouseY - ypos; // reversed since y-coordinates range from bottom to top.
-
-		camera.ProcessMouseMovement(xoffset, yoffset, true);
-	}*/
+		for (int i = 0; i < gui_objects.size(); ++i)
+			gui_objects[i]->processMouseMove(window, xpos, ypos);
+	}
 
 	lastMouseX = xpos;
 	lastMouseY = ypos;
@@ -78,11 +79,13 @@ void MainApp::processMouseClick(GLFWwindow* window, int button, int action, int 
 			lbutton_down = false;
 	}
 
-	for (int i = 0; i < gui_objects.size(); ++i)
-		gui_objects[i]->processMouseClick(window, button, action, lastMouseX, lastMouseY);
+	if (startPage)
+	{
+		for (int i = 0; i < gui_objects.size(); ++i)
+			gui_objects[i]->processMouseClick(window, button, action, lastMouseX, lastMouseY);
+	}
 }
 
 void MainApp::processMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
 {
-	//camera.ProcessMouseScroll(yoffset);
 }

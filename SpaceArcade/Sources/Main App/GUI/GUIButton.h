@@ -16,10 +16,10 @@ public:
 	GUIButton(SpriteRenderer* renderer);
 	virtual ~GUIButton();
 
-	virtual void init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_scale, bool resizable);
+	virtual void init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool resizable);
 
 	virtual void draw();
-	virtual void resize();
+	virtual void resize(bool useParentResize = false);
 
 	virtual void clear();
 
