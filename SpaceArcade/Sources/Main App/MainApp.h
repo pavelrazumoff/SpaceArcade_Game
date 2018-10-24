@@ -3,8 +3,9 @@
 #include "../Miscellaneous/Camera.h"
 #include "../Miscellaneous/ResourceManager.h"
 #include "Game/GameLevel.h"
-#include "GUI/GUIButton.h"
+#include "GUI/GUICheckBox.h"
 #include "GUI/GUILayout.h"
+#include "GUI/GUITextBox.h"
 #include "MainData.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -15,7 +16,21 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 void showScene();
+void showSettings();
 void quitGame();
+void backToMainMenu();
+
+void enableMultisampling(bool enable);
+void enableGammaCorrection(bool enable);
+void enableHDR(bool enable);
+void enableBloom(bool enable);
+
+enum PageType
+{
+	MainMenu = 0,
+	Settings,
+	Game
+};
 
 class MainApp
 {
@@ -45,6 +60,7 @@ public:
 	void drawTextData();
 	void drawScene();
 	void drawStartPage();
+	void drawSettingsPage();
 
 	void RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 
@@ -72,17 +88,22 @@ public:
 	Camera camera;
 
 	// GUI.
-	std::vector<GUIObject*> gui_objects;
+	std::map<int, std::vector<GUIObject*>> gui_objects;
 
 	// Game Data.
 	GameLevel base_level;
 
-	bool startPage = true;
+	int currentPage = PageType::MainMenu;
+
+	int screenWidth, screenHeight;
+
+	bool useMultisampling = true;
+	bool useGammaCorrection = true;
+	bool useHDR = true;
+	bool useBloom = true;
 
 private:
 	GLFWwindow* window = NULL;
-
-	int screenWidth, screenHeight;
 
 	unsigned int framebuffer, intermediateFBO, finalFBO;
 	unsigned int texColorMSBuffer, screenTexture;
@@ -106,11 +127,6 @@ private:
 	bool firstMouseUse = true;
 	bool lbutton_down = false;
 	bool key_pressed = false;
-
-	bool useMultisampling = true;
-	bool useGammaCorrection = true;
-	bool useHDR = true;
-	bool useBloom = true;
 
 	ResourceManager res_manager;
 	SpriteRenderer renderer;

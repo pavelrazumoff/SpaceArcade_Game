@@ -5,7 +5,7 @@ void MainApp::processInput(GLFWwindow *window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 	
-	if(!startPage)
+	if(currentPage == PageType::Game)
 		base_level.handleInput(window, deltaTime);
 }
 
@@ -42,12 +42,13 @@ void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, 
 		key_pressed = false;
 	}
 
-	if (!startPage)
+	if (currentPage == PageType::Game)
 		base_level.processKey(key, action, &key_pressed);
 	else
 	{
-		for (int i = 0; i < gui_objects.size(); ++i)
-			gui_objects[i]->processKey(key, action);
+		for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)
+			for (int i = 0; i < it->second.size(); ++i)
+				it->second[i]->processKey(key, action);
 	}
 }
 
@@ -60,10 +61,10 @@ void MainApp::processMouseMove(GLFWwindow* window, double xpos, double ypos)
 		firstMouseUse = false;
 	}
 
-	if (startPage)
+	if (currentPage != PageType::Game)
 	{
-		for (int i = 0; i < gui_objects.size(); ++i)
-			gui_objects[i]->processMouseMove(window, xpos, ypos);
+		for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+			gui_objects[currentPage][i]->processMouseMove(window, xpos, ypos);
 	}
 
 	lastMouseX = xpos;
@@ -79,10 +80,10 @@ void MainApp::processMouseClick(GLFWwindow* window, int button, int action, int 
 			lbutton_down = false;
 	}
 
-	if (startPage)
+	if (currentPage != PageType::Game)
 	{
-		for (int i = 0; i < gui_objects.size(); ++i)
-			gui_objects[i]->processMouseClick(window, button, action, lastMouseX, lastMouseY);
+		for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+			gui_objects[currentPage][i]->processMouseClick(window, button, action, lastMouseX, lastMouseY);
 	}
 }
 

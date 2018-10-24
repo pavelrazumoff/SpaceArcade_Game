@@ -34,15 +34,19 @@ public:
 	void setAlignment(int align);
 	void setSpace(int space);
 	void setIndents(glm::vec4 indents);
+	void setUseParentDimensions(bool use);
 
 	int getTypeLayout();
 	int getAlignment();
 	int getSpace();
 	glm::vec4 getIndents();
+	bool isUseParentDimensions();
 
 private:
 	int typeLayout = GUILayout_Type::Vertical;
 	int alignment = GUILayout_Alignment::Top;
 	int space = 0;					// vertical or horizontal space between two adjacent objects.
 	glm::vec4 indents;				// indents on the sides of layout frame.
+
+	bool useParentDimensions = false;
 };

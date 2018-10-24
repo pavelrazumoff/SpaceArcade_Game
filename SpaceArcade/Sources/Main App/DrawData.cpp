@@ -20,7 +20,7 @@ void MainApp::render()
 	// skybox cube
 	glBindVertexArray(skyboxVAO);
 
-	if (!startPage)
+	if (currentPage == PageType::Game)
 		drawScene();
 
 	// second render framebuffer as texture for post-processing.
@@ -101,11 +101,20 @@ void MainApp::render()
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	if (startPage)
+	switch (currentPage)
+	{
+	case PageType::MainMenu:
 		drawStartPage();
+		break;
+	case PageType::Settings:
+		drawSettingsPage();
+		break;
+	default:
+		break;
+	}
 
 	// Draw text.
-	drawTextData();
+	//drawTextData();
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -117,8 +126,14 @@ void MainApp::drawScene()
 
 void MainApp::drawStartPage()
 {
-	for (int i = 0; i < gui_objects.size(); ++i)
-		gui_objects[i]->draw();
+	for (int i = 0; i < gui_objects[PageType::MainMenu].size(); ++i)
+		gui_objects[PageType::MainMenu][i]->draw();
+}
+
+void MainApp::drawSettingsPage()
+{
+	for (int i = 0; i < gui_objects[PageType::Settings].size(); ++i)
+		gui_objects[PageType::Settings][i]->draw();
 }
 
 void MainApp::drawTextData()

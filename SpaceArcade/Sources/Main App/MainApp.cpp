@@ -78,7 +78,7 @@ void MainApp::init()
 
 void MainApp::loadFonts()
 {
-	res_manager.loadFont("Fonts/PT Sans Narrow.ttf", "SansNarrow", 18);
+	res_manager.loadFont("Fonts/PT Sans Narrow.ttf", "SansNarrow", 26);
 }
 
 void MainApp::update()
@@ -88,7 +88,7 @@ void MainApp::update()
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 
-	if(!startPage)
+	if(currentPage == PageType::Game)
 		base_level.update(deltaTime);
 }
 
@@ -109,16 +109,19 @@ void MainApp::resize(int width, int height)
 		resizeFramebuffer(pingpongFBO[i], pingpongColorbuffers[i], -1, false, useHDR, false);
 
 	renderer.resize(screenWidth, screenHeight);
-	for (int i = 0; i < gui_objects.size(); ++i)
-		gui_objects[i]->resize();
+
+	for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)
+		for (int i = 0; i < it->second.size(); ++i)
+			it->second[i]->resize();
 
 	base_level.resize();
 }
 
 void MainApp::clearBuffers()
 {
-	for (int i = 0; i < gui_objects.size(); ++i)
-		delete gui_objects[i];
+	for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)
+		for (int i = 0; i < it->second.size(); ++i)
+			delete it->second[i];
 
 	gui_objects.clear();
 

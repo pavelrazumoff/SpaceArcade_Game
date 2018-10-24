@@ -111,6 +111,12 @@
     <ClInclude Include="Sources\Main App\GUI\GUILayout.h">
       <Filter>Header Files\Main App\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Main App\GUI\GUICheckBox.h">
+      <Filter>Header Files\Main App\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\GUI\GUITextBox.h">
+      <Filter>Header Files\Main App\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image.cpp">
@@ -174,6 +180,12 @@
       <Filter>Source Files\Main App\GUI</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Main App\GUI\GUILayout.cpp">
+      <Filter>Source Files\Main App\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\GUI\GUICheckBox.cpp">
+      <Filter>Source Files\Main App\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\GUI\GUITextBox.cpp">
       <Filter>Source Files\Main App\GUI</Filter>
     </ClCompile>
   </ItemGroup>

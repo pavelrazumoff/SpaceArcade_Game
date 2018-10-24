@@ -27,6 +27,16 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//Interface//quitButtonHovered.png", "quitButtonHovered", false);
 	res_manager.LoadTexture("Images//Interface//quitButtonPressed.png", "quitButtonPressed", false);
 
+	res_manager.LoadTexture("Images//Interface//backButton.png", "backButton", false);
+	res_manager.LoadTexture("Images//Interface//backButtonHovered.png", "backButtonHovered", false);
+	res_manager.LoadTexture("Images//Interface//backButtonPressed.png", "backButtonPressed", false);
+
+	res_manager.LoadTexture("Images//Interface//settingsPageFrame.png", "settingsFrame", false);
+	res_manager.LoadTexture("Images//Interface//checkBox.png", "checkBox", false);
+	res_manager.LoadTexture("Images//Interface//checkBoxHovered.png", "checkBoxHovered", false);
+	res_manager.LoadTexture("Images//Interface//checkBoxPressed.png", "checkBoxPressed", false);
+	res_manager.LoadTexture("Images//Interface//checkIcon.png", "checkIcon", false);
+
 	Texture2D* tex = res_manager.GetTexture("explosion");
 	tex->numOfColumns = 8;
 	tex->numOfRows = 4;

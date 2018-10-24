@@ -39,11 +39,14 @@ void GUIButton::draw()
 	default:
 		break;
 	}
+
+	for (int i = 0; i < children.size(); ++i)
+		children[i]->draw();
 }
 
 void GUIButton::resize(bool useParentResize)
 {
-	GUIObject::resize();
+	GUIObject::resize(useParentResize);
 }
 
 void GUIButton::processMouseMove(GLFWwindow* window, float xpos, float ypos)
@@ -116,5 +119,5 @@ void GUIButton::setActionCallback(void(*actionCallback)(void))
 
 void GUIButton::clear()
 {
-	
+	GUIObject::clear();
 }

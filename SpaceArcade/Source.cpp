@@ -81,10 +81,42 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void showScene()
 {
-	app.startPage = false;
+	app.currentPage = PageType::Game;
+}
+
+void showSettings()
+{
+	app.currentPage = PageType::Settings;
 }
 
 void quitGame()
 {
 	glfwSetWindowShouldClose(app.getWindow(), true);
+}
+
+void backToMainMenu()
+{
+	app.currentPage = PageType::MainMenu;
+}
+
+void enableMultisampling(bool enable)
+{
+	app.useMultisampling = enable;
+	app.resize(app.screenWidth, app.screenHeight);
+}
+
+void enableGammaCorrection(bool enable)
+{
+	app.useGammaCorrection = enable;
+}
+
+void enableHDR(bool enable)
+{
+	app.useHDR = enable;
+	app.resize(app.screenWidth, app.screenHeight);
+}
+
+void enableBloom(bool enable)
+{
+	app.useBloom = enable;
 }

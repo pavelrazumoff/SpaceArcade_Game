@@ -71,13 +71,17 @@ void MainApp::initBuffers()
 
 void MainApp::initGUI()
 {
-	GUILayout* windowLayout = new GUILayout(&renderer);
-	gui_objects.push_back(windowLayout);
+	std::vector<GUIObject*> mainMenuObjects;
+	std::vector<GUIObject*> settingsObjects;
 
-	windowLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
-	windowLayout->setSpace(0);
-	windowLayout->setTypeLayout(GUILayout_Type::Horizontal);
-	windowLayout->setAlignment(GUILayout_Alignment::Center);
+	// Main Menu.
+	GUILayout* mainMenuLayout = new GUILayout(&renderer);
+	mainMenuObjects.push_back(mainMenuLayout);
+
+	mainMenuLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	mainMenuLayout->setSpace(0);
+	mainMenuLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	mainMenuLayout->setAlignment(GUILayout_Alignment::Center);
 
 	GUIObject* fillObjects[2];
 	for (int i = 0; i < 2; ++i)
@@ -87,10 +91,10 @@ void MainApp::initGUI()
 		fillObjects[i]->setLayoutFillPercent(3);
 	}
 
-	windowLayout->addChild(fillObjects[0]);
+	mainMenuLayout->addChild(fillObjects[0]);
 
 	GUILayout* menuLayout = new GUILayout(&renderer);
-	windowLayout->addChild(menuLayout);
+	mainMenuLayout->addChild(menuLayout);
 
 	glm::vec2 layoutSize = glm::vec2(270, 342);
 	menuLayout->init(NULL, glm::vec2(screenWidth / 2 - layoutSize.x / 2, screenHeight / 2 - layoutSize.y / 2), layoutSize, true);
@@ -99,41 +103,144 @@ void MainApp::initGUI()
 	menuLayout->setTypeLayout(GUILayout_Type::Vertical);
 	menuLayout->setAlignment(GUILayout_Alignment::Center);
 
-	windowLayout->addChild(fillObjects[1]);
+	mainMenuLayout->addChild(fillObjects[1]);
 
-	GUIButton* playGameButton = new GUIButton(&renderer);
-	menuLayout->addChild(playGameButton);
+	std::string textureNames[] = { "playGameButton", "settingsButton", "quitButton" };
+	std::string textureNames_0[] = { "playGameButtonHovered", "settingsButtonHovered", "quitButtonHovered" };
+	std::string textureNames_1[] = { "playGameButtonPressed", "settingsButtonPressed", "quitButtonPressed" };
 
 	glm::vec2 spriteSize = glm::vec2(270, 84);
-	playGameButton->init(res_manager.GetTexture("playGameButton"), glm::vec2(0.0f, 0.0f), spriteSize, true);
-	playGameButton->setSizeRatio(spriteSize.x / spriteSize.y, true);
-	playGameButton->setMinimumSize(glm::vec2(193, 60));
-	playGameButton->setHoveredTexture(res_manager.GetTexture("playGameButtonHovered"));
-	playGameButton->setPressedTexture(res_manager.GetTexture("playGameButtonPressed"));
+	GUIButton* buttons[3];
 
-	playGameButton->setActionCallback(showScene);
+	for (int i = 0; i < 3; ++i)
+	{
+		buttons[i] = new GUIButton(&renderer);
+		menuLayout->addChild(buttons[i]);
 
-	GUIButton* settingsButton = new GUIButton(&renderer);
-	menuLayout->addChild(settingsButton);
+		buttons[i]->init(res_manager.GetTexture(textureNames[i]), glm::vec2(0.0f, 0.0f), spriteSize, true);
+		buttons[i]->setSizeRatio(spriteSize.x / spriteSize.y, true);
+		buttons[i]->setMinimumSize(glm::vec2(193, 60));
+		buttons[i]->setHoveredTexture(res_manager.GetTexture(textureNames_0[i]));
+		buttons[i]->setPressedTexture(res_manager.GetTexture(textureNames_1[i]));
+	}
 
-	settingsButton->init(res_manager.GetTexture("settingsButton"), glm::vec2(0.0f, 0.0f), spriteSize, true);
-	settingsButton->setSizeRatio(spriteSize.x / spriteSize.y, true);
-	settingsButton->setMinimumSize(glm::vec2(193, 60));
-	settingsButton->setHoveredTexture(res_manager.GetTexture("settingsButtonHovered"));
-	settingsButton->setPressedTexture(res_manager.GetTexture("settingsButtonPressed"));
+	buttons[0]->setActionCallback(showScene);
+	buttons[1]->setActionCallback(showSettings);
+	buttons[2]->setActionCallback(quitGame);
 
-	GUIButton* quitButton = new GUIButton(&renderer);
-	menuLayout->addChild(quitButton);
+	// Settings page.
+	GUILayout* settingsLayout = new GUILayout(&renderer);
+	settingsObjects.push_back(settingsLayout);
 
-	quitButton->init(res_manager.GetTexture("quitButton"), glm::vec2(0.0f, 0.0f), spriteSize, true);
-	quitButton->setSizeRatio(spriteSize.x / spriteSize.y, true);
-	quitButton->setMinimumSize(glm::vec2(193, 60));
-	quitButton->setHoveredTexture(res_manager.GetTexture("quitButtonHovered"));
-	quitButton->setPressedTexture(res_manager.GetTexture("quitButtonPressed"));
+	settingsLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	settingsLayout->setSpace(0);
+	settingsLayout->setIndents(glm::vec4(50, 50, 50, 50));
+	settingsLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	settingsLayout->setAlignment(GUILayout_Alignment::Center);
 
-	quitButton->setActionCallback(quitGame);
+	GUIObject* settingsFrame = new GUIObject(&renderer);
+	settingsFrame->init(res_manager.GetTexture("settingsFrame"), glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
 
-	windowLayout->resize();
+	settingsLayout->addChild(settingsFrame);
+
+	GUILayout* paramsLayout = new GUILayout(&renderer);
+	settingsFrame->addChild(paramsLayout);
+
+	paramsLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	paramsLayout->setSpace(20);
+	paramsLayout->setUseParentDimensions(true);
+	paramsLayout->setIndents(glm::vec4(20, 20, 20, 20));
+	paramsLayout->setTypeLayout(GUILayout_Type::Vertical);
+	paramsLayout->setAlignment(GUILayout_Alignment::Top);
+
+	GUIObject* lineObject[8];
+	int linePercent[] = { 1, 3 };
+
+	for (int i = 0; i < 4; ++i)
+	{
+		GUILayout* paramLineLayout = new GUILayout(&renderer);
+		paramsLayout->addChild(paramLineLayout);
+
+		paramLineLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		paramLineLayout->setTypeLayout(GUILayout_Type::Horizontal);
+		paramLineLayout->setAlignment(GUILayout_Alignment::Left);
+		paramLineLayout->setMinimumHeight(50);
+		paramLineLayout->setMaximumHeight(50);
+		
+		for (int j = 0; j < 2; ++j)
+		{
+			lineObject[i * 2 + j] = new GUIObject(&renderer);
+			paramLineLayout->addChild(lineObject[i * 2 + j]);
+
+			lineObject[i * 2 + j]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+			lineObject[i * 2 + j]->setLayoutFillPercent(linePercent[j]);
+		}
+	}
+
+	std::string textBoxData[] ={
+		"MULTISAMPLING",
+		"GAMMA CORRECTION",
+		"HDR",
+		"BLOOM"
+	};
+
+	bool params[] = {
+		useMultisampling,
+		useGammaCorrection,
+		useHDR,
+		useBloom
+	};
+
+	GUICheckBox* checkBoxes[4];
+	for (int i = 0; i < 4; ++i)
+	{
+		GUITextBox* textBox = new GUITextBox(&renderer);
+		lineObject[i * 2]->addChild(textBox);
+
+		textBox->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		textBox->setMinimumHeight(40.0f);
+		textBox->setMaximumHeight(40.0f);
+		textBox->setText(textBoxData[i]);
+		textBox->setTextColor(glm::vec3(0.0, 0.68f, 1.0f));
+		textBox->setFont(res_manager.Fonts["SansNarrow"]);
+		textBox->setFontShader(&font_shader);
+		textBox->setFontBuffers(fontVAO, fontVBO);
+		textBox->setTextPos(glm::vec2(10.0f, 30.0f));
+
+		checkBoxes[i] = new GUICheckBox(&renderer);
+		lineObject[i * 2 + 1]->addChild(checkBoxes[i]);
+
+		checkBoxes[i]->init(res_manager.GetTexture("checkBox"), glm::vec2(0.0f, 0.0f), glm::vec2(40.0f, 40.0f), false);
+		checkBoxes[i]->setSizeRatio(1.0f, true);
+		checkBoxes[i]->setHoveredTexture(res_manager.GetTexture("checkBoxHovered"));
+		checkBoxes[i]->setPressedTexture(res_manager.GetTexture("checkBoxPressed"));
+		checkBoxes[i]->setChecked(params[i]);
+
+		GUIObject* checkIcon = new GUIObject(&renderer);
+		checkIcon->init(res_manager.GetTexture("checkIcon"), glm::vec2(5.0f, 5.0f), glm::vec2(30.0f, 30.0f), false);
+		checkIcon->setUseFixedPosition(true);
+		checkBoxes[i]->addChild(checkIcon);
+	}
+
+	checkBoxes[0]->setCheckCallback(enableMultisampling);
+	checkBoxes[1]->setCheckCallback(enableGammaCorrection);
+	checkBoxes[2]->setCheckCallback(enableHDR);
+	checkBoxes[3]->setCheckCallback(enableBloom);
+
+	GUIButton* backMenuButton = new GUIButton(&renderer);
+	settingsObjects.push_back(backMenuButton);
+
+	backMenuButton->init(res_manager.GetTexture("backButton"), glm::vec2(10.0f, 10.0f), glm::vec2(40, 40), true);
+	backMenuButton->setSizeRatio(1.0f, true);
+	backMenuButton->setHoveredTexture(res_manager.GetTexture("backButtonHovered"));
+	backMenuButton->setPressedTexture(res_manager.GetTexture("backButtonPressed"));
+	backMenuButton->setActionCallback(backToMainMenu);
+
+	mainMenuLayout->resize();
+	settingsLayout->resize();
+
+	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::MainMenu, mainMenuObjects));
+	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Settings, settingsObjects));
 }
 
 void MainApp::initScene()

@@ -26,9 +26,16 @@ public:
 	void setParent(GUIObject* parent);
 	void setPosition(glm::vec2 pos);
 	void setSize(glm::vec2 size);
+
 	void setMinimumSize(glm::vec2 size);
 	void setMaximumSize(glm::vec2 size);
+	void setMinimumWidth(int width);
+	void setMinimumHeight(int height);
+	void setMaximumWidth(int width);
+	void setMaximumHeight(int height);
+
 	void setRenderer(SpriteRenderer* renderer);
+	void setVisible(bool visible);
 	void setResizable(bool resizable);
 	void setUseFixedPosition(bool fixed);
 	void setUseSourceResize(bool source);
@@ -39,8 +46,10 @@ public:
 	int getChildrenNum();
 	GUIObject* getChildByIndex(int index);
 	glm::vec2 getPosition();
-	glm::vec2 getSourceSize();
+	glm::vec2 getSourcePosition();
 	glm::vec2 getSize();
+	glm::vec2 getSourceSize();
+	bool isVisible();
 	bool getResizable();
 	bool isUseFixedPosition();
 	bool isUseSourceResize();
@@ -49,10 +58,11 @@ public:
 	int getLayoutFillPercent();
 
 protected:
-	glm::vec2 Position;
+	glm::vec2 Position, SourcePosition;
 	glm::vec2 SourceSize, Size;
 	glm::vec2 minimumSize, maximumSize;
 
+	bool visible = true;
 	bool resizable = false;
 	bool fixedPosition = false;
 	bool useSourceResize = true;

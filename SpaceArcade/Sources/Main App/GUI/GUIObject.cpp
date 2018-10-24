@@ -18,13 +18,17 @@ void GUIObject::init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool
 {
 	this->Texture = tex;
 	this->Position = pos;
-	this->SourceSize = initial_size;
+	this->SourcePosition = pos;
 	this->Size = initial_size;
+	this->SourceSize = initial_size;
 	this->resizable = resizable;
 }
 
 void GUIObject::draw()
 {
+	if (!visible)
+		return;
+
 	if(renderer)
 		renderer->DrawSprite(Texture, Position, Size);
 
@@ -37,29 +41,40 @@ void GUIObject::resize(bool useParentResize)
 	if (!renderer)
 		return;
 
-	if (!fixedPosition)
+	if (!useParentResize)
 	{
-		glm::vec2 screenRatio = renderer->getScreenRatio();
-		Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
-	}
-
-	if (resizable)
-	{
-		if (useSourceResize)
+		if (!fixedPosition)
 		{
 			glm::vec2 screenRatio = renderer->getCurrentScreenDimensions() / renderer->getInitialScreenDimensions();
-			if (!useSizeRatio)
-				Size = glm::vec2(SourceSize.x * screenRatio.x, SourceSize.y * screenRatio.x); // always save source scale ratio.
-			else
-				Size = glm::vec2(SourceSize.x * screenRatio.x, (SourceSize.x * screenRatio.x) / sizeRatio);
+			Position = glm::vec2(SourcePosition.x * screenRatio.x, SourcePosition.y * screenRatio.y);
+
+			if (parent)
+				Position = parent->getPosition() + Position;
 		}
 		else
 		{
-			glm::vec2 screenRatio = renderer->getScreenRatio();
-			if (!useSizeRatio)
-				Size *= screenRatio;
+			if (parent)
+				Position = parent->getPosition() + SourcePosition;
+		}
+
+		if (resizable)
+		{
+			if (useSourceResize)
+			{
+				glm::vec2 screenRatio = renderer->getCurrentScreenDimensions() / renderer->getInitialScreenDimensions();
+				if (!useSizeRatio)
+					Size = glm::vec2(SourceSize.x * screenRatio.x, SourceSize.y * screenRatio.x); // always save source scale ratio.
+				else
+					Size = glm::vec2(SourceSize.x * screenRatio.x, (SourceSize.x * screenRatio.x) / sizeRatio);
+			}
 			else
-				Size = glm::vec2(Size.x * screenRatio.x, (Size.x * screenRatio.x) / sizeRatio);
+			{
+				glm::vec2 screenRatio = renderer->getScreenRatio();
+				if (!useSizeRatio)
+					Size *= screenRatio;
+				else
+					Size = glm::vec2(Size.x * screenRatio.x, (Size.x * screenRatio.x) / sizeRatio);
+			}
 		}
 	}
 
@@ -150,9 +165,34 @@ void GUIObject::setMaximumSize(glm::vec2 size)
 	maximumSize = size;
 }
 
+void GUIObject::setMinimumWidth(int width)
+{
+	minimumSize.x = width;
+}
+
+void GUIObject::setMinimumHeight(int height)
+{
+	minimumSize.y = height;
+}
+
+void GUIObject::setMaximumWidth(int width)
+{
+	maximumSize.x = width;
+}
+
+void GUIObject::setMaximumHeight(int height)
+{
+	maximumSize.y = height;
+}
+
 void GUIObject::setRenderer(SpriteRenderer* renderer)
 {
 	this->renderer = renderer;
+}
+
+void GUIObject::setVisible(bool visible)
+{
+	this->visible = visible;
 }
 
 void GUIObject::setResizable(bool resizable)
@@ -203,14 +243,24 @@ glm::vec2 GUIObject::getPosition()
 	return Position;
 }
 
-glm::vec2 GUIObject::getSourceSize()
+glm::vec2 GUIObject::getSourcePosition()
 {
-	return SourceSize;
+	return SourcePosition;
 }
 
 glm::vec2 GUIObject::getSize()
 {
 	return Size;
+}
+
+glm::vec2 GUIObject::getSourceSize()
+{
+	return SourceSize;
+}
+
+bool GUIObject::isVisible()
+{
+	return visible;
 }
 
 bool GUIObject::getResizable()

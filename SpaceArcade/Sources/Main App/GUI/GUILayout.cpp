@@ -32,8 +32,14 @@ void GUILayout::draw()
 
 void GUILayout::resize(bool useParentResize)
 {
-	if(!useParentResize)
+	if(!useParentResize && !useParentDimensions)
 		GUIObject::resize();
+
+	if (useParentDimensions && parent)
+	{
+		Position = parent->getPosition();
+		Size = parent->getSize();
+	}
 
 	glm::vec2 screenRatio = renderer->getCurrentScreenDimensions() / renderer->getInitialScreenDimensions();
 	glm::vec4 currentIndents = glm::vec4(indents.x * screenRatio.x, indents.y * screenRatio.y, indents.z * screenRatio.x, indents.w * screenRatio.y);
@@ -89,7 +95,7 @@ void GUILayout::resize(bool useParentResize)
 			}
 			else if (alignment == GUILayout_Alignment::Center)
 			{
-				children[i]->setPosition(glm::vec2(layout_center.x - children[i]->getSize().x / 2, layout_center.y - content_size.y / 2 + currentIndents.y + shift));
+				children[i]->setPosition(glm::vec2(layout_center.x - children[i]->getSize().x / 2, layout_center.y - content_size.y / 2 + shift));
 				shift += children[i]->getSize().y + currentSpace;
 			}
 		}
@@ -102,12 +108,12 @@ void GUILayout::resize(bool useParentResize)
 			}
 			else if (alignment == GUILayout_Alignment::Center)
 			{
-				children[i]->setPosition(glm::vec2(layout_center.x - content_size.x / 2 + currentIndents.y + shift, layout_center.y - children[i]->getSize().y / 2));
+				children[i]->setPosition(glm::vec2(layout_center.x - content_size.x / 2 + shift, layout_center.y - children[i]->getSize().y / 2));
 				shift += children[i]->getSize().x + currentSpace;
 			}
 		}
 
-		if (dynamic_cast<GUILayout*>(children[i]))
+		//if (dynamic_cast<GUILayout*>(children[i]))
 			children[i]->resize(true);
 	}
 }
@@ -132,6 +138,11 @@ void GUILayout::setIndents(glm::vec4 indents)
 	this->indents = indents;
 }
 
+void GUILayout::setUseParentDimensions(bool use)
+{
+	this->useParentDimensions = use;
+}
+
 int GUILayout::getTypeLayout()
 {
 	return typeLayout;
@@ -152,6 +163,12 @@ glm::vec4 GUILayout::getIndents()
 	return indents;
 }
 
+bool GUILayout::isUseParentDimensions()
+{
+	return useParentDimensions;
+}
+
 void GUILayout::clear()
 {
+	GUIObject::clear();
 }
