@@ -59,6 +59,7 @@ public:
 	void render();
 	void drawTextData();
 	void drawScene();
+	void drawMenuBackground();
 	void drawStartPage();
 	void drawSettingsPage();
 

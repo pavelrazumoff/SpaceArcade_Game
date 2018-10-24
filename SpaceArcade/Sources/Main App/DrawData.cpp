@@ -20,8 +20,18 @@ void MainApp::render()
 	// skybox cube
 	glBindVertexArray(skyboxVAO);
 
-	if (currentPage == PageType::Game)
+	switch (currentPage)
+	{
+	case PageType::MainMenu:
+	case PageType::Settings:
+		drawMenuBackground();
+		break;
+	case PageType::Game:
 		drawScene();
+		break;
+	default:
+		break;
+	}
 
 	// second render framebuffer as texture for post-processing.
 	// blit multisampled buffer(s) to normal colorbuffer of intermediate FBO. Image is stored in screenTexture.
@@ -122,6 +132,29 @@ void MainApp::render()
 void MainApp::drawScene()
 {
 	base_level.Draw();
+}
+
+void MainApp::drawMenuBackground()
+{
+	// draw skybox as last.
+	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content.
+
+	Shader cubemapShader = res_manager.GetShader("Skybox");
+	Texture2D* backgroundCubemap = res_manager.GetCubemap("BlueSpace");
+	cubemapShader.use();
+
+	glm::mat4 modelMat = glm::mat4();
+	modelMat = glm::rotate(modelMat, -(float)glfwGetTime() / 100, glm::vec3(1.0f, 0.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, -(float)glfwGetTime() / 1000, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	cubemapShader.setMat4("model", modelMat);
+	glActiveTexture(GL_TEXTURE0);
+	backgroundCubemap->BindCubemap();
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS); // set depth function back to default.
 }
 
 void MainApp::drawStartPage()

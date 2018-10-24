@@ -298,7 +298,7 @@ void SpacecraftObject::followTargetEnemy(float delta)
 void SpacecraftObject::clear()
 {
 	for (int i = 0; i < laser_rays.size(); ++i)
-		delete laser_rays[i];
+		laser_rays[i]->setParentObject(NULL);
 
 	laser_rays.clear();
 
