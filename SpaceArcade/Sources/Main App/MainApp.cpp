@@ -117,6 +117,36 @@ void MainApp::resize(int width, int height)
 	base_level.resize();
 }
 
+void MainApp::setFullscreenMode(bool fullscreen)
+{
+	fullscreenMode = fullscreen;
+
+	if (fullscreen)
+	{
+		// backup window position and window size.
+		int wndPosX, wndPosY;
+		int wndSizeX, wndSizeY;
+
+		glfwGetWindowPos(window, &wndPosX, &wndPosY);
+		glfwGetWindowSize(window, &wndSizeX, &wndSizeY);
+		lastWndPos = glm::vec2(wndPosX, wndPosY);
+		lastWndSize = glm::vec2(wndSizeX, wndSizeY);
+
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+
+		screenWidth = mode->width;
+		screenHeight = mode->height;
+	}
+	else
+	{
+		// restore last window size and position
+		glfwSetWindowMonitor(window, nullptr, lastWndPos.x, lastWndPos.y, lastWndSize.x, lastWndSize.y, 0);
+		screenWidth = lastWndSize.x;
+		screenHeight = lastWndSize.y;
+	}
+}
+
 void MainApp::clearBuffers()
 {
 	for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)

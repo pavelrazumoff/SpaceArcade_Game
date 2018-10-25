@@ -133,13 +133,25 @@ void MainApp::initGUI()
 	settingsObjects.push_back(settingsLayout);
 
 	settingsLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
-	settingsLayout->setSpace(0);
-	settingsLayout->setIndents(glm::vec4(50, 50, 50, 50));
-	settingsLayout->setTypeLayout(GUILayout_Type::Horizontal);
-	settingsLayout->setAlignment(GUILayout_Alignment::Center);
+	settingsLayout->setSpace(10);
+	settingsLayout->setIndents(glm::vec4(50, 10, 50, 10));
+	settingsLayout->setTypeLayout(GUILayout_Type::Vertical);
+	settingsLayout->setAlignment(GUILayout_Alignment::Top);
+
+	GUILayout* topLayout = new GUILayout(&renderer);
+	settingsLayout->addChild(topLayout);
+
+	topLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	topLayout->setMinimumHeight(50.0f);
+	topLayout->setMaximumHeight(50.0f);
+	topLayout->setLayoutFillPercent(1);
+	topLayout->setSpace(0);
+	topLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	topLayout->setAlignment(GUILayout_Alignment::Left);
 
 	GUIObject* settingsFrame = new GUIObject(&renderer);
 	settingsFrame->init(res_manager.GetTexture("settingsFrame"), glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	settingsFrame->setLayoutFillPercent(10);
 
 	settingsLayout->addChild(settingsFrame);
 
@@ -153,10 +165,10 @@ void MainApp::initGUI()
 	paramsLayout->setTypeLayout(GUILayout_Type::Vertical);
 	paramsLayout->setAlignment(GUILayout_Alignment::Top);
 
-	GUIObject* lineObject[8];
+	GUIObject* lineObject[10];
 	int linePercent[] = { 1, 3 };
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		GUILayout* paramLineLayout = new GUILayout(&renderer);
 		paramsLayout->addChild(paramLineLayout);
@@ -181,18 +193,20 @@ void MainApp::initGUI()
 		"MULTISAMPLING",
 		"GAMMA CORRECTION",
 		"HDR",
-		"BLOOM"
+		"BLOOM",
+		"FULLSCREEN"
 	};
 
 	bool params[] = {
 		useMultisampling,
 		useGammaCorrection,
 		useHDR,
-		useBloom
+		useBloom,
+		fullscreenMode
 	};
 
-	GUICheckBox* checkBoxes[4];
-	for (int i = 0; i < 4; ++i)
+	GUICheckBox* checkBoxes[5];
+	for (int i = 0; i < 5; ++i)
 	{
 		GUITextBox* textBox = new GUITextBox(&renderer);
 		lineObject[i * 2]->addChild(textBox);
@@ -214,23 +228,25 @@ void MainApp::initGUI()
 		checkBoxes[i]->setSizeRatio(1.0f, true);
 		checkBoxes[i]->setHoveredTexture(res_manager.GetTexture("checkBoxHovered"));
 		checkBoxes[i]->setPressedTexture(res_manager.GetTexture("checkBoxPressed"));
-		checkBoxes[i]->setChecked(params[i]);
 
 		GUIObject* checkIcon = new GUIObject(&renderer);
 		checkIcon->init(res_manager.GetTexture("checkIcon"), glm::vec2(5.0f, 5.0f), glm::vec2(30.0f, 30.0f), false);
 		checkIcon->setUseFixedPosition(true);
 		checkBoxes[i]->addChild(checkIcon);
+
+		checkBoxes[i]->setChecked(params[i]);
 	}
 
 	checkBoxes[0]->setCheckCallback(enableMultisampling);
 	checkBoxes[1]->setCheckCallback(enableGammaCorrection);
 	checkBoxes[2]->setCheckCallback(enableHDR);
 	checkBoxes[3]->setCheckCallback(enableBloom);
+	checkBoxes[4]->setCheckCallback(setFullscreen);
 
 	GUIButton* backMenuButton = new GUIButton(&renderer);
-	settingsObjects.push_back(backMenuButton);
+	topLayout->addChild(backMenuButton);
 
-	backMenuButton->init(res_manager.GetTexture("backButton"), glm::vec2(10.0f, 10.0f), glm::vec2(40, 40), true);
+	backMenuButton->init(res_manager.GetTexture("backButton"), glm::vec2(10.0f, 10.0f), glm::vec2(40.0f, 40.0f), false);
 	backMenuButton->setSizeRatio(1.0f, true);
 	backMenuButton->setHoveredTexture(res_manager.GetTexture("backButtonHovered"));
 	backMenuButton->setPressedTexture(res_manager.GetTexture("backButtonPressed"));

@@ -24,6 +24,7 @@ void enableMultisampling(bool enable);
 void enableGammaCorrection(bool enable);
 void enableHDR(bool enable);
 void enableBloom(bool enable);
+void setFullscreen(bool fullscreen);
 
 enum PageType
 {
@@ -83,6 +84,8 @@ public:
 	void resizeFramebuffer(unsigned int FBO, unsigned int texBuffer, unsigned int RBO, bool useMultisampling, bool useHDR, bool forceRegenerate);
 	void resizeBloomFramebuffer(unsigned int FBO, unsigned int texBuffer[], unsigned int RBO, bool useHDR);
 
+	void setFullscreenMode(bool fullscreen);
+
 	GLFWwindow* getWindow();
 
 	Shader font_shader;
@@ -102,9 +105,12 @@ public:
 	bool useGammaCorrection = true;
 	bool useHDR = true;
 	bool useBloom = true;
+	bool fullscreenMode = false;
 
 private:
 	GLFWwindow* window = NULL;
+	glm::vec2 lastWndPos;
+	glm::vec2 lastWndSize;
 
 	unsigned int framebuffer, intermediateFBO, finalFBO;
 	unsigned int texColorMSBuffer, screenTexture;

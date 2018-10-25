@@ -17,6 +17,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	// Uncomment this if uses Mac OS X.
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
@@ -119,4 +120,9 @@ void enableHDR(bool enable)
 void enableBloom(bool enable)
 {
 	app.useBloom = enable;
+}
+
+void setFullscreen(bool fullscreen)
+{
+	app.setFullscreenMode(fullscreen);
 }
