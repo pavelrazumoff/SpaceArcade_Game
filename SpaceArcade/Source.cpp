@@ -80,6 +80,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	app.processMouseScroll(window, xoffset, yoffset);
 }
 
+void healthBarChanged(float health, float initialHealth)
+{
+	app.updateHealthBar(health, initialHealth);
+}
+
 void showScene()
 {
 	app.currentPage = PageType::Game;

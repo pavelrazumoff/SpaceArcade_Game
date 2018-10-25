@@ -113,6 +113,9 @@ void MainApp::render()
 
 	switch (currentPage)
 	{
+	case PageType::Game:
+		drawSceneInterface();
+		break;
 	case PageType::MainMenu:
 		drawStartPage();
 		break;
@@ -157,6 +160,12 @@ void MainApp::drawMenuBackground()
 	glDepthFunc(GL_LESS); // set depth function back to default.
 }
 
+void MainApp::drawSceneInterface()
+{
+	for (int i = 0; i < gui_objects[PageType::Game].size(); ++i)
+		gui_objects[PageType::Game][i]->draw();
+}
+
 void MainApp::drawStartPage()
 {
 	for (int i = 0; i < gui_objects[PageType::MainMenu].size(); ++i)
@@ -169,47 +178,6 @@ void MainApp::drawSettingsPage()
 		gui_objects[PageType::Settings][i]->draw();
 }
 
-void MainApp::drawTextData()
-{
-	GLint prevBlendFunc;
-	glGetIntegerv(GL_BLEND_SRC_ALPHA, &prevBlendFunc);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(screenWidth), 0.0f, static_cast<GLfloat>(screenHeight));
-
-	font_shader.use();
-	font_shader.setMat4("projection", projection);
-
-	std::string textArray[] = {
-		"Multisampling",
-		"GammaCorrection",
-		"HDR",
-		"Bloom",
-	};
-
-	bool params[] = {
-		useMultisampling,
-		useGammaCorrection,
-		useHDR,
-		useBloom,
-	};
-
-	for (int i = 0; i < 4; ++i)
-	{
-		std::string out_text;
-
-		if (params[i])
-			out_text = " - disable ";
-		else
-			out_text = " - enable ";
-		RenderText("SansNarrow", std::to_string(i + 1) + out_text + textArray[i], 25.0f, screenHeight - 100.0f - i * 25.0f, 1.0f, glm::vec3(0.0, 0.68f, 1.0f));
-	}
-
-	glBlendFunc(GL_SRC_ALPHA, prevBlendFunc);
-	glDisable(GL_BLEND);
-}
-
 void MainApp::RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
 {
 	// Activate corresponding render state
@@ -217,6 +185,9 @@ void MainApp::RenderText(std::string fontType, std::string text, GLfloat x, GLfl
 	glUniform3f(glGetUniformLocation(font_shader.getShaderProgram(), "textColor"), color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(fontVAO);
+
+	font_shader.setBool("useClipSpace", false);
+
 	// Iterate through all characters
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); c++)

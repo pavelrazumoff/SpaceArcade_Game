@@ -15,6 +15,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_click_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
+void healthBarChanged(float health, float initialHealth);
+
 void showScene();
 void showSettings();
 void quitGame();
@@ -58,13 +60,15 @@ public:
 	void resize(int width, int height);
 
 	void render();
-	void drawTextData();
 	void drawScene();
+	void drawSceneInterface();
 	void drawMenuBackground();
 	void drawStartPage();
 	void drawSettingsPage();
 
 	void RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+
+	void updateHealthBar(float health, float initialHealth);
 
 	// input.
 	void processInput(GLFWwindow *window);
@@ -137,4 +141,6 @@ private:
 
 	ResourceManager res_manager;
 	SpriteRenderer renderer;
+
+	GUIObject* pHealthBar = NULL;
 };

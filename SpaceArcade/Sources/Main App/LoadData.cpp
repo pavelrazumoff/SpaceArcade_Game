@@ -9,9 +9,17 @@ void MainApp::loadShaders()
 	res_manager.LoadShader("Shaders//Sprite//SpriteShaderVS.glsl", "Shaders//Sprite//SpriteShaderFS.glsl", "Sprite");
 
 	//textures.
-	res_manager.LoadTexture("Images//SpaceShip.png", "spacecraft", useGammaCorrection);
-	res_manager.LoadTexture("Images//laser_ray.png", "laserRay", useGammaCorrection);
-	res_manager.LoadTexture("Images//asteroid.png", "asteroid", useGammaCorrection);
+	// use this params for non-resized objects (not maximized mostly).
+	// this will clean all borders artefacts of textures.
+	TextureParams gameObjectsParams;
+	gameObjectsParams.Filter_Min = GL_LINEAR_MIPMAP_NEAREST;
+	gameObjectsParams.Filter_Max = GL_NEAREST;
+
+	res_manager.LoadTexture("Images//SpaceShip.png", "spacecraft", useGammaCorrection, &gameObjectsParams);
+	res_manager.LoadTexture("Images//SpaceShipEnemy.png", "spacecraftEnemy", useGammaCorrection, &gameObjectsParams);
+	res_manager.LoadTexture("Images//laser_ray.png", "laserRayBlue", useGammaCorrection, &gameObjectsParams);
+	res_manager.LoadTexture("Images//laser_rayEnemy.png", "laserRayRed", useGammaCorrection, &gameObjectsParams);
+	res_manager.LoadTexture("Images//asteroid.png", "asteroid", useGammaCorrection, &gameObjectsParams);
 	res_manager.LoadTexture("Images//explosion.png", "explosion", useGammaCorrection);
 
 	// gui.
@@ -32,10 +40,10 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//Interface//backButtonPressed.png", "backButtonPressed", false);
 
 	res_manager.LoadTexture("Images//Interface//settingsPageFrame.png", "settingsFrame", false);
-	res_manager.LoadTexture("Images//Interface//checkBox.png", "checkBox", false);
-	res_manager.LoadTexture("Images//Interface//checkBoxHovered.png", "checkBoxHovered", false);
-	res_manager.LoadTexture("Images//Interface//checkBoxPressed.png", "checkBoxPressed", false);
-	res_manager.LoadTexture("Images//Interface//checkIcon.png", "checkIcon", false);
+	res_manager.LoadTexture("Images//Interface//checkBox.png", "checkBox", false, &gameObjectsParams);
+	res_manager.LoadTexture("Images//Interface//checkBoxHovered.png", "checkBoxHovered", false, &gameObjectsParams);
+	res_manager.LoadTexture("Images//Interface//checkBoxPressed.png", "checkBoxPressed", false, &gameObjectsParams);
+	res_manager.LoadTexture("Images//Interface//checkIcon.png", "checkIcon", false, &gameObjectsParams);
 
 	Texture2D* tex = res_manager.GetTexture("explosion");
 	tex->numOfColumns = 8;

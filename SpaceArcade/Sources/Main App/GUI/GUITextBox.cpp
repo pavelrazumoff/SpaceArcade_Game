@@ -54,6 +54,8 @@ void GUITextBox::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scal
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(screenDimensions.x), 0.0f, static_cast<GLfloat>(screenDimensions.y));
 
 	fontShader->setMat4("projection", projection);
+	fontShader->setBool("useClipSpace", true);
+	fontShader->setVec4("clipSpace", glm::vec4(Position.x, Position.y, Position.x + Size.x, Position.y + Size.y));
 
 	glUniform3f(glGetUniformLocation(fontShader->getShaderProgram(), "textColor"), color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);

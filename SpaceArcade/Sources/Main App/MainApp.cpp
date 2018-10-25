@@ -92,6 +92,15 @@ void MainApp::update()
 		base_level.update(deltaTime);
 }
 
+void MainApp::updateHealthBar(float health, float initialHealth)
+{
+	if (pHealthBar)
+	{
+		float percent = health / initialHealth;
+		pHealthBar->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f - percent, 0.0f), true);
+	}
+}
+
 void MainApp::resize(int width, int height)
 {
 	// Calls when window is resizing.

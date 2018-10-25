@@ -55,11 +55,8 @@ glm::vec2 SpriteRenderer::getScreenRatio()
 	return screenRatio;
 }
 
-void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec2 size, GLfloat rotate, int frame)
+void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec2 size, glm::vec4 color, GLfloat rotate, int frame)
 {
-	if (!texture)
-		return;
-
 	// Prepare transformations
 	this->shader.use();
 	
@@ -71,12 +68,22 @@ void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec
 
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->screenWidth), static_cast<GLfloat>(this->screenHeight), 0.0f, -1.0f, 1.0f);
 
+	if(texture)
+		this->shader.setBool("useImage", true);
+	else
+		this->shader.setBool("useImage", false);
+
 	this->shader.setInt("image", 0);
 	this->shader.setMat4("projection", projection);
+	this->shader.setVec4("background_color", color);
 
 	this->shader.setInt("frame", frame);
-	this->shader.setInt("numOfColumns", texture->numOfColumns);
-	this->shader.setInt("numOfRows", texture->numOfRows);
+
+	if (texture)
+	{
+		this->shader.setInt("numOfColumns", texture->numOfColumns);
+		this->shader.setInt("numOfRows", texture->numOfRows);
+	}
 
 	glm::mat4 model;
 	model = glm::translate(model, glm::vec3(position, 0.0f));  // First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
@@ -89,8 +96,11 @@ void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec
 
 	this->shader.setMat4("model", model);
 
-	glActiveTexture(GL_TEXTURE0);
-	texture->BindTexture();
+	if (texture)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		texture->BindTexture();
+	}
 
 	glBindVertexArray(this->quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -126,4 +136,9 @@ void SpriteRenderer::initRenderData()
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+Shader* SpriteRenderer::getShader()
+{
+	return &shader;
 }

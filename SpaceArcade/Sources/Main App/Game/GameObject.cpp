@@ -35,6 +35,7 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->setIsDamagingObject(this->isDamagingObject());
 	obj->setDamage(this->getDamage());
 	obj->setHealth(this->getHealth());
+	obj->setInitialHealth(this->getInitialHealth());
 	obj->setParentObject(this->getParentObject());
 	obj->setExplosionTime(this->explosionTime);
 	obj->setExplosionSprite(this->ExplosionSprite);
@@ -99,9 +100,9 @@ void GameObject::update(float delta)
 void GameObject::Draw()
 {
 	if(visible && health > 0.0f)
-		pLevel->getRenderer()->DrawSprite(this->Sprite, this->Position, this->Size, this->InitialRotation);
+		pLevel->getRenderer()->DrawSprite(this->Sprite, this->Position, this->Size, glm::vec4(0.0f), this->InitialRotation);
 	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
-		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->Position, this->Size, this->InitialRotation, currentExplosionFrame);
+		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->Position, this->Size, glm::vec4(0.0f), this->InitialRotation, currentExplosionFrame);
 }
 
 void GameObject::resize()
@@ -148,6 +149,9 @@ void GameObject::makeCollision(GameObject* obj)
 
 	this->health -= obj->getDamage();
 	obj->setHealth(obj->getHealth() - this->damage);
+
+	if (healthChanged)
+		healthChanged(this->health, this->initialHealth);
 }
 
 void GameObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -188,6 +192,11 @@ void GameObject::setExplosionSprite(Texture2D* sprite)
 		explosionTimeStep = explosionTime / sprite->numOfFrames;
 }
 
+void GameObject::setHealthChangedCallback(void(*actionCallback)(float, float))
+{
+	healthChanged = actionCallback;
+}
+
 void GameObject::setObjectType(int type)
 {
 	objectType = type;
@@ -211,6 +220,11 @@ void GameObject::setDamage(float damage)
 void GameObject::setHealth(float hp)
 {
 	health = hp;
+}
+
+void GameObject::setInitialHealth(float hp)
+{
+	initialHealth = hp;
 }
 
 void GameObject::setExplosionTime(float time)
@@ -261,6 +275,11 @@ float GameObject::getDamage()
 float GameObject::getHealth()
 {
 	return health;
+}
+
+float GameObject::getInitialHealth()
+{
+	return initialHealth;
 }
 
 bool GameObject::getReadyForDeath()

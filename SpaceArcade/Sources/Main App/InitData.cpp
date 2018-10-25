@@ -73,6 +73,7 @@ void MainApp::initGUI()
 {
 	std::vector<GUIObject*> mainMenuObjects;
 	std::vector<GUIObject*> settingsObjects;
+	std::vector<GUIObject*> gameInterfaceObjects;
 
 	// Main Menu.
 	GUILayout* mainMenuLayout = new GUILayout(&renderer);
@@ -165,7 +166,7 @@ void MainApp::initGUI()
 	paramsLayout->setTypeLayout(GUILayout_Type::Vertical);
 	paramsLayout->setAlignment(GUILayout_Alignment::Top);
 
-	GUIObject* lineObject[10];
+	GUILayout* lineObject[10];
 	int linePercent[] = { 1, 3 };
 
 	for (int i = 0; i < 5; ++i)
@@ -181,10 +182,13 @@ void MainApp::initGUI()
 		
 		for (int j = 0; j < 2; ++j)
 		{
-			lineObject[i * 2 + j] = new GUIObject(&renderer);
+			lineObject[i * 2 + j] = new GUILayout(&renderer);
 			paramLineLayout->addChild(lineObject[i * 2 + j]);
 
 			lineObject[i * 2 + j]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+			lineObject[i * 2 + j]->setTypeLayout(GUILayout_Type::Horizontal);
+			lineObject[i * 2 + j]->setAlignment(GUILayout_Alignment::Left);
+			lineObject[i * 2 + j]->setIndents(glm::vec4(5, 0, 5, 0));
 			lineObject[i * 2 + j]->setLayoutFillPercent(linePercent[j]);
 		}
 	}
@@ -252,11 +256,64 @@ void MainApp::initGUI()
 	backMenuButton->setPressedTexture(res_manager.GetTexture("backButtonPressed"));
 	backMenuButton->setActionCallback(backToMainMenu);
 
+	// Game Interface.
+	GUILayout* gameLayout = new GUILayout(&renderer);
+	gameInterfaceObjects.push_back(gameLayout);
+
+	gameLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	gameLayout->setSpace(10);
+	gameLayout->setTypeLayout(GUILayout_Type::Vertical);
+	gameLayout->setAlignment(GUILayout_Alignment::Center);
+
+	GUILayout* screenLayouts[2];
+	int screenPercents[2] = { 9, 1 };
+
+	for (int i = 0; i < 2; ++i)
+	{
+		screenLayouts[i] = new GUILayout(&renderer);
+		gameLayout->addChild(screenLayouts[i]);
+
+		screenLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		screenLayouts[i]->setSpace(10);
+		screenLayouts[i]->setIndents(glm::vec4(10, 10, 10, 10));
+		screenLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
+		screenLayouts[i]->setAlignment(GUILayout_Alignment::Left);
+		screenLayouts[i]->setLayoutFillPercent(screenPercents[i]);
+		//screenLayouts[i]->setColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.1f)); // debug color.
+	}
+
+	GUILayout* screenBottomLayouts[2];
+	screenPercents[0] = 1;
+	screenPercents[1] = 6;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		screenBottomLayouts[i] = new GUILayout(&renderer);
+		screenLayouts[1]->addChild(screenBottomLayouts[i]);
+
+		screenBottomLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		screenBottomLayouts[i]->setSpace(10);
+		screenBottomLayouts[i]->setIndents(glm::vec4(20, 0, 20, 0));
+		screenBottomLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
+		screenBottomLayouts[i]->setAlignment(GUILayout_Alignment::Left);
+		screenBottomLayouts[i]->setLayoutFillPercent(screenPercents[i]);
+	}
+
+	pHealthBar = new GUIObject(&renderer);
+	screenBottomLayouts[0]->addChild(pHealthBar);
+
+	pHealthBar->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(100.0f, 20.0f), true);
+	pHealthBar->setMinimumHeight(20.0f);
+	pHealthBar->setMaximumHeight(20.0f);
+	pHealthBar->setColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
 	mainMenuLayout->resize();
 	settingsLayout->resize();
+	gameLayout->resize();
 
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::MainMenu, mainMenuObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Settings, settingsObjects));
+	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Game, gameInterfaceObjects));
 }
 
 void MainApp::initScene()
@@ -272,14 +329,16 @@ void MainApp::initScene()
 	pSpaceCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
 	pSpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
 	pSpaceCraft->setUseAI(false);
+	pSpaceCraft->setHealthChangedCallback(healthBarChanged);
 
-	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, -500.0f), false);
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(1);
 	
 	for (int i = 0; i < 30; ++i)
 	{
 		GameObject* asteroid = new GameObject();
 		asteroid->setHealth(20.0f);
+		asteroid->setInitialHealth(20.0f);
 		asteroid->setDamage(10.0f);
 		asteroid->setExplosionTime(1.0f);
 		asteroid->setExplosionSprite(res_manager.GetTexture("explosion"));
@@ -292,7 +351,7 @@ void MainApp::initScene()
 	}
 
 	SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
-	enemySpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
+	enemySpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 42, 200), glm::vec2(85, 92), res_manager.GetTexture("spacecraftEnemy"), glm::vec2(0.0f, 0.0f));
 	enemySpaceCraft->InitialRotation = 180.0f;
 	enemySpaceCraft->VelocityScale = glm::vec2(200.0f, 100.0f);
 	enemySpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
@@ -301,7 +360,7 @@ void MainApp::initScene()
 	enemySpaceCraft->setTargetEnemy(pSpaceCraft);
 
 	pLaserRay = enemySpaceCraft->getLaserRay();
-	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRay"), glm::vec2(0.0f, -500.0f), false);
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(1);
 
 	base_level.resize();

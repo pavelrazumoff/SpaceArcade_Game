@@ -106,6 +106,18 @@ void Texture2D::GenerateCubemap(std::vector<const GLchar*> faces, bool gamma)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
+void Texture2D::setTextureParams(TextureParams* params)
+{
+	if (!params)
+		return;
+
+	this->Wrap_S = params->Wrap_S;
+	this->Wrap_T = params->Wrap_T;
+	this->Wrap_R = params->Wrap_R;
+	this->Filter_Min = params->Filter_Min;
+	this->Filter_Max = params->Filter_Max;
+}
+
 void Texture2D::BindTexture() const
 {
 	glBindTexture(GL_TEXTURE_2D, this->ID);

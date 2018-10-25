@@ -11,6 +11,7 @@ SpacecraftObject::SpacecraftObject()
 	laser_ray->setIsDamagingObject(true);
 	laser_ray->setDamage(20.0f);
 	laser_ray->setHealth(1.0f); // destroys momentally.
+	laser_ray->setInitialHealth(1.0f);
 	laser_ray->setUsePhysics(false);
 	laser_ray->setParentObject(this);
 }

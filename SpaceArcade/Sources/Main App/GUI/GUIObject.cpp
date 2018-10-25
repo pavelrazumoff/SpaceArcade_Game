@@ -29,8 +29,21 @@ void GUIObject::draw()
 	if (!visible)
 		return;
 
-	if(renderer)
-		renderer->DrawSprite(Texture, Position, Size);
+	if (renderer)
+	{
+		// set clip space.
+		Shader* pShader = renderer->getShader();
+		glm::vec4 realClip = glm::vec4(Position.x + Size.x * clipSpace.x, Position.y + Size.y * clipSpace.y,
+			Position.x + Size.x - (Size.x * clipSpace.z), Position.y + Size.y - (Size.y * clipSpace.w));
+
+		pShader->setBool("useClipSpace", useClipSpace);
+		pShader->setVec4("clipSpace", realClip);
+
+		renderer->DrawSprite(Texture, Position, Size, color);
+
+		// restore default.
+		pShader->setBool("useClipSpace", false);
+	}
 
 	for (int i = 0; i < children.size(); ++i)
 		children[i]->draw();
@@ -221,6 +234,17 @@ void GUIObject::setLayoutFillPercent(int percent)
 	this->layoutFillPercent = percent;
 }
 
+void GUIObject::setClipSpace(glm::vec4 clip, bool use)
+{
+	useClipSpace = use;
+	clipSpace = clip;
+}
+
+void GUIObject::setColor(glm::vec4 color)
+{
+	this->color = color;
+}
+
 GUIObject* GUIObject::getParent()
 {
 	return parent;
@@ -258,6 +282,11 @@ glm::vec2 GUIObject::getSourceSize()
 	return SourceSize;
 }
 
+glm::vec4 GUIObject::getClipSpace()
+{
+	return clipSpace;
+}
+
 bool GUIObject::isVisible()
 {
 	return visible;
@@ -283,6 +312,11 @@ bool GUIObject::isUseSizeRatio()
 	return useSizeRatio;
 }
 
+bool GUIObject::isUseClipSpace()
+{
+	return useClipSpace;
+}
+
 float GUIObject::getSizeRatio()
 {
 	return sizeRatio;
@@ -291,6 +325,11 @@ float GUIObject::getSizeRatio()
 int GUIObject::getLayoutFillPercent()
 {
 	return layoutFillPercent;
+}
+
+glm::vec4 GUIObject::getColor()
+{
+	return color;
 }
 
 void GUIObject::clear()

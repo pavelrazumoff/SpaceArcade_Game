@@ -37,12 +37,14 @@ public:
 	virtual void notify(GameObject* notifiedObject, NotifyCode code);
 
 	void setExplosionSprite(Texture2D* sprite);
+	void setHealthChangedCallback(void(*actionCallback)(float, float));
 
 	void setObjectType(int type);
 	void setVisible(bool visible);
 	void setIsDamagingObject(bool damaging);
 	void setDamage(float damage);
 	void setHealth(float hp);
+	void setInitialHealth(float hp);
 	void setExplosionTime(float time);
 	void setUsePhysics(bool physics);
 	void setUseAI(bool useAI);
@@ -54,6 +56,7 @@ public:
 	bool isDamagingObject();
 	float getDamage();
 	float getHealth();
+	float getInitialHealth();
 	float getExplosionTime();
 	bool isUsePhysics();
 	bool isAIControlled();
@@ -84,6 +87,7 @@ protected:
 	bool damagingObject = true;
 	float damage = 1.0f;
 	float health = 100.0f;
+	float initialHealth = 100.0f;
 	float explosionTime = 0.0f;
 	bool usePhysics = false;
 	bool controlledByAI = true;
@@ -94,4 +98,6 @@ protected:
 	bool readyForDeath = false;
 
 	float impulseFactor = 200;
+
+	void(*healthChanged)(float, float) = NULL;
 };

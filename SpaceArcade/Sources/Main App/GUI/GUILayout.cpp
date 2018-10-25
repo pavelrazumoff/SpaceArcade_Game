@@ -26,8 +26,10 @@ void GUILayout::draw()
 	if (!renderer)
 		return;
 
-	for (int i = 0; i < children.size(); ++i)
-		children[i]->draw();
+	GUIObject::draw();
+
+	//for (int i = 0; i < children.size(); ++i)
+	//	children[i]->draw();
 }
 
 void GUILayout::resize(bool useParentResize)

@@ -20,17 +20,23 @@ Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fSha
 	return Shaders[name];
 }
 
-Texture2D* ResourceManager::LoadTexture(const GLchar *file, std::string name, bool gamma)
+Texture2D* ResourceManager::LoadTexture(const GLchar *file, std::string name, bool gamma, TextureParams* texParams)
 {
 	Texture2D* texture = new Texture2D();
+	if (texParams)
+		texture->setTextureParams(texParams);
+
 	texture->GenerateTexture(file, gamma);
 	Textures[name] = texture;
 	return Textures[name];
 }
 
-Texture2D* ResourceManager::LoadCubemap(std::vector<const GLchar*> faces, std::string name, bool gamma)
+Texture2D* ResourceManager::LoadCubemap(std::vector<const GLchar*> faces, std::string name, bool gamma, TextureParams* texParams)
 {
 	Texture2D* cubemap = new Texture2D();
+	if (texParams)
+		cubemap->setTextureParams(texParams);
+
 	cubemap->Filter_Min = GL_LINEAR;
 	cubemap->GenerateCubemap(faces, gamma);
 	Cubemaps[name] = cubemap;

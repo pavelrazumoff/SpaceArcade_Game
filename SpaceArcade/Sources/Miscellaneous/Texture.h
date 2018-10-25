@@ -3,6 +3,15 @@
 
 // Texture2D is able to store and configure a texture in OpenGL.
 // It also hosts utility functions for easy management.
+struct TextureParams
+{
+	GLuint Wrap_S = GL_CLAMP_TO_EDGE; // Wrapping mode on S axis
+	GLuint Wrap_T = GL_CLAMP_TO_EDGE; // Wrapping mode on T axis
+	GLuint Wrap_R = GL_CLAMP_TO_EDGE; // Wrapping mode on R axis
+	GLuint Filter_Min = GL_LINEAR_MIPMAP_LINEAR; // Filtering mode if texture pixels < screen pixels
+	GLuint Filter_Max = GL_LINEAR; // Filtering mode if texture pixels > screen pixels
+};
+
 class Texture2D
 {
 public:
@@ -24,6 +33,9 @@ public:
 	// Generates texture from image data
 	void GenerateTexture(const GLchar *file, bool gamma);
 	void GenerateCubemap(std::vector<const GLchar*> faces, bool gamma);
+
+	void setTextureParams(TextureParams* params);
+
 	// Binds the texture as the current active GL_TEXTURE_2D texture object
 	void BindTexture() const;
 	void BindCubemap() const;

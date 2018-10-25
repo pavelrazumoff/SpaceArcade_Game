@@ -19,8 +19,8 @@ public:
 	// Loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
 	Shader LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, std::string name);
 	// Loads (and generates) a texture from file
-	Texture2D* LoadTexture(const GLchar *file, std::string name, bool gamma);
-	Texture2D* LoadCubemap(std::vector<const GLchar*> faces, std::string name, bool gamma);
+	Texture2D* LoadTexture(const GLchar *file, std::string name, bool gamma, TextureParams* texParams = NULL);
+	Texture2D* LoadCubemap(std::vector<const GLchar*> faces, std::string name, bool gamma, TextureParams* texParams = NULL);
 	//Loads font.
 	void loadFont(std::string fontPath, std::string fontType, int fontSize);
 
