@@ -101,6 +101,15 @@ void MainApp::updateHealthBar(float health, float initialHealth)
 	}
 }
 
+void MainApp::updateEnergyBar(float usedEnergy, float maxEnergy)
+{
+	if (pEnergyBar)
+	{
+		float percent = usedEnergy / maxEnergy;
+		pEnergyBar->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f - percent, 0.0f), true);
+	}
+}
+
 void MainApp::resize(int width, int height)
 {
 	// Calls when window is resizing.

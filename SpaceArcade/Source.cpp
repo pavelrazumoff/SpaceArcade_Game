@@ -85,6 +85,11 @@ void healthBarChanged(float health, float initialHealth)
 	app.updateHealthBar(health, initialHealth);
 }
 
+void energyBarChanged(float usedEnergy, float maxEnergy)
+{
+	app.updateEnergyBar(usedEnergy, maxEnergy);
+}
+
 void showScene()
 {
 	app.currentPage = PageType::Game;

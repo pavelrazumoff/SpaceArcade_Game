@@ -27,8 +27,7 @@ void GUITextBox::draw()
 
 	GUIObject::draw();
 
-	renderText(this->text, this->Position.x + textRelativePos.x,
-		renderer->getCurrentScreenDimensions().y - (this->Position.y + textRelativePos.y), 1.0f, textColor);
+	renderText(this->text, this->Position.x + textRelativePos.x, this->Position.y + textRelativePos.y, 1.0f, textColor);
 }
 
 void GUITextBox::resize(bool useParentResize)
@@ -51,7 +50,7 @@ void GUITextBox::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scal
 	fontShader->use();
 
 	glm::vec2 screenDimensions = renderer->getCurrentScreenDimensions();
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(screenDimensions.x), 0.0f, static_cast<GLfloat>(screenDimensions.y));
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(screenDimensions.x), static_cast<GLfloat>(screenDimensions.y), 0.0f, -1.0f, 1.0f);
 
 	fontShader->setMat4("projection", projection);
 	fontShader->setBool("useClipSpace", true);
@@ -66,17 +65,17 @@ void GUITextBox::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scal
 	{
 		Character ch = font[*c];
 		GLfloat xpos = x + ch.Bearing.x * scale;
-		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+		GLfloat ypos = y + (ch.Size.y - ch.Bearing.y) * scale;
 		GLfloat w = ch.Size.x * scale;
 		GLfloat h = ch.Size.y * scale;
 		// Update VBO for each character
 		GLfloat vertices[6][4] = {
-		{ xpos, ypos + h, 0.0, 0.0 },
-		{ xpos, ypos, 0.0, 1.0 },
-		{ xpos + w, ypos, 1.0, 1.0 },
-		{ xpos, ypos + h, 0.0, 0.0 },
-		{ xpos + w, ypos, 1.0, 1.0 },
-		{ xpos + w, ypos + h, 1.0, 0.0 }
+			{ xpos, ypos - h, 0.0, 0.0 },
+			{ xpos, ypos, 0.0, 1.0 },
+			{ xpos + w, ypos, 1.0, 1.0 },
+			{ xpos, ypos - h, 0.0, 0.0 },
+			{ xpos + w, ypos, 1.0, 1.0 },
+			{ xpos + w, ypos - h, 1.0, 0.0 }
 		};
 		// Render glyph texture over quad
 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);

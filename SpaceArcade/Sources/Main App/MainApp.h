@@ -16,6 +16,7 @@ void mouse_click_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 void healthBarChanged(float health, float initialHealth);
+void energyBarChanged(float usedEnergy, float maxEnergy);
 
 void showScene();
 void showSettings();
@@ -69,6 +70,7 @@ public:
 	void RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 
 	void updateHealthBar(float health, float initialHealth);
+	void updateEnergyBar(float usedEnergy, float maxEnergy);
 
 	// input.
 	void processInput(GLFWwindow *window);
@@ -143,4 +145,5 @@ private:
 	SpriteRenderer renderer;
 
 	GUIObject* pHealthBar = NULL;
+	GUIObject* pEnergyBar = NULL;
 };

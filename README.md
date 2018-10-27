@@ -2,4 +2,4 @@
 This is my first 2D game on OpenGL.
 The work is in progress.
 
-The spaceships textures are from http://pixeljoint.com/pixelart/7254.htm
+The spaceships textures are from http://pixeljoint.com/

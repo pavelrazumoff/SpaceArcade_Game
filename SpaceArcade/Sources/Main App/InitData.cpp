@@ -257,6 +257,7 @@ void MainApp::initGUI()
 	backMenuButton->setActionCallback(backToMainMenu);
 
 	// Game Interface.
+	// Whole screen.
 	GUILayout* gameLayout = new GUILayout(&renderer);
 	gameInterfaceObjects.push_back(gameLayout);
 
@@ -266,8 +267,9 @@ void MainApp::initGUI()
 	gameLayout->setAlignment(GUILayout_Alignment::Center);
 
 	GUILayout* screenLayouts[2];
-	int screenPercents[2] = { 9, 1 };
+	int screenPercents[2] = { 8, 1 };
 
+	// Top Screen and bottom (health and energy bars).
 	for (int i = 0; i < 2; ++i)
 	{
 		screenLayouts[i] = new GUILayout(&renderer);
@@ -282,30 +284,69 @@ void MainApp::initGUI()
 		//screenLayouts[i]->setColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.1f)); // debug color.
 	}
 
-	GUILayout* screenBottomLayouts[2];
-	screenPercents[0] = 1;
-	screenPercents[1] = 6;
+	GUILayout* screenBottomLayouts[3];
+	int bottomScreenPercents[3] = { 1, 5, 1 };
 
-	for (int i = 0; i < 2; ++i)
+	// Left layout (Health), Center (Fill), Right (Energy).
+	for (int i = 0; i < 3; ++i)
 	{
 		screenBottomLayouts[i] = new GUILayout(&renderer);
 		screenLayouts[1]->addChild(screenBottomLayouts[i]);
 
 		screenBottomLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
-		screenBottomLayouts[i]->setSpace(10);
 		screenBottomLayouts[i]->setIndents(glm::vec4(20, 0, 20, 0));
-		screenBottomLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
-		screenBottomLayouts[i]->setAlignment(GUILayout_Alignment::Left);
-		screenBottomLayouts[i]->setLayoutFillPercent(screenPercents[i]);
+		screenBottomLayouts[i]->setTypeLayout(GUILayout_Type::Vertical);
+		screenBottomLayouts[i]->setAlignment(GUILayout_Alignment::Center);
+		screenBottomLayouts[i]->setLayoutFillPercent(bottomScreenPercents[i]);
+	}
+
+	std::string barCaptions[] = {
+		"Health",
+		"Energy"
+	};
+
+	std::string captionTexes[] = {
+		"healthCaption",
+		"energyCaption"
+	};
+
+	// Frame + layout with caption and changing stats (health and energy).
+	GUILayout* barLayouts[2];
+	for (int i = 0; i < 2; ++i)
+	{
+		GUIObject* barCaption = new GUIObject(&renderer);
+		screenBottomLayouts[i * 2]->addChild(barCaption);
+
+		barCaption->init(res_manager.GetTexture(captionTexes[i]), glm::vec2(0.0f, 0.0f), glm::vec2(260.0f, 65.0f), true);
+		barCaption->setSizeRatio(4.0f, true);
+
+		GUIObject* barFrame = new GUIObject(&renderer);
+		screenBottomLayouts[i * 2]->addChild(barFrame);
+
+		barFrame->init(res_manager.GetTexture("barFrame"), glm::vec2(0.0f, 0.0f), glm::vec2(260.0f, 40.0f), true);
+		barFrame->setSizeRatio(6.5f, true);
+
+		barLayouts[i] = new GUILayout(&renderer);
+		barFrame->addChild(barLayouts[i]);
+
+		barLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		barLayouts[i]->setIndents(glm::vec4(3, 7, 3, 7));
+		barLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
+		barLayouts[i]->setAlignment(GUILayout_Alignment::Left);
+		barLayouts[i]->setUseParentDimensions(true);
 	}
 
 	pHealthBar = new GUIObject(&renderer);
-	screenBottomLayouts[0]->addChild(pHealthBar);
+	barLayouts[0]->addChild(pHealthBar);
 
-	pHealthBar->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(100.0f, 20.0f), true);
-	pHealthBar->setMinimumHeight(20.0f);
-	pHealthBar->setMaximumHeight(20.0f);
-	pHealthBar->setColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	pHealthBar->init(res_manager.GetTexture("healthBar"), glm::vec2(0.0f, 0.0f), glm::vec2(250.0f, 30.0f), true);
+	pHealthBar->setSizeRatio(8.5f, true);
+
+	pEnergyBar = new GUIObject(&renderer);
+	barLayouts[1]->addChild(pEnergyBar);
+
+	pEnergyBar->init(res_manager.GetTexture("energyBar"), glm::vec2(0.0f, 0.0f), glm::vec2(250.0f, 30.0f), true);
+	pEnergyBar->setSizeRatio(8.5f, true);
 
 	mainMenuLayout->resize();
 	settingsLayout->resize();
@@ -330,6 +371,7 @@ void MainApp::initScene()
 	pSpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
 	pSpaceCraft->setUseAI(false);
 	pSpaceCraft->setHealthChangedCallback(healthBarChanged);
+	pSpaceCraft->setEnergyChangedCallback(energyBarChanged);
 
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(1);

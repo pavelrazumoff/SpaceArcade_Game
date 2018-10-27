@@ -54,32 +54,52 @@ void SpacecraftObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Tex
 void SpacecraftObject::update(float delta)
 {
 	GameObject::update(delta);
-	if (health > 0.0f && (abs(Velocity.x) > 0 || abs(Velocity.y) > 0))
+
+	if (health > 0.0f)
 	{
-		if (abs(Velocity.x) > 0)
-			Velocity.x = glm::sign(Velocity.x) * (abs(Velocity.x) - (impulseFactor * 1.5) * delta);
-		if (abs(Velocity.y) > 0)
-			Velocity.y = glm::sign(Velocity.y) * (abs(Velocity.y) - (impulseFactor * 1.5) * delta);
-
-		if (abs(Velocity.x) < 10)
-			Velocity.x = 0;
-		if (abs(Velocity.y) < 10)
-			Velocity.y = 0;
-	}
-
-	if (controlledByAI && health > 0.0f)
-	{
-		followTargetEnemy(delta);
-
-		if (readyToFire)
+		if (abs(Velocity.x) > 0 || abs(Velocity.y) > 0)
 		{
-			timeToFire -= delta;
-			if (timeToFire <= 0.0f)
+			if (abs(Velocity.x) > 0)
+				Velocity.x = glm::sign(Velocity.x) * (abs(Velocity.x) - (impulseFactor * 1.5) * delta);
+			if (abs(Velocity.y) > 0)
+				Velocity.y = glm::sign(Velocity.y) * (abs(Velocity.y) - (impulseFactor * 1.5) * delta);
+
+			if (abs(Velocity.x) < 10)
+				Velocity.x = 0;
+			if (abs(Velocity.y) < 10)
+				Velocity.y = 0;
+		}
+
+		if (controlledByAI)
+		{
+			followTargetEnemy(delta);
+
+			if (readyToFire)
 			{
-				spawnLaserRay();
-				timeToFire = fireFrequency;
+				timeToFire -= delta;
+				if (timeToFire <= 0.0f)
+				{
+					spawnLaserRay();
+					timeToFire = fireFrequency;
+				}
 			}
 		}
+
+		if (usedEnergy > 0.0f)
+		{
+			if (!exceedMaxEnergy)
+				usedEnergy -= 20.0f * delta;
+			else
+				usedEnergy -= 40.0f * delta;
+		}
+		if (usedEnergy <= 0.0f)
+		{
+			usedEnergy = 0.0f;
+			exceedMaxEnergy = false;
+		}
+
+		if (energyChanged)
+			energyChanged(usedEnergy, maxEnergy);
 	}
 
 	for(int i = 0; i < laser_rays.size(); ++i)
@@ -212,16 +232,41 @@ GameObject* SpacecraftObject::getLaserRay()
 	return laser_ray;
 }
 
+void SpacecraftObject::setEnergyChangedCallback(void(*actionCallback)(float, float))
+{
+	energyChanged = actionCallback;
+}
+
 void SpacecraftObject::setControlVelocityByRotation(bool control)
 {
 	GameObject::setControlVelocityByRotation(control);
 	laser_ray->setControlVelocityByRotation(control);
 }
 
+void SpacecraftObject::setMaxEnergy(float energy)
+{
+	maxEnergy = energy;
+}
+
+void SpacecraftObject::setUsedEnergy(float energy)
+{
+	usedEnergy = energy;
+}
+
 void SpacecraftObject::setFireFrequency(float freq)
 {
 	fireFrequency = freq;
 	timeToFire = freq;
+}
+
+float SpacecraftObject::getMaxEnergy()
+{
+	return maxEnergy;
+}
+
+float SpacecraftObject::getUsedEnergy()
+{
+	return usedEnergy;
 }
 
 float SpacecraftObject::getFireFrequency()
@@ -254,6 +299,15 @@ void SpacecraftObject::spawnLaserRay()
 {
 	if (!laser_ray || !laser_ray->getLevel())
 		return;
+
+	if (usedEnergy >= maxEnergy || exceedMaxEnergy)
+	{
+		exceedMaxEnergy = true;
+		return;
+	}
+
+	usedEnergy += 15.0f;
+
 	laser_rays.push_back(laser_ray->clone());
 	laser_rays.back()->Position = glm::vec2(Position.x + Size.x / 2 - laser_ray->Size.x / 2, Position.y);
 	laser_rays.back()->InitialRotation = this->InitialRotation;

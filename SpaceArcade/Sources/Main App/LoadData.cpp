@@ -45,6 +45,12 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//Interface//checkBoxPressed.png", "checkBoxPressed", false, &gameObjectsParams);
 	res_manager.LoadTexture("Images//Interface//checkIcon.png", "checkIcon", false, &gameObjectsParams);
 
+	res_manager.LoadTexture("Images//Interface//healthBar.png", "healthBar", false);
+	res_manager.LoadTexture("Images//Interface//energyBar.png", "energyBar", false);
+	res_manager.LoadTexture("Images//Interface//barFrame.png", "barFrame", false);
+	res_manager.LoadTexture("Images//Interface//healthCaption.png", "healthCaption", false);
+	res_manager.LoadTexture("Images//Interface//energyCaption.png", "energyCaption", false);
+
 	Texture2D* tex = res_manager.GetTexture("explosion");
 	tex->numOfColumns = 8;
 	tex->numOfRows = 4;
