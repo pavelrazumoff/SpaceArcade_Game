@@ -377,7 +377,7 @@ void MainApp::initScene()
 	pSpaceCraft->setNonPlayerObject(false);
 
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -500.0f), false);
-	pLaserRay->setObjectType(1);
+	pLaserRay->setObjectType(ObjectTypes::LaserRay);
 	
 	for (int i = 0; i < 30; ++i)
 	{
@@ -390,7 +390,7 @@ void MainApp::initScene()
 		asteroid->setUsePhysics(true);
 		asteroid->setObjectType(ObjectTypes::Meteorite);
 
-		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 400 + 1) - 400),
+		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 350 + 1) - 350),
 			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));
 		asteroid->InitialRotation = rand() % 360;
 		asteroid->Rotation = 10.0f;

@@ -34,6 +34,16 @@ void AIController::update(float delta)
 	
 }
 
+void AIController::BlockAI()
+{
+	isActive = false;
+}
+
+void AIController::unblockAI()
+{
+	isActive = true;
+}
+
 void AIController::setPawn(GameObject* pawn)
 {
 	controlledPawn = pawn;

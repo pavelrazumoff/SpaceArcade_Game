@@ -76,6 +76,9 @@ void GameLevel::resize()
 
 void GameLevel::handleInput(GLFWwindow *window, float delta)
 {
+	if (behaviour && behaviour->isUserInputBlocked())
+		return;
+
 	for (int i = 0; i < objects.size(); ++i)
 		if(!objects[i]->getAIController() && objects[i]->getHealth() > 0 && !objects[i]->isHiddenFromLevel())
 			objects[i]->handleInput(window, delta);
@@ -83,6 +86,9 @@ void GameLevel::handleInput(GLFWwindow *window, float delta)
 
 void GameLevel::processKey(int key, int action, bool* key_pressed)
 {
+	if (behaviour && behaviour->isUserInputBlocked())
+		return;
+
 	for (int i = 0; i < objects.size(); ++i)
 		if (!objects[i]->getAIController() && objects[i]->getHealth() > 0 && !objects[i]->isHiddenFromLevel())
 			objects[i]->processKey(key, action, key_pressed);

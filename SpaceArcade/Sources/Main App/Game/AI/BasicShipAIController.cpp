@@ -33,6 +33,9 @@ void BasicShipAIController::init()
 
 void BasicShipAIController::update(float delta)
 {
+	if (!isActive || controlledPawn->getHealth() <= 0.0f)
+		return;
+
 	followTargetEnemy(delta);
 
 	if (readyToFire)

@@ -15,9 +15,16 @@ public:
 	virtual void clear();
 
 	void setLevel(GameLevel* level);
+	void blockUserInput();
+	void unblockUserInput();
+	virtual bool checkForCollisionAddiction(GameObject* obj1, GameObject* obj2) = 0;
 
 	GameLevel* getLevel();
+	bool isUserInputBlocked();
 
 protected:
 	GameLevel* pLevel = NULL;
+	bool userInput = true;
+
+	int levelMode = -1;
 };

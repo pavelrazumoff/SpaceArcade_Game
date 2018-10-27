@@ -1,6 +1,7 @@
 #include "GameObject.h"
 #include "GameLevel.h"
 #include "AI/AIController.h"
+#include "AI/LevelBehaviour.h"
 
 GameObject::GameObject()
 	: Position(0, 0), Size(1, 1), Velocity(0.0f), InitialRotation(0.0f), Rotation(0.0f)
@@ -157,7 +158,7 @@ bool GameObject::checkCollision(GameObject* obj, glm::vec2& difference)
 void GameObject::makeCollision(GameObject* obj)
 {
 	if (this->readyForDeath || obj->getReadyForDeath() ||
-		(this->objectType != ObjectTypes::None && this->objectType == obj->getObjectType()))
+		!pLevel->getBehaviour()->checkForCollisionAddiction(this, obj))
 		return;
 
 	this->health -= obj->getDamage();

@@ -16,6 +16,9 @@ public:
 
 	virtual void clear();
 
+	void BlockAI();
+	void unblockAI();
+
 	virtual void setPawn(GameObject* pawn);
 	void setTargetEnemy(GameObject* target);
 
@@ -25,4 +28,6 @@ public:
 protected:
 	GameObject* controlledPawn = NULL;
 	GameObject* targetEnemy = NULL;
+
+	bool isActive = true;
 };

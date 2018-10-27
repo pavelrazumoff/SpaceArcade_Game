@@ -1,6 +1,7 @@
 #include "SpacecraftObject.h"
 #include "GameLevel.h"
 #include "AI/AIController.h"
+#include "AI/LevelBehaviour.h"
 
 SpacecraftObject::SpacecraftObject()
 {
@@ -57,7 +58,7 @@ void SpacecraftObject::update(float delta)
 
 	if (health > 0.0f)
 	{
-		if (abs(Velocity.x) > 0 || abs(Velocity.y) > 0)
+		if (usePhysics && (abs(Velocity.x) > 0 || abs(Velocity.y) > 0))
 		{
 			if (abs(Velocity.x) > 0)
 				Velocity.x = glm::sign(Velocity.x) * (abs(Velocity.x) - (impulseFactor * 1.5) * delta);
@@ -117,15 +118,19 @@ void SpacecraftObject::resize()
 	glm::vec2 screenRatio = pLevel->getRenderer()->getScreenRatio();
 
 	Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
+	Velocity = glm::vec2(Velocity.x * screenRatio.x, Velocity.y * screenRatio.y);
 
-	if (Position.x < indents.x)
-		Position.x = indents.x;
-	if (Position.x + Size.x > dimensions.x - indents.x)
-		Position.x = dimensions.x - indents.x - Size.x;
-	if (Position.y < indents.y)
-		Position.y = indents.y;
-	if (Position.y + Size.y > dimensions.y - indents.y)
-		Position.y = dimensions.y - indents.y - Size.y;
+	if (!pLevel->getBehaviour()->isUserInputBlocked())
+	{
+		if (Position.x < indents.x)
+			Position.x = indents.x;
+		if (Position.x + Size.x > dimensions.x - indents.x)
+			Position.x = dimensions.x - indents.x - Size.x;
+		if (Position.y < indents.y)
+			Position.y = indents.y;
+		if (Position.y + Size.y > dimensions.y - indents.y)
+			Position.y = dimensions.y - indents.y - Size.y;
+	}
 
 	for (int i = 0; i < laser_rays.size(); ++i)
 		laser_rays[i]->Position = glm::vec2(laser_rays[i]->Position.x * screenRatio.x, laser_rays[i]->Position.y * screenRatio.y);

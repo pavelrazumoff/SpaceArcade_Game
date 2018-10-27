@@ -37,9 +37,24 @@ void LevelBehaviour::setLevel(GameLevel* level)
 	pLevel = level;
 }
 
+void LevelBehaviour::blockUserInput()
+{
+	userInput = false;
+}
+
+void LevelBehaviour::unblockUserInput()
+{
+	userInput = true;
+}
+
 GameLevel* LevelBehaviour::getLevel()
 {
 	return pLevel;
+}
+
+bool LevelBehaviour::isUserInputBlocked()
+{
+	return !userInput;
 }
 
 void LevelBehaviour::clear()
