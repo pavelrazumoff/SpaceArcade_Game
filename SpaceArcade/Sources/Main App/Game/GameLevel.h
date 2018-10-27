@@ -1,6 +1,8 @@
 #pragma once
 #include "SpacecraftObject.h"
 
+class LevelBehaviour;
+
 class GameLevel
 {
 public:
@@ -13,8 +15,9 @@ public:
 	void						clear();
 
 	// Render level
-	void						Draw();
+	void						draw();
 	void						update(float delta);
+	void						startLevel();			// calls once after all initializations and before updating.
 
 	void						handleInput(GLFWwindow *window, float delta);
 	void						processKey(int key, int action, bool* key_pressed);
@@ -24,19 +27,26 @@ public:
 	void						addNewObject(GameObject* obj);
 	void						removeObject(GameObject* obj);
 
+	void						setBehaviour(LevelBehaviour* behaviour);
 	void						setScreenIndents(glm::vec4 indents);
 	void						setPlayerRestrictionHeight(float height);
+
+	LevelBehaviour*				getBehaviour();
+
+	int							getObjectsSize();
+	GameObject*					getObjectByIndex(int index);
+	int							getIndexByObject(GameObject* obj);
+	int							getObjectsSizeByType(int obj_type);
+	GameObject*					getObjectByTypeIndex(int obj_type, int index);
 
 	glm::vec4					getScreenIndents();
 	float						getPlayerRestrictionHeight();
 
 	SpriteRenderer*				getRenderer();
 
-	// Check if the level is completed.
-	GLboolean					IsCompleted();
-
 private:
 	std::vector<GameObject*>	objects;
+	LevelBehaviour*				behaviour = NULL;
 
 	Texture2D*					backgroundCubemap;
 	Shader						cubemapShader;

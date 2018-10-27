@@ -1,5 +1,6 @@
 #include "GameObject.h"
 #include "GameLevel.h"
+#include "AI/AIController.h"
 
 GameObject::GameObject()
 	: Position(0, 0), Size(1, 1), Velocity(0.0f), InitialRotation(0.0f), Rotation(0.0f)
@@ -39,8 +40,9 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->setParentObject(this->getParentObject());
 	obj->setExplosionTime(this->explosionTime);
 	obj->setExplosionSprite(this->ExplosionSprite);
+	obj->setNonPlayerObject(this->nonPlayerObject);
 	obj->setUsePhysics(this->isUsePhysics());
-	obj->setUseAI(this->isAIControlled());
+	obj->setAIController(this->getAIController());
 	obj->setControlVelocityByRotation(this->isControlVelocityByRotation());
 }
 
@@ -85,16 +87,27 @@ void GameObject::update(float delta)
 		Position.x += currentVelocity.x * delta;
 		Position.y += currentVelocity.y * delta;
 
-		if (!controlledByAI)
+		if (InitialRotation >= 360.0f || InitialRotation <= -360.0f)
+			InitialRotation = 0.0f;
+
+		if (!nonPlayerObject)
 		{
 			float restrZone = pLevel->getRenderer()->getCurrentScreenDimensions().y - pLevel->getPlayerRestrictionHeight();
 			if (Position.y < restrZone)
 				Position.y = restrZone;
 		}
-
-		if (InitialRotation >= 360.0f || InitialRotation <= -360.0f)
-			InitialRotation = 0.0f;
+		else
+		{
+			// when object goes out of screen bounds when it already overstepped top side of the screen, destroy it.
+			glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+			if (Position.y > 0.0f && (Position.x < 0.0f || Position.x > screenDimensions.x || Position.y > screenDimensions.y))
+				setHealth(0.0f);
+		}
 	}
+
+	// Update AI after all.
+	if(aiController)
+		aiController->update(delta);
 }
 
 void GameObject::Draw()
@@ -144,7 +157,7 @@ bool GameObject::checkCollision(GameObject* obj, glm::vec2& difference)
 void GameObject::makeCollision(GameObject* obj)
 {
 	if (this->readyForDeath || obj->getReadyForDeath() ||
-		(this->objectType != -1 && this->objectType == obj->getObjectType()))
+		(this->objectType != ObjectTypes::None && this->objectType == obj->getObjectType()))
 		return;
 
 	this->health -= obj->getDamage();
@@ -207,6 +220,11 @@ void GameObject::setVisible(bool visible)
 	this->visible = visible;
 }
 
+void GameObject::hideFromLevel(bool hide)
+{
+	hidden = hide;
+}
+
 void GameObject::setIsDamagingObject(bool damaging)
 {
 	damagingObject = damaging;
@@ -232,14 +250,21 @@ void GameObject::setExplosionTime(float time)
 	explosionTime = time;
 }
 
+void GameObject::setNonPlayerObject(bool nonPlayer)
+{
+	nonPlayerObject = nonPlayer;
+}
+
 void GameObject::setUsePhysics(bool physics)
 {
 	usePhysics = physics;
 }
 
-void GameObject::setUseAI(bool useAI)
+void GameObject::setAIController(AIController* controller)
 {
-	controlledByAI = useAI;
+	aiController = controller;
+	if(controller)
+		controller->setPawn(this);
 }
 
 void GameObject::setControlVelocityByRotation(bool control)
@@ -260,6 +285,11 @@ int GameObject::getObjectType()
 bool GameObject::isVisible()
 {
 	return visible;
+}
+
+bool GameObject::isHiddenFromLevel()
+{
+	return hidden;
 }
 
 bool GameObject::isDamagingObject()
@@ -292,14 +322,19 @@ float GameObject::getExplosionTime()
 	return explosionTime;
 }
 
+bool GameObject::isNonPlayerObject()
+{
+	return nonPlayerObject;
+}
+
 bool GameObject::isUsePhysics()
 {
 	return usePhysics;
 }
 
-bool GameObject::isAIControlled()
+AIController* GameObject::getAIController()
 {
-	return controlledByAI;
+	return aiController;
 }
 
 bool GameObject::isControlVelocityByRotation()

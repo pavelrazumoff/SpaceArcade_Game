@@ -167,6 +167,16 @@ void MainApp::setFullscreenMode(bool fullscreen)
 
 void MainApp::clearBuffers()
 {
+	for (int i = 0; i < aiControllers.size(); ++i)
+		delete aiControllers[i];
+	
+	aiControllers.clear();
+
+	for (int i = 0; i < levelBehaviours.size(); ++i)
+		delete levelBehaviours[i];
+
+	levelBehaviours.clear();
+
 	for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)
 		for (int i = 0; i < it->second.size(); ++i)
 			delete it->second[i];

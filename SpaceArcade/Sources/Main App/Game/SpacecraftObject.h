@@ -24,10 +24,8 @@ public:
 
 	virtual void notify(GameObject* notifiedObject, NotifyCode code);
 
-	void setTargetEnemy(GameObject* target);
 	void setLaserRay(GameObject* laser);
 
-	GameObject* getTargetEnemy();
 	GameObject* getLaserRay();
 
 	void setEnergyChangedCallback(void(*actionCallback)(float, float));
@@ -35,19 +33,14 @@ public:
 	void setControlVelocityByRotation(bool control);
 	void setMaxEnergy(float energy);
 	void setUsedEnergy(float energy);
-	void setFireFrequency(float freq);
 
 	float getMaxEnergy();
 	float getUsedEnergy();
-	float getFireFrequency();
 
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 	void spawnLaserRay();
-	void followTargetEnemy(float delta);
 
 protected:
-	GameObject* targetEnemy = NULL;
-
 	GameObject* laser_ray;
 	std::vector<GameObject*> laser_rays;
 
@@ -55,9 +48,4 @@ protected:
 	float usedEnergy = 0.0f;
 	bool exceedMaxEnergy = false;
 	void(*energyChanged)(float, float) = NULL;
-
-	// ai.
-	bool readyToFire = false;
-	float timeToFire;
-	float fireFrequency = 0.3f;
 };

@@ -1,4 +1,5 @@
 #include "GameLevel.h"
+#include "AI/LevelBehaviour.h"
 
 GameLevel::~GameLevel()
 {
@@ -12,16 +13,27 @@ void GameLevel::init(Texture2D* cubemap, Shader cubemapShader, SpriteRenderer* r
 	this->renderer = renderer;
 }
 
+void GameLevel::startLevel()
+{
+	if (behaviour)
+		behaviour->startBehaviour();
+
+	resize();
+}
+
 void GameLevel::update(float delta)
 {
+	if (behaviour)
+		behaviour->update(delta);
+
 	for (int i = 0; i < objects.size(); ++i)
-		if(!objects[i]->getParentObject())
+		if(!objects[i]->getParentObject() && !objects[i]->isHiddenFromLevel())
 			objects[i]->update(delta);
 
 	doCollisions();
 }
 
-void GameLevel::Draw()
+void GameLevel::draw()
 {
 	// draw skybox as last.
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content.
@@ -46,7 +58,7 @@ void GameLevel::Draw()
 	// draw only those objects, whose parents are NULL.
 	// other objects will be drawn inside those draw calls (such as laser rays of spacecraft).
 	for (int i = 0; i < objects.size(); ++i)
-		if (!objects[i]->getParentObject())
+		if (!objects[i]->getParentObject() && !objects[i]->isHiddenFromLevel())
 			objects[i]->Draw();
 
 	glEnable(GL_DEPTH_TEST);
@@ -65,14 +77,14 @@ void GameLevel::resize()
 void GameLevel::handleInput(GLFWwindow *window, float delta)
 {
 	for (int i = 0; i < objects.size(); ++i)
-		if(!objects[i]->isAIControlled() && objects[i]->getHealth() > 0)
+		if(!objects[i]->getAIController() && objects[i]->getHealth() > 0 && !objects[i]->isHiddenFromLevel())
 			objects[i]->handleInput(window, delta);
 }
 
 void GameLevel::processKey(int key, int action, bool* key_pressed)
 {
 	for (int i = 0; i < objects.size(); ++i)
-		if (!objects[i]->isAIControlled() && objects[i]->getHealth() > 0)
+		if (!objects[i]->getAIController() && objects[i]->getHealth() > 0 && !objects[i]->isHiddenFromLevel())
 			objects[i]->processKey(key, action, key_pressed);
 }
 
@@ -85,7 +97,8 @@ void GameLevel::doCollisions()
 			// check if two objects can do damage (exclude cases when damaging object collides with stars for example)
 			// and also check collision for two objects.
 			if (objects[i]->isDamagingObject() && objects[j]->isDamagingObject() &&
-				objects[i]->getHealth() > 0.0f && objects[j]->getHealth() > 0.0f)
+				objects[i]->getHealth() > 0.0f && objects[j]->getHealth() > 0.0f && 
+				!objects[i]->isHiddenFromLevel() && !objects[j]->isHiddenFromLevel())
 			{
 				glm::vec2 diff;
 				if (objects[i]->checkCollision(objects[j], diff))
@@ -99,7 +112,7 @@ void GameLevel::doCollisions()
 	}
 
 	for (int i = 0; i < objects.size(); ++i)
-		if (objects[i]->getReadyForDeath())
+		if (objects[i]->getReadyForDeath() && !objects[i]->isHiddenFromLevel())
 		{
 			GameObject* parentObj = objects[i]->getParentObject();
 			if (parentObj)
@@ -129,6 +142,11 @@ void GameLevel::removeObject(GameObject* obj)
 		objects.erase(it);
 }
 
+void GameLevel::setBehaviour(LevelBehaviour* behaviour)
+{
+	this->behaviour = behaviour;
+}
+
 void GameLevel::setScreenIndents(glm::vec4 indents)
 {
 	screenIndents = indents;
@@ -137,6 +155,55 @@ void GameLevel::setScreenIndents(glm::vec4 indents)
 void GameLevel::setPlayerRestrictionHeight(float height)
 {
 	playerRestrictionHeight = height;
+}
+
+LevelBehaviour* GameLevel::getBehaviour()
+{
+	return behaviour;
+}
+
+int GameLevel::getObjectsSize()
+{
+	return objects.size();
+}
+
+GameObject* GameLevel::getObjectByIndex(int index)
+{
+	if (index < 0 || index >= objects.size())
+		return NULL;
+
+	return objects[index];
+}
+
+int GameLevel::getIndexByObject(GameObject* obj)
+{
+	for (int i = 0; i < objects.size(); ++i)
+		if (objects[i] == obj)
+			return i;
+
+	return -1;
+}
+
+int	GameLevel::getObjectsSizeByType(int obj_type)
+{
+	int size = 0;
+	for (int i = 0; i < objects.size(); ++i)
+		if (objects[i]->getObjectType() == obj_type)
+			size++;
+
+	return size;
+}
+
+GameObject* GameLevel::getObjectByTypeIndex(int obj_type, int index)
+{
+	for (int i = 0, typeIndex = 0; i < objects.size(); ++i)
+		if (objects[i]->getObjectType() == obj_type)
+		{
+			if (typeIndex++ == index)
+				return objects[i];
+		}
+
+	return NULL;
 }
 
 glm::vec4 GameLevel::getScreenIndents()
@@ -152,11 +219,6 @@ float GameLevel::getPlayerRestrictionHeight()
 SpriteRenderer* GameLevel::getRenderer()
 {
 	return renderer;
-}
-
-GLboolean GameLevel::IsCompleted()
-{
-	return GL_FALSE;
 }
 
 void GameLevel::clear()

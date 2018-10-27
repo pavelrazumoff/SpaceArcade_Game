@@ -122,6 +122,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Header.h" />
+    <ClInclude Include="Sources\Main App\Game\AI\AIController.h" />
+    <ClInclude Include="Sources\Main App\Game\AI\BasicShipAIController.h" />
+    <ClInclude Include="Sources\Main App\Game\AI\LevelBehaviour.h" />
+    <ClInclude Include="Sources\Main App\Game\AI\StartLevelBehaviour.h" />
     <ClInclude Include="Sources\Main App\Game\GameLevel.h" />
     <ClInclude Include="Sources\Main App\Game\GameObject.h" />
     <ClInclude Include="Sources\Main App\Game\SpacecraftObject.h" />
@@ -144,6 +148,10 @@
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Sources\Main App\BuffersData.cpp" />
     <ClCompile Include="Sources\Main App\DrawData.cpp" />
+    <ClCompile Include="Sources\Main App\Game\AI\AIController.cpp" />
+    <ClCompile Include="Sources\Main App\Game\AI\BasicShipAIController.cpp" />
+    <ClCompile Include="Sources\Main App\Game\AI\LevelBehaviour.cpp" />
+    <ClCompile Include="Sources\Main App\Game\AI\StartLevelBehaviour.cpp" />
     <ClCompile Include="Sources\Main App\Game\GameLevel.cpp" />
     <ClCompile Include="Sources\Main App\Game\GameObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\SpacecraftObject.cpp" />

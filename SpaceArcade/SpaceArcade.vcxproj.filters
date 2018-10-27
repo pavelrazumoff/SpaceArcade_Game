@@ -64,6 +64,12 @@
     <Filter Include="Source Files\Main App\GUI">
       <UniqueIdentifier>{8e19af70-3893-46c1-8e0e-770e3fb97194}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Main App\Game\AI">
+      <UniqueIdentifier>{7358e9cb-55db-474f-b038-141271fe9d57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Main App\Game\AI">
+      <UniqueIdentifier>{9adb1087-8371-4015-9ad1-3ef3ccdf960d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -116,6 +122,18 @@
     </ClInclude>
     <ClInclude Include="Sources\Main App\GUI\GUITextBox.h">
       <Filter>Header Files\Main App\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\AI\AIController.h">
+      <Filter>Header Files\Main App\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\AI\BasicShipAIController.h">
+      <Filter>Header Files\Main App\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\AI\LevelBehaviour.h">
+      <Filter>Header Files\Main App\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\AI\StartLevelBehaviour.h">
+      <Filter>Header Files\Main App\Game\AI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +205,18 @@
     </ClCompile>
     <ClCompile Include="Sources\Main App\GUI\GUITextBox.cpp">
       <Filter>Source Files\Main App\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\AI\AIController.cpp">
+      <Filter>Source Files\Main App\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\AI\BasicShipAIController.cpp">
+      <Filter>Source Files\Main App\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\AI\LevelBehaviour.cpp">
+      <Filter>Source Files\Main App\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\AI\StartLevelBehaviour.cpp">
+      <Filter>Source Files\Main App\Game\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

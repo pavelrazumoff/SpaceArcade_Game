@@ -3,6 +3,8 @@
 #include "../Miscellaneous/Camera.h"
 #include "../Miscellaneous/ResourceManager.h"
 #include "Game/GameLevel.h"
+#include "Game/AI/BasicShipAIController.h"
+#include "Game/AI/StartLevelBehaviour.h"
 #include "GUI/GUICheckBox.h"
 #include "GUI/GUILayout.h"
 #include "GUI/GUITextBox.h"
@@ -102,6 +104,8 @@ public:
 
 	// Game Data.
 	GameLevel base_level;
+	std::vector<AIController*> aiControllers;
+	std::vector<LevelBehaviour*> levelBehaviours;
 
 	int currentPage = PageType::MainMenu;
 

@@ -363,15 +363,18 @@ void MainApp::initScene()
 	base_level.setScreenIndents(glm::vec4(10, 10, 10, 10));
 	base_level.setPlayerRestrictionHeight(screenHeight / 2.5f);
 
+	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(&base_level);
+	levelBehaviours.push_back(basicBehaviour);
+
 	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
 	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
 
 	pSpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, screenHeight - 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
 	pSpaceCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
 	pSpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
-	pSpaceCraft->setUseAI(false);
 	pSpaceCraft->setHealthChangedCallback(healthBarChanged);
 	pSpaceCraft->setEnergyChangedCallback(energyBarChanged);
+	pSpaceCraft->setNonPlayerObject(false);
 
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(1);
@@ -385,6 +388,7 @@ void MainApp::initScene()
 		asteroid->setExplosionTime(1.0f);
 		asteroid->setExplosionSprite(res_manager.GetTexture("explosion"));
 		asteroid->setUsePhysics(true);
+		asteroid->setObjectType(ObjectTypes::Meteorite);
 
 		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 400 + 1) - 400),
 			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));
@@ -392,18 +396,21 @@ void MainApp::initScene()
 		asteroid->Rotation = 10.0f;
 	}
 
+	BasicShipAIController* spacecraftAI = new BasicShipAIController();
+	aiControllers.push_back(spacecraftAI);
+	spacecraftAI->setTargetEnemy(pSpaceCraft);
+
 	SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
 	enemySpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 42, 200), glm::vec2(85, 92), res_manager.GetTexture("spacecraftEnemy"), glm::vec2(0.0f, 0.0f));
 	enemySpaceCraft->InitialRotation = 180.0f;
 	enemySpaceCraft->VelocityScale = glm::vec2(200.0f, 100.0f);
 	enemySpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
-	enemySpaceCraft->setUseAI(true);
+	enemySpaceCraft->setAIController(spacecraftAI);
 	enemySpaceCraft->setControlVelocityByRotation(true);
-	enemySpaceCraft->setTargetEnemy(pSpaceCraft);
 
 	pLaserRay = enemySpaceCraft->getLaserRay();
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -500.0f), false);
-	pLaserRay->setObjectType(1);
+	pLaserRay->setObjectType(ObjectTypes::LaserRay);
 
-	base_level.resize();
+	base_level.startLevel();
 }

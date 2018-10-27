@@ -1,11 +1,13 @@
 #include "SpacecraftObject.h"
 #include "GameLevel.h"
+#include "AI/AIController.h"
 
 SpacecraftObject::SpacecraftObject()
 {
 	damage = 10.0f;
 	explosionTime = 1.5f;
 	usePhysics = true;
+	objectType = ObjectTypes::SpaceCraft;
 
 	laser_ray = new GameObject();
 	laser_ray->setIsDamagingObject(true);
@@ -42,8 +44,6 @@ void SpacecraftObject::cloneParams(GameObject* obj)
 
 	SpacecraftObject* spacecraft = (SpacecraftObject*)obj;
 	spacecraft->setLaserRay(this->getLaserRay()->clone());
-	spacecraft->setTargetEnemy(this->targetEnemy);
-	spacecraft->setFireFrequency(this->fireFrequency);
 }
 
 void SpacecraftObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity)
@@ -68,21 +68,6 @@ void SpacecraftObject::update(float delta)
 				Velocity.x = 0;
 			if (abs(Velocity.y) < 10)
 				Velocity.y = 0;
-		}
-
-		if (controlledByAI)
-		{
-			followTargetEnemy(delta);
-
-			if (readyToFire)
-			{
-				timeToFire -= delta;
-				if (timeToFire <= 0.0f)
-				{
-					spawnLaserRay();
-					timeToFire = fireFrequency;
-				}
-			}
 		}
 
 		if (usedEnergy > 0.0f)
@@ -210,21 +195,11 @@ void SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 	}
 }
 
-void SpacecraftObject::setTargetEnemy(GameObject* target)
-{
-	targetEnemy = target;
-}
-
 void SpacecraftObject::setLaserRay(GameObject* laser)
 {
 	if (laser_ray)
 		delete laser_ray;
 	laser_ray = laser;
-}
-
-GameObject* SpacecraftObject::getTargetEnemy()
-{
-	return targetEnemy;
 }
 
 GameObject* SpacecraftObject::getLaserRay()
@@ -253,12 +228,6 @@ void SpacecraftObject::setUsedEnergy(float energy)
 	usedEnergy = energy;
 }
 
-void SpacecraftObject::setFireFrequency(float freq)
-{
-	fireFrequency = freq;
-	timeToFire = freq;
-}
-
 float SpacecraftObject::getMaxEnergy()
 {
 	return maxEnergy;
@@ -267,11 +236,6 @@ float SpacecraftObject::getMaxEnergy()
 float SpacecraftObject::getUsedEnergy()
 {
 	return usedEnergy;
-}
-
-float SpacecraftObject::getFireFrequency()
-{
-	return fireFrequency;
 }
 
 void SpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -311,43 +275,6 @@ void SpacecraftObject::spawnLaserRay()
 	laser_rays.push_back(laser_ray->clone());
 	laser_rays.back()->Position = glm::vec2(Position.x + Size.x / 2 - laser_ray->Size.x / 2, Position.y);
 	laser_rays.back()->InitialRotation = this->InitialRotation;
-}
-
-void SpacecraftObject::followTargetEnemy(float delta)
-{
-	if (!targetEnemy)
-		return;
-
-	if (targetEnemy->getHealth() <= 0.0f)
-	{
-		targetEnemy = NULL;
-		readyToFire = false;
-		return;
-	}
-
-	if (abs(Position.x - targetEnemy->Position.x) > 20.0f)
-	{
-		glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
-		glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
-
-		glm::vec2 shift = glm::vec2(delta * VelocityScale.x * initialScreenRatio.x, delta * VelocityScale.y * initialScreenRatio.y);
-
-		if (Position.x < targetEnemy->Position.x)
-			Position.x += shift.x;
-		else
-			Position.x -= shift.x;
-
-		readyToFire = false;
-	}
-	else
-	{
-		if (!readyToFire)
-			timeToFire = 0.0f;
-		readyToFire = true;
-	}
-
-	if (abs(Position.x - targetEnemy->Position.x) < 5.0f)
-		Velocity.x = 0.0f;
 }
 
 void SpacecraftObject::clear()

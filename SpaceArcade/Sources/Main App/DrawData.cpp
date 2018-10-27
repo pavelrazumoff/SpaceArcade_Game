@@ -134,7 +134,7 @@ void MainApp::render()
 
 void MainApp::drawScene()
 {
-	base_level.Draw();
+	base_level.draw();
 }
 
 void MainApp::drawMenuBackground()

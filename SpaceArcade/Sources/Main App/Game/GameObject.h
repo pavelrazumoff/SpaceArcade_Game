@@ -4,10 +4,19 @@
 // Container object for holding all state relevant for a single
 // game object entity.
 class GameLevel;
+class AIController;
 
 enum NotifyCode
 {
 	Destroyed = 0,
+};
+
+enum ObjectTypes
+{
+	None = 0,
+	LaserRay,
+	Meteorite,
+	SpaceCraft
 };
 
 class GameObject
@@ -41,25 +50,29 @@ public:
 
 	void setObjectType(int type);
 	void setVisible(bool visible);
+	void hideFromLevel(bool hide);
 	void setIsDamagingObject(bool damaging);
 	void setDamage(float damage);
 	void setHealth(float hp);
 	void setInitialHealth(float hp);
 	void setExplosionTime(float time);
+	void setNonPlayerObject(bool nonPlayer);
 	void setUsePhysics(bool physics);
-	void setUseAI(bool useAI);
+	void setAIController(AIController* controller);
 	virtual void setControlVelocityByRotation(bool control);
 
 	GameLevel* getLevel();
 	int getObjectType();
 	bool isVisible();
+	bool isHiddenFromLevel();
 	bool isDamagingObject();
 	float getDamage();
 	float getHealth();
 	float getInitialHealth();
 	float getExplosionTime();
+	bool isNonPlayerObject();
 	bool isUsePhysics();
-	bool isAIControlled();
+	AIController* getAIController();
 	bool isControlVelocityByRotation();
 
 	bool isOffTheScreen(glm::vec2 screenDimensions);
@@ -81,16 +94,18 @@ public:
 protected:
 	GameLevel* pLevel = NULL;
 	GameObject* parentObject = NULL;
+	AIController* aiController = NULL;
 
-	int objectType = -1;
+	int objectType = ObjectTypes::None;
 	bool visible = true;
+	bool hidden = false;
 	bool damagingObject = true;
 	float damage = 1.0f;
 	float health = 100.0f;
 	float initialHealth = 100.0f;
 	float explosionTime = 0.0f;
+	bool nonPlayerObject = true;
 	bool usePhysics = false;
-	bool controlledByAI = true;
 	bool controlVelocityByRot = false;
 
 	int currentExplosionFrame = 0;
