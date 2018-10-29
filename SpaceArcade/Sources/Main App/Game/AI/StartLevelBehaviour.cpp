@@ -98,7 +98,7 @@ void StartLevelBehaviour::updateMeteorMode(float delta)
 			if (spacecraft->getAIController())
 			{
 				spacecraft->hideFromLevel(false);
-				spacecraft->Position = glm::vec2(screenDimensions.x / 2 - spacecraft->Size.x / 2, -50);
+				spacecraft->Position = glm::vec2(screenDimensions.x / 2 - spacecraft->Size.x / 2, -100);
 				spacecraft->getAIController()->BlockAI();
 			}
 		}

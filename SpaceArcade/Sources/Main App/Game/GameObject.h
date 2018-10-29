@@ -34,8 +34,9 @@ public:
 	virtual void cloneParams(GameObject* obj);
 
 	// Draw sprite
-	virtual void Draw();
+	virtual void draw(bool useInstanced = false, int amount = 0);
 	virtual void update(float delta);
+	virtual void updateModelMatrix();
 
 	virtual void handleInput(GLFWwindow *window, float delta);
 	virtual void processKey(int key, int action, bool* key_pressed);
@@ -62,6 +63,7 @@ public:
 	virtual void setControlVelocityByRotation(bool control);
 
 	GameLevel* getLevel();
+	glm::mat4 getModel();
 	int getObjectType();
 	bool isVisible();
 	bool isHiddenFromLevel();
@@ -95,6 +97,8 @@ protected:
 	GameLevel* pLevel = NULL;
 	GameObject* parentObject = NULL;
 	AIController* aiController = NULL;
+
+	glm::mat4 model;
 
 	int objectType = ObjectTypes::None;
 	bool visible = true;

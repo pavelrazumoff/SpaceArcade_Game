@@ -135,6 +135,9 @@
     <ClInclude Include="Sources\Main App\Game\AI\StartLevelBehaviour.h">
       <Filter>Header Files\Main App\Game\AI</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Miscellaneous\QuadTree.h">
+      <Filter>Header Files\Miscellaneous</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image.cpp">
@@ -217,6 +220,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Main App\Game\AI\StartLevelBehaviour.cpp">
       <Filter>Source Files\Main App\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Miscellaneous\QuadTree.cpp">
+      <Filter>Source Files\Miscellaneous</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

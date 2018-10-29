@@ -23,8 +23,8 @@ GameObject::~GameObject()
 GameObject* GameObject::clone()
 {
 	GameObject* newObject = new GameObject();
-	newObject->init(this->pLevel, this->Position, this->Size, this->Sprite, this->Velocity);
 	this->cloneParams(newObject);
+	newObject->init(this->pLevel, this->Position, this->Size, this->Sprite, this->Velocity);
 
 	return newObject;
 }
@@ -109,14 +109,35 @@ void GameObject::update(float delta)
 	// Update AI after all.
 	if(aiController)
 		aiController->update(delta);
+
+	// update model (world) matrix after all calculations.
+	updateModelMatrix();
 }
 
-void GameObject::Draw()
+void GameObject::updateModelMatrix()
 {
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(Position, 0.0f));  // First translate (transformations are: scale happens first, then rotation and then finall translation happens; reversed order)
+
+	model = glm::translate(model, glm::vec3(0.5f * Size.x, 0.5f * Size.y, 0.0f)); // Move origin of rotation to center of quad
+	model = glm::rotate(model, glm::radians(this->InitialRotation), glm::vec3(0.0f, 0.0f, 1.0f)); // Then rotate
+	model = glm::translate(model, glm::vec3(-0.5f * Size.x, -0.5f * Size.y, 0.0f)); // Move origin back
+
+	model = glm::scale(model, glm::vec3(Size, 1.0f)); // Last scale
+}
+
+void GameObject::draw(bool useInstanced, int amount)
+{
+	// prepare renderer for drawing instances, if it has to.
+	pLevel->getRenderer()->setUseInstanced(useInstanced, amount);
+
 	if(visible && health > 0.0f)
-		pLevel->getRenderer()->DrawSprite(this->Sprite, this->Position, this->Size, glm::vec4(0.0f), this->InitialRotation);
+		pLevel->getRenderer()->DrawSprite(this->Sprite, this->model, glm::vec4(0.0f));
 	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
-		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->Position, this->Size, glm::vec4(0.0f), this->InitialRotation, currentExplosionFrame);
+		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->model, glm::vec4(0.0f), currentExplosionFrame);
+
+	// drop renderer from drawing instances.
+	pLevel->getRenderer()->dropInstanced();
 }
 
 void GameObject::resize()
@@ -161,11 +182,8 @@ void GameObject::makeCollision(GameObject* obj)
 		!pLevel->getBehaviour()->checkForCollisionAddiction(this, obj))
 		return;
 
-	this->health -= obj->getDamage();
+	this->setHealth(this->health - obj->getDamage());
 	obj->setHealth(obj->getHealth() - this->damage);
-
-	if (healthChanged)
-		healthChanged(this->health, this->initialHealth);
 }
 
 void GameObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -239,6 +257,9 @@ void GameObject::setDamage(float damage)
 void GameObject::setHealth(float hp)
 {
 	health = hp;
+
+	if (healthChanged)
+		healthChanged(this->health, this->initialHealth);
 }
 
 void GameObject::setInitialHealth(float hp)
@@ -276,6 +297,11 @@ void GameObject::setControlVelocityByRotation(bool control)
 GameLevel* GameObject::getLevel()
 {
 	return pLevel;
+}
+
+glm::mat4 GameObject::getModel()
+{
+	return model;
 }
 
 int GameObject::getObjectType()

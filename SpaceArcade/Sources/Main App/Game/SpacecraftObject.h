@@ -16,7 +16,7 @@ public:
 	virtual GameObject* clone();
 	virtual void cloneParams(GameObject* obj);
 
-	virtual void Draw();
+	virtual void draw(bool useInstanced = false, int amount = 0);
 	virtual void update(float delta);
 
 	virtual void handleInput(GLFWwindow *window, float delta);

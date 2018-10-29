@@ -103,11 +103,11 @@ void SpacecraftObject::update(float delta)
 	}
 }
 
-void SpacecraftObject::Draw()
+void SpacecraftObject::draw(bool useInstanced, int amount)
 {
 	for (int i = 0; i < laser_rays.size(); ++i)
-		laser_rays[i]->Draw();
-	GameObject::Draw();
+		laser_rays[i]->draw(useInstanced, amount);
+	GameObject::draw(useInstanced, amount);
 }
 
 void SpacecraftObject::resize()

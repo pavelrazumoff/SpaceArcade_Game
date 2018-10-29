@@ -369,6 +369,7 @@ void MainApp::initScene()
 	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
 	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
 
+	pSpaceCraft->setObjectType(ObjectTypes::SpaceCraft);
 	pSpaceCraft->init(&base_level, glm::vec2(screenWidth / 2 - 31, screenHeight - 200), glm::vec2(62, 57), res_manager.GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
 	pSpaceCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
 	pSpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
@@ -376,10 +377,10 @@ void MainApp::initScene()
 	pSpaceCraft->setEnergyChangedCallback(energyBarChanged);
 	pSpaceCraft->setNonPlayerObject(false);
 
-	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -500.0f), false);
 	
-	for (int i = 0; i < 30; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
 		GameObject* asteroid = new GameObject();
 		asteroid->setHealth(20.0f);
@@ -390,8 +391,9 @@ void MainApp::initScene()
 		asteroid->setUsePhysics(true);
 		asteroid->setObjectType(ObjectTypes::Meteorite);
 
-		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (screenHeight / 6 + 350 + 1) - 350),
-			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (30 - 10 + 1) + 10));
+		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (0 + 3000 + 1) - 3000),
+			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (300 - 100 + 1) + 100));
+
 		asteroid->InitialRotation = rand() % 360;
 		asteroid->Rotation = 10.0f;
 	}
@@ -407,10 +409,11 @@ void MainApp::initScene()
 	enemySpaceCraft->setExplosionSprite(res_manager.GetTexture("explosion"));
 	enemySpaceCraft->setAIController(spacecraftAI);
 	enemySpaceCraft->setControlVelocityByRotation(true);
+	enemySpaceCraft->setObjectType(ObjectTypes::SpaceCraft);
 
 	pLaserRay = enemySpaceCraft->getLaserRay();
-	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -500.0f), false);
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -500.0f), false);
 
 	base_level.startLevel();
 }

@@ -96,6 +96,8 @@ void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec
 
 	this->shader.setMat4("model", model);
 
+	this->shader.setBool("useInstances", false);
+
 	if (texture)
 	{
 		glActiveTexture(GL_TEXTURE0);
@@ -104,6 +106,58 @@ void SpriteRenderer::DrawSprite(Texture2D* texture, glm::vec2 position, glm::vec
 
 	glBindVertexArray(this->quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+
+	glBlendFunc(GL_SRC_ALPHA, prevBlendFunc);
+	glDisable(GL_BLEND);
+}
+
+void SpriteRenderer::DrawSprite(Texture2D* texture, glm::mat4 model, glm::vec4 color, int frame)
+{
+	// Prepare transformations
+	this->shader.use();
+
+	GLint prevBlendFunc;
+	glGetIntegerv(GL_BLEND_SRC_ALPHA, &prevBlendFunc);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(this->screenWidth), static_cast<GLfloat>(this->screenHeight), 0.0f, -1.0f, 1.0f);
+
+	if (texture)
+		this->shader.setBool("useImage", true);
+	else
+		this->shader.setBool("useImage", false);
+
+	this->shader.setInt("image", 0);
+	this->shader.setMat4("projection", projection);
+	this->shader.setVec4("background_color", color);
+
+	this->shader.setInt("frame", frame);
+
+	if (texture)
+	{
+		this->shader.setInt("numOfColumns", texture->numOfColumns);
+		this->shader.setInt("numOfRows", texture->numOfRows);
+	}
+
+	this->shader.setMat4("model", model);
+
+	this->shader.setBool("useInstances", useInstanced);
+
+	if (texture)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		texture->BindTexture();
+	}
+
+	glBindVertexArray(this->quadVAO);
+
+	if (useInstanced)
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, amountInstances);
+	else
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 
 	glBlendFunc(GL_SRC_ALPHA, prevBlendFunc);
@@ -138,7 +192,24 @@ void SpriteRenderer::initRenderData()
 	glBindVertexArray(0);
 }
 
+void SpriteRenderer::setUseInstanced(bool useInstanced, int amount)
+{
+	this->useInstanced = useInstanced;
+	this->amountInstances = amount;
+}
+
+void SpriteRenderer::dropInstanced()
+{
+	this->useInstanced = false;
+	this->amountInstances = 0;
+}
+
 Shader* SpriteRenderer::getShader()
 {
 	return &shader;
+}
+
+GLuint SpriteRenderer::getVAO()
+{
+	return quadVAO;
 }

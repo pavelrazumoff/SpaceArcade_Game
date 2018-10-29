@@ -11,10 +11,22 @@ void GameLevel::init(Texture2D* cubemap, Shader cubemapShader, SpriteRenderer* r
 	this->backgroundCubemap = cubemap;
 	this->cubemapShader = cubemapShader;
 	this->renderer = renderer;
+
+	QTRectangle rect;
+	rect.x = 0.0f;
+	rect.y = 0.0f;
+	rect.Width = renderer->getCurrentScreenDimensions().x;
+	rect.Height = renderer->getCurrentScreenDimensions().y;
+
+	quadTree = new QuadTree(0, rect);
 }
 
 void GameLevel::startLevel()
 {
+	setUseInstancing(ObjectTypes::Meteorite, true);
+	setUseInstancing(ObjectTypes::LaserRay, false);
+	setUseInstancing(ObjectTypes::SpaceCraft, false);
+
 	if (behaviour)
 		behaviour->startBehaviour();
 
@@ -31,6 +43,52 @@ void GameLevel::update(float delta)
 			objects[i]->update(delta);
 
 	doCollisions();
+	
+	// here we sort all of our visible objects on the arrays of instances (one object look, that'll be draw many times),
+	// same type of instanced but have different look (explosions) and basic non-instanced objects.
+	updateInstances();
+}
+
+void GameLevel::updateInstances()
+{
+	glm::vec2 screenDimensions = renderer->getCurrentScreenDimensions();
+
+	// clear previous arrays.
+	instancedObjects.clear();
+	normalObjects.clear();
+
+	// go through all of object types and corresponding objects on the whole level.
+	for (auto it = typeObjects.begin(); it != typeObjects.end(); ++it)
+	{
+		// if this object type uses instancing.
+		if (useInstancing[it->first])
+		{
+			// go through all objects if this type and check, if every object is appropriate for rendering.
+			for (int i = 0; i < it->second.size(); ++i)
+				if (!it->second[i]->getParentObject() && !it->second[i]->isHiddenFromLevel() && !it->second[i]->isOffTheScreen(screenDimensions))
+				{
+					// if this object is not explosing yet, put it to the instanced array,
+					// else put to the normals.
+					if (it->second[i]->getHealth() > 0.0f)
+						instancedObjects[it->first].push_back(it->second[i]);
+					else
+						normalObjects[it->first].push_back(it->second[i]);
+				}
+
+			// get size of instanced objects of this type.
+			int renderSize = instancedObjects[it->first].size();
+			if (renderSize > 0)
+			{
+				// fill model matrices array to be able to render this type of object many times with one draw call.
+				glm::mat4* modelMatrices = new glm::mat4[renderSize];
+
+				for (int i = 0; i < renderSize; ++i)
+					modelMatrices[i] = instancedObjects[it->first][i]->getModel();
+
+				setInstancesTransforms(it->first, modelMatrices, renderSize);
+			}
+		}
+	}
 }
 
 void GameLevel::draw()
@@ -55,11 +113,38 @@ void GameLevel::draw()
 
 	glDisable(GL_DEPTH_TEST);
 
+	glm::vec2 screenDimensions = renderer->getCurrentScreenDimensions();
+
 	// draw only those objects, whose parents are NULL.
 	// other objects will be drawn inside those draw calls (such as laser rays of spacecraft).
-	for (int i = 0; i < objects.size(); ++i)
-		if (!objects[i]->getParentObject() && !objects[i]->isHiddenFromLevel())
-			objects[i]->Draw();
+	//for (int i = 0; i < objects.size(); ++i)
+	//	if (!objects[i]->getParentObject() && !objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions))
+	//		objects[i]->Draw();
+	
+	// first we have to draw all instanced objects (one draw call for every type).
+	for (auto it = instancedObjects.begin(); it != instancedObjects.end(); ++it)
+	{
+		if(it->second.size() > 0)
+			it->second[0]->draw(true, it->second.size());
+	}
+
+	// second draw all normal objects as usual.
+	for (auto it = normalObjects.begin(); it != normalObjects.end(); ++it)
+	{
+		for (int i = 0; i < it->second.size(); ++i)
+			it->second[i]->draw();
+	}
+	
+	// at last draw non-instanced objects as usual.
+	for (auto it = typeObjects.begin(); it != typeObjects.end(); ++it)
+	{
+		if (!useInstancing[it->first])
+		{
+			for (int i = 0; i < it->second.size(); ++i)
+				if (!it->second[i]->getParentObject() && !it->second[i]->isHiddenFromLevel() && !it->second[i]->isOffTheScreen(screenDimensions))
+					it->second[i]->draw();
+		}
+	}
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -96,22 +181,68 @@ void GameLevel::processKey(int key, int action, bool* key_pressed)
 
 void GameLevel::doCollisions()
 {
+	glm::vec2 screenDimensions = renderer->getCurrentScreenDimensions();
+
+	QTRectangle rect;
+	rect.x = 0.0f;
+	rect.y = 0.0f;
+	rect.Width = screenDimensions.x;
+	rect.Height = screenDimensions.y;
+
+	quadTree->reset(rect);
+
+	//Insert all the objects's rects in the QuadTree algorithm.
+	for (int i = 0; i < objects.size(); i++)
+	{
+		if (objects[i]->isDamagingObject() && objects[i]->getHealth() > 0.0f &&
+			!objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions))
+		{
+			rect.x = objects[i]->Position.x;
+			rect.y = objects[i]->Position.y;
+			rect.Width = objects[i]->Size.x;
+			rect.Height = objects[i]->Size.y;
+			rect.object_index = i;
+
+			quadTree->insert(rect);
+		}
+	}
+
+	std::vector<QTRectangle> returnObjects;
+	
 	for (int i = 0; i < objects.size(); ++i)
 	{
-		for (int j = i + 1; j < objects.size(); ++j)
+		if (objects[i]->isDamagingObject() && objects[i]->getHealth() > 0.0f &&
+			!objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions))
 		{
-			// check if two objects can do damage (exclude cases when damaging object collides with stars for example)
-			// and also check collision for two objects.
-			if (objects[i]->isDamagingObject() && objects[j]->isDamagingObject() &&
-				objects[i]->getHealth() > 0.0f && objects[j]->getHealth() > 0.0f && 
-				!objects[i]->isHiddenFromLevel() && !objects[j]->isHiddenFromLevel())
+			QTRectangle rect;
+			rect.x = objects[i]->Position.x;
+			rect.y = objects[i]->Position.y;
+			rect.Width = objects[i]->Size.x;
+			rect.Height = objects[i]->Size.y;
+			rect.object_index = i;
+
+			returnObjects.clear();
+			quadTree->retrieve(returnObjects, rect);
+
+			for (int j = 0; j < returnObjects.size(); ++j)
 			{
-				glm::vec2 diff;
-				if (objects[i]->checkCollision(objects[j], diff))
+				int currentIndex = returnObjects[j].object_index;
+
+				if (objects[i] == objects[currentIndex])
+					continue;
+
+				// check if two objects can do damage (exclude cases when damaging object collides with stars for example)
+				// and also check collision for two objects.
+				if (objects[currentIndex]->isDamagingObject() && objects[currentIndex]->getHealth() > 0.0f &&
+					!objects[currentIndex]->isHiddenFromLevel() && !objects[currentIndex]->isOffTheScreen(screenDimensions))
 				{
-					objects[i]->makeCollision(objects[j]);
-					objects[i]->makeReaction(diff, objects[j], true);
-					objects[j]->makeReaction(diff, objects[i], false);
+					glm::vec2 diff;
+					if (objects[i]->checkCollision(objects[currentIndex], diff))
+					{
+						objects[i]->makeCollision(objects[currentIndex]);
+						objects[i]->makeReaction(diff, objects[currentIndex], true);
+						objects[currentIndex]->makeReaction(diff, objects[i], false);
+					}
 				}
 			}
 		}
@@ -137,6 +268,8 @@ void GameLevel::doCollisions()
 void GameLevel::addNewObject(GameObject* obj)
 {
 	objects.push_back(obj);
+	typeObjects[obj->getObjectType()].push_back(obj);
+	objectsMatrices[obj->getObjectType()] = NULL;
 }
 
 void GameLevel::removeObject(GameObject* obj)
@@ -146,6 +279,14 @@ void GameLevel::removeObject(GameObject* obj)
 	it = find(objects.begin(), objects.end(), obj);
 	if (it != objects.end())
 		objects.erase(it);
+
+	auto it2 = typeObjects.find(obj->getObjectType());
+	if (it2 != typeObjects.end())
+	{
+		auto it3 = find(it2->second.begin(), it2->second.end(), obj);
+		if (it3 != it2->second.end())
+			it2->second.erase(it3);
+	}
 }
 
 void GameLevel::setBehaviour(LevelBehaviour* behaviour)
@@ -161,6 +302,58 @@ void GameLevel::setScreenIndents(glm::vec4 indents)
 void GameLevel::setPlayerRestrictionHeight(float height)
 {
 	playerRestrictionHeight = height;
+}
+
+void GameLevel::setUseInstancing(int object_type, bool use)
+{
+	useInstancing[object_type] = use;
+}
+
+void GameLevel::setInstancesTransforms(int object_type, glm::mat4* transforms, int size)
+{
+	// here we update renderer vertex array to support instancing.
+
+	// clear previous matrices array.
+	if (objectsMatrices[object_type])
+	{
+		delete objectsMatrices[object_type];
+		objectsMatrices[object_type] = NULL;
+	}
+
+	// if there is no current type in types array or there is no objects of this type, return.
+	auto it = typeObjects.find(object_type);
+	if (it == typeObjects.end() || it->second.size() == 0)
+		return;
+
+	objectsMatrices[object_type] = transforms;
+
+	// configure instanced array
+	// -------------------------
+	unsigned int buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, size * sizeof(glm::mat4), &transforms[0], GL_STATIC_DRAW);
+
+	glBindVertexArray(renderer->getVAO());
+
+	// set attribute pointers for matrix (4 times vec4)
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+	glVertexAttribDivisor(1, 1);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+
+	glBindVertexArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 LevelBehaviour* GameLevel::getBehaviour()
@@ -229,6 +422,23 @@ SpriteRenderer* GameLevel::getRenderer()
 
 void GameLevel::clear()
 {
+	if (quadTree)
+	{
+		quadTree->clear();
+		delete quadTree;
+		quadTree = NULL;
+	}
+
+	for (auto it = typeObjects.begin(); it != typeObjects.end(); ++it)
+		if(useInstancing[it->first])
+		{
+			if (objectsMatrices[it->first])
+			{
+				delete objectsMatrices[it->first];
+				objectsMatrices[it->first] = NULL;
+			}
+		}
+
 	for (int i = 0; i < objects.size(); ++i)
 		if (!objects[i]->getParentObject())
 			delete objects[i];

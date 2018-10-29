@@ -137,6 +137,7 @@
     <ClInclude Include="Sources\Main App\MainApp.h" />
     <ClInclude Include="Sources\Main App\MainData.h" />
     <ClInclude Include="Sources\Miscellaneous\Camera.h" />
+    <ClInclude Include="Sources\Miscellaneous\QuadTree.h" />
     <ClInclude Include="Sources\Miscellaneous\ResourceManager.h" />
     <ClInclude Include="Sources\Miscellaneous\SpriteRenderer.h" />
     <ClInclude Include="Sources\Miscellaneous\Texture.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Sources\Main App\LoadData.cpp" />
     <ClCompile Include="Sources\Main App\MainApp.cpp" />
     <ClCompile Include="Sources\Miscellaneous\Camera.cpp" />
+    <ClCompile Include="Sources\Miscellaneous\QuadTree.cpp" />
     <ClCompile Include="Sources\Miscellaneous\ResourceManager.cpp" />
     <ClCompile Include="Sources\Miscellaneous\SpriteRenderer.cpp" />
     <ClCompile Include="Sources\Miscellaneous\Texture.cpp" />
