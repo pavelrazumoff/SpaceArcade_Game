@@ -132,7 +132,8 @@ void MainApp::resize(int width, int height)
 		for (int i = 0; i < it->second.size(); ++i)
 			it->second[i]->resize();
 
-	base_level.resize();
+	if(base_level.isStarted())
+		base_level.resize();
 }
 
 void MainApp::setFullscreenMode(bool fullscreen)
@@ -163,6 +164,11 @@ void MainApp::setFullscreenMode(bool fullscreen)
 		screenWidth = lastWndSize.x;
 		screenHeight = lastWndSize.y;
 	}
+}
+
+void MainApp::startGame()
+{
+	base_level.startLevel();
 }
 
 void MainApp::clearBuffers()

@@ -362,6 +362,8 @@ void MainApp::initScene()
 	base_level.init(res_manager.GetCubemap("BlueSpace"), res_manager.GetShader("Skybox"), &renderer);
 	base_level.setScreenIndents(glm::vec4(10, 10, 10, 10));
 	base_level.setPlayerRestrictionHeight(screenHeight / 2.5f);
+	base_level.setSoundEnginePointer(res_manager.getSoundEngine());
+	base_level.addSound("BackgroundSound", res_manager.getSoundPath("BackgroundSound"));
 
 	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(&base_level);
 	levelBehaviours.push_back(basicBehaviour);
@@ -378,7 +380,7 @@ void MainApp::initScene()
 	pSpaceCraft->setNonPlayerObject(false);
 
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
-	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -500.0f), false);
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -400.0f), false);
 	
 	for (int i = 0; i < 100; ++i)
 	{
@@ -390,9 +392,10 @@ void MainApp::initScene()
 		asteroid->setExplosionSprite(res_manager.GetTexture("explosion"));
 		asteroid->setUsePhysics(true);
 		asteroid->setObjectType(ObjectTypes::Meteorite);
+		//asteroid->hideFromLevel(true);
 
 		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (0 + 3000 + 1) - 3000),
-			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (300 - 100 + 1) + 100));
+			glm::vec2(46, 47), res_manager.GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (150 - 50 + 1) + 50));
 
 		asteroid->InitialRotation = rand() % 360;
 		asteroid->Rotation = 10.0f;
@@ -413,7 +416,45 @@ void MainApp::initScene()
 
 	pLaserRay = enemySpaceCraft->getLaserRay();
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
-	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -500.0f), false);
+	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f), false);
 
-	base_level.startLevel();
+	for (int i = 0; i < 10; ++i)
+	{
+		EnergyBarrierObject* barrier = new EnergyBarrierObject();
+		barrier->init(&base_level, glm::vec2(rand() % (screenWidth - 170 + 1) + 10, rand() % (0 + 1000 + 1) - 1000),
+			glm::vec2(131, 35), res_manager.GetTexture("energyBarrier"), glm::vec2(0.0f, 60.0f));
+		barrier->setAnimationDuration(0.5f);
+		barrier->hideFromLevel(true);
+
+		GameObject* generators[2];
+		std::string texes[] = { "leftGenerator", "rightGenerator" };
+		for (int j = 0; j < 2; ++j)
+		{
+			generators[j] = new GameObject();
+			generators[j]->setHealth(40.0f);
+			generators[j]->setInitialHealth(40.0f);
+			generators[j]->setDamage(10.0f);
+			generators[j]->setExplosionTime(1.0f);
+			generators[j]->setExplosionSprite(res_manager.GetTexture("explosion"));
+			generators[j]->setUsePhysics(true);
+			generators[j]->setObjectType(ObjectTypes::Basic);
+
+			generators[j]->init(&base_level, glm::vec2(0.0f, 0.0f), glm::vec2(33, 32), res_manager.GetTexture(texes[j]), glm::vec2(0.0f, 0.0f));
+		}
+
+		barrier->setGenerators(generators[0], generators[1]);
+
+		GameObject* electricShock = new GameObject();
+		electricShock->setDamage(0.1f);
+		electricShock->setHealth(1000.0f);
+		electricShock->setUsePhysics(false);
+		electricShock->setObjectType(ObjectTypes::ElectricShock);
+		electricShock->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(96, 84), res_manager.GetTexture("electricShock"), glm::vec2(0.0f, 0.0f));
+		electricShock->RelativePosition = glm::vec2(0.0f, 0.0f);
+		electricShock->setAnimationDuration(0.5f);
+		electricShock->setUseAnimation(true);
+		electricShock->setSelfDestroyTime(1.5f);
+
+		barrier->setElectricShock(electricShock);
+	}
 }

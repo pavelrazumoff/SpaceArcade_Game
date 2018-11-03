@@ -21,6 +21,28 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//laser_rayEnemy.png", "laserRayRed", useGammaCorrection, &gameObjectsParams);
 	res_manager.LoadTexture("Images//asteroid.png", "asteroid", useGammaCorrection, &gameObjectsParams);
 	res_manager.LoadTexture("Images//explosion.png", "explosion", useGammaCorrection);
+	res_manager.LoadTexture("Images//energy_barrier.png", "energyBarrier", useGammaCorrection);
+	res_manager.LoadTexture("Images//generatorLeft.png", "leftGenerator", useGammaCorrection);
+	res_manager.LoadTexture("Images//generatorRight.png", "rightGenerator", useGammaCorrection);
+	res_manager.LoadTexture("Images//electric_shock.png", "electricShock", useGammaCorrection);
+
+	Texture2D* tex = res_manager.GetTexture("explosion");
+	tex->numOfColumns = 8;
+	tex->numOfRows = 4;
+	tex->numOfFrames = 32;
+
+	tex = res_manager.GetTexture("energyBarrier");
+	tex->numOfColumns = 1;
+	tex->numOfRows = 6;
+	tex->numOfFrames = 6;
+
+	tex = res_manager.GetTexture("electricShock");
+	tex->numOfColumns = 5;
+	tex->numOfRows = 2;
+	tex->numOfFrames = 8;
+
+	// sounds.
+	res_manager.addSound("Sounds//sound1_0.mp3", "BackgroundSound");
 
 	// gui.
 	res_manager.LoadTexture("Images//Interface//playGameButton.png", "playGameButton", false);
@@ -50,11 +72,6 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//Interface//barFrame.png", "barFrame", false);
 	res_manager.LoadTexture("Images//Interface//healthCaption.png", "healthCaption", false);
 	res_manager.LoadTexture("Images//Interface//energyCaption.png", "energyCaption", false);
-
-	Texture2D* tex = res_manager.GetTexture("explosion");
-	tex->numOfColumns = 8;
-	tex->numOfRows = 4;
-	tex->numOfFrames = 32;
 
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");

@@ -33,8 +33,8 @@ SpacecraftObject::~SpacecraftObject()
 GameObject* SpacecraftObject::clone()
 {
 	SpacecraftObject* newObject = new SpacecraftObject(false);
-	newObject->init(this->pLevel, this->Position, this->Size, this->Sprite, this->Velocity);
 	this->cloneParams(newObject);
+	newObject->init(this->pLevel, this->Position, this->Size, this->Sprite, this->Velocity);
 
 	return newObject;
 }
@@ -134,6 +134,8 @@ void SpacecraftObject::resize()
 
 	for (int i = 0; i < laser_rays.size(); ++i)
 		laser_rays[i]->Position = glm::vec2(laser_rays[i]->Position.x * screenRatio.x, laser_rays[i]->Position.y * screenRatio.y);
+
+	laser_ray->resize();
 }
 
 void SpacecraftObject::handleInput(GLFWwindow *window, float delta)
@@ -180,6 +182,8 @@ void SpacecraftObject::processKey(int key, int action, bool* key_pressed)
 
 void SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 {
+	GameObject::notify(notifiedObject, code);
+
 	std::vector<GameObject*>::iterator it;
 
 	it = find(laser_rays.begin(), laser_rays.end(), notifiedObject);

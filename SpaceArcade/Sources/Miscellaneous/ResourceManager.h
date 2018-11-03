@@ -23,12 +23,17 @@ public:
 	Texture2D* LoadCubemap(std::vector<const GLchar*> faces, std::string name, bool gamma, TextureParams* texParams = NULL);
 	//Loads font.
 	void loadFont(std::string fontPath, std::string fontType, int fontSize);
+	// Adds sound path to the map.
+	void addSound(std::string soundPath, std::string soundName);
 
 	// Retrieves a stored sader
 	Shader GetShader(std::string name);
 	// Retrieves a stored texture
 	Texture2D* GetTexture(std::string name);
 	Texture2D* GetCubemap(std::string name);
+
+	ISoundEngine* getSoundEngine();
+	std::string getSoundPath(std::string name);
 	// Properly de-allocates all loaded resources
 	void clear();
 
@@ -37,7 +42,9 @@ public:
 	std::map<std::string, Texture2D*> Textures;
 	std::map<std::string, Texture2D*> Cubemaps;
 	std::map<std::string, std::map<GLchar, Character>> Fonts;
+	std::map<std::string, std::string> sounds;
 
 private:
 	FT_Library ft;
+	ISoundEngine *SoundEngine = NULL;
 };

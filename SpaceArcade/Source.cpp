@@ -93,6 +93,7 @@ void energyBarChanged(float usedEnergy, float maxEnergy)
 void showScene()
 {
 	app.currentPage = PageType::Game;
+	app.startGame();
 }
 
 void showSettings()

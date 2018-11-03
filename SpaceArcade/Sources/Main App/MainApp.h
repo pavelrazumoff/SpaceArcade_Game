@@ -94,6 +94,8 @@ public:
 
 	void setFullscreenMode(bool fullscreen);
 
+	void startGame();
+
 	GLFWwindow* getWindow();
 
 	Shader font_shader;

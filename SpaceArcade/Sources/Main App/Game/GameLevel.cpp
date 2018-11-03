@@ -26,11 +26,15 @@ void GameLevel::startLevel()
 	setUseInstancing(ObjectTypes::Meteorite, true);
 	setUseInstancing(ObjectTypes::LaserRay, false);
 	setUseInstancing(ObjectTypes::SpaceCraft, false);
+	setUseInstancing(ObjectTypes::Basic, false);
+	setUseInstancing(ObjectTypes::EnergyBarrier, false);
+
+	resize();
 
 	if (behaviour)
 		behaviour->startBehaviour();
 
-	resize();
+	wasStarted = true;
 }
 
 void GameLevel::update(float delta)
@@ -240,6 +244,8 @@ void GameLevel::doCollisions()
 					if (objects[i]->checkCollision(objects[currentIndex], diff))
 					{
 						objects[i]->makeCollision(objects[currentIndex]);
+						objects[currentIndex]->makeCollision(objects[i]);
+
 						objects[i]->makeReaction(diff, objects[currentIndex], true);
 						objects[currentIndex]->makeReaction(diff, objects[i], false);
 					}
@@ -286,7 +292,28 @@ void GameLevel::removeObject(GameObject* obj)
 		auto it3 = find(it2->second.begin(), it2->second.end(), obj);
 		if (it3 != it2->second.end())
 			it2->second.erase(it3);
+		else
+			std::cout << "Not Destroyed, type: " << obj->getObjectType() << "\n";
 	}
+}
+
+void GameLevel::addSound(std::string soundName, std::string soundPath)
+{
+	soundNames[soundName] = soundPath;
+}
+
+void GameLevel::playSound(std::string soundName, bool loop)
+{
+	auto it = soundNames.find(soundName);
+	if (it != soundNames.end())
+		sounds[soundName] = pSoundEngine->play2D(soundNames[soundName].c_str(), loop);
+}
+
+void GameLevel::stopSound(std::string soundName)
+{
+	auto it = sounds.find(soundName);
+	if (it != sounds.end())
+		it->second->drop();
 }
 
 void GameLevel::setBehaviour(LevelBehaviour* behaviour)
@@ -356,6 +383,11 @@ void GameLevel::setInstancesTransforms(int object_type, glm::mat4* transforms, i
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void GameLevel::setSoundEnginePointer(ISoundEngine* soundEngine)
+{
+	pSoundEngine = soundEngine;
+}
+
 LevelBehaviour* GameLevel::getBehaviour()
 {
 	return behaviour;
@@ -418,6 +450,11 @@ float GameLevel::getPlayerRestrictionHeight()
 SpriteRenderer* GameLevel::getRenderer()
 {
 	return renderer;
+}
+
+bool GameLevel::isStarted()
+{
+	return wasStarted;
 }
 
 void GameLevel::clear()

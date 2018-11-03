@@ -10,6 +10,9 @@ void ResourceManager::init()
 	// Initialize FreeType library.
 	if (FT_Init_FreeType(&ft))
 		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+
+	// Initialize irrKlang Sound library.
+	SoundEngine = createIrrKlangDevice();
 }
 
 Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, std::string name)
@@ -92,6 +95,11 @@ void ResourceManager::loadFont(std::string fontPath, std::string fontType, int f
 	FT_Done_Face(face);
 }
 
+void ResourceManager::addSound(std::string soundPath, std::string soundName)
+{
+	sounds[soundName] = soundPath;
+}
+
 Shader ResourceManager::GetShader(std::string name)
 {
 	return Shaders[name];
@@ -105,6 +113,19 @@ Texture2D* ResourceManager::GetTexture(std::string name)
 Texture2D* ResourceManager::GetCubemap(std::string name)
 {
 	return Cubemaps[name];
+}
+
+ISoundEngine* ResourceManager::getSoundEngine()
+{
+	return SoundEngine;
+}
+
+std::string ResourceManager::getSoundPath(std::string name)
+{
+	auto it = sounds.find(name);
+	if (it != sounds.end())
+		return it->second;
+	return "";
 }
 
 void ResourceManager::clear()
@@ -125,4 +146,6 @@ void ResourceManager::clear()
 	}
 
 	FT_Done_FreeType(ft);
+
+	SoundEngine->drop();
 }

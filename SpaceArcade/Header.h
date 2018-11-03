@@ -20,6 +20,9 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <irrKlang.h>
+using namespace irrklang;
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>

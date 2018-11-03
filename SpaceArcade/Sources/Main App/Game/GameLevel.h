@@ -1,5 +1,6 @@
 #pragma once
 #include "SpacecraftObject.h"
+#include "EnergyBarrierObject.h"
 #include "../../Miscellaneous/QuadTree.h"
 
 class LevelBehaviour;
@@ -29,11 +30,16 @@ public:
 	void									addNewObject(GameObject* obj);
 	void									removeObject(GameObject* obj);
 
+	void									addSound(std::string soundName, std::string soundPath);
+	void									playSound(std::string soundName, bool loop);
+	void									stopSound(std::string soundName);
+
 	void									setBehaviour(LevelBehaviour* behaviour);
 	void									setScreenIndents(glm::vec4 indents);
 	void									setPlayerRestrictionHeight(float height);
 	void									setUseInstancing(int object_type, bool use);
 	void									setInstancesTransforms(int object_type, glm::mat4* transforms, int size);
+	void									setSoundEnginePointer(ISoundEngine* soundEngine);
 
 	LevelBehaviour*							getBehaviour();
 
@@ -47,6 +53,8 @@ public:
 	float									getPlayerRestrictionHeight();
 
 	SpriteRenderer*							getRenderer();
+
+	bool									isStarted();
 
 private:
 	std::vector<GameObject*>				objects;
@@ -67,4 +75,10 @@ private:
 
 	std::map<int, glm::mat4*>				objectsMatrices;
 	std::map<int, bool>						useInstancing;
+
+	ISoundEngine*							pSoundEngine = NULL;
+	std::map<std::string, std::string>		soundNames;
+	std::map<std::string, ISound*>			sounds;
+
+	bool									wasStarted = false;
 };

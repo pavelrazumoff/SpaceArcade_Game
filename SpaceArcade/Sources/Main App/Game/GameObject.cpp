@@ -31,6 +31,7 @@ GameObject* GameObject::clone()
 
 void GameObject::cloneParams(GameObject* obj)
 {
+	obj->RelativePosition = this->RelativePosition;
 	obj->InitialRotation = this->InitialRotation;
 	obj->Rotation = this->Rotation;
 	obj->setObjectType(this->getObjectType());
@@ -41,21 +42,27 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->setParentObject(this->getParentObject());
 	obj->setExplosionTime(this->explosionTime);
 	obj->setExplosionSprite(this->ExplosionSprite);
+	obj->setSelfDestroyTime(this->selfDestroyTime);
+	obj->startSelfDestroying(this->selfDestroying);
 	obj->setNonPlayerObject(this->nonPlayerObject);
 	obj->setUsePhysics(this->isUsePhysics());
 	obj->setAIController(this->getAIController());
 	obj->setControlVelocityByRotation(this->isControlVelocityByRotation());
+	obj->setUseAnimation(this->isUseAnimation());
+	obj->setAnimationDuration(this->getAnimationDuration());
+	obj->setDamageAsAttachment(this->isDamageAsAttachment());
 }
 
 void GameObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity, bool addToLevel)
 {
 	this->Position = pos;
 	this->Size = size;
-	this->Sprite = sprite;
 	this->Velocity = velocity;
 	this->pLevel = level;
 
-	if(addToLevel)
+	this->setSprite(sprite);
+
+	if(addToLevel && level)
 		level->addNewObject(this);
 }
 
@@ -67,6 +74,8 @@ void GameObject::update(float delta)
 		{
 			explosionTime -= delta;
 			currentExplosionFrame = ExplosionSprite->numOfFrames - explosionTime / explosionTimeStep;
+			if (currentExplosionFrame >= ExplosionSprite->numOfFrames)
+				currentExplosionFrame = ExplosionSprite->numOfFrames - 1;
 		}
 		if (explosionTime <= 0.0f)
 			readyForDeath = true;
@@ -74,6 +83,26 @@ void GameObject::update(float delta)
 
 	if (health > 0.0f)
 	{
+		if (useAnimation)
+		{
+			if (animationTime > 0.0f)
+			{
+				animationTime -= delta;
+				currentAnimationFrame = Sprite->numOfFrames - animationTime / animationTimeStep;
+				if(currentAnimationFrame >= Sprite->numOfFrames)
+					currentAnimationFrame = Sprite->numOfFrames - 1;
+			}
+			else
+				animationTime = animationDuration;
+		}
+
+		if (selfDestroying)
+		{
+			selfDestroyTime -= delta;
+			if (selfDestroyTime <= 0.0f)
+				setHealth(0.0f);
+		}
+
 		InitialRotation += Rotation * delta;
 
 		glm::vec2 currentVelocity = Velocity;
@@ -112,6 +141,12 @@ void GameObject::update(float delta)
 
 	// update model (world) matrix after all calculations.
 	updateModelMatrix();
+
+	for (int i = 0; i < attachedObjects.size(); ++i)
+	{
+		attachedObjects[i]->Position = this->Position + attachedObjects[i]->RelativePosition;
+		attachedObjects[i]->update(delta);
+	}
 }
 
 void GameObject::updateModelMatrix()
@@ -132,10 +167,13 @@ void GameObject::draw(bool useInstanced, int amount)
 	pLevel->getRenderer()->setUseInstanced(useInstanced, amount);
 
 	if(visible && health > 0.0f)
-		pLevel->getRenderer()->DrawSprite(this->Sprite, this->model, glm::vec4(0.0f));
+		pLevel->getRenderer()->DrawSprite(this->Sprite, this->model, glm::vec4(0.0f), currentAnimationFrame);
 	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
 		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->model, glm::vec4(0.0f), currentExplosionFrame);
 
+	for (int i = 0; i < attachedObjects.size(); ++i)
+		attachedObjects[i]->draw(useInstanced, amount);
+	
 	// drop renderer from drawing instances.
 	pLevel->getRenderer()->dropInstanced();
 }
@@ -145,6 +183,10 @@ void GameObject::resize()
 	glm::vec2 screenRatio = pLevel->getRenderer()->getScreenRatio();
 
 	Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
+	Velocity = glm::vec2(Velocity.x * screenRatio.x, Velocity.y * screenRatio.y);
+
+	for (int i = 0; i < attachedObjects.size(); ++i)
+		attachedObjects[i]->resize();
 }
 
 void GameObject::handleInput(GLFWwindow *window, float delta)
@@ -158,7 +200,18 @@ void GameObject::processKey(int key, int action, bool* key_pressed)
 bool GameObject::checkCollision(GameObject* obj, glm::vec2& difference)
 {
 	if (this->parentObject == obj || obj->getParentObject() == this)
-		return false;
+	{
+		bool attachedFirst = this->isObjectAttachedTo(obj);
+		bool attachedSecond = obj->isObjectAttachedTo(this);
+
+		if (attachedFirst && !obj->isDamageAsAttachment())
+			return false;
+		if(attachedSecond && !this->isDamageAsAttachment())
+			return false;
+
+		if (!attachedFirst && !attachedSecond)
+			return false;
+	}
 
 	// Collision x-axis?
 	bool collisionX = this->Position.x + this->Size.x >= obj->Position.x &&
@@ -182,7 +235,6 @@ void GameObject::makeCollision(GameObject* obj)
 		!pLevel->getBehaviour()->checkForCollisionAddiction(this, obj))
 		return;
 
-	this->setHealth(this->health - obj->getDamage());
 	obj->setHealth(obj->getHealth() - this->damage);
 }
 
@@ -193,6 +245,43 @@ void GameObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool c
 		readyForDeath = true;
 		return;
 	}
+}
+
+void GameObject::attachNewObject(GameObject* obj)
+{
+	auto it = find(attachedObjects.begin(), attachedObjects.end(), obj);
+	if (it == attachedObjects.end())
+	{
+		attachedObjects.push_back(obj);
+		obj->setParentObject(this);
+	}
+}
+
+void GameObject::removeAttachedObject(GameObject* obj)
+{
+	auto it = find(attachedObjects.begin(), attachedObjects.end(), obj);
+	if (it != attachedObjects.end())
+		attachedObjects.erase(it);
+}
+
+int GameObject::getAttachedObjectsSize()
+{
+	return attachedObjects.size();
+}
+
+GameObject* GameObject::getAttachedObjectByIndex(int index)
+{
+	if (index < 0 || index >= attachedObjects.size())
+		return NULL;
+	return attachedObjects[index];
+}
+
+bool GameObject::isObjectAttachedTo(GameObject* obj)
+{
+	auto it = find(attachedObjects.begin(), attachedObjects.end(), obj);
+	if (it != attachedObjects.end())
+		return true;
+	return false;
 }
 
 bool GameObject::isOffTheScreen(glm::vec2 screenDimensions)
@@ -215,6 +304,22 @@ GameObject* GameObject::getParentObject()
 
 void GameObject::notify(GameObject* notifiedObject, NotifyCode code)
 {
+	auto it = find(attachedObjects.begin(), attachedObjects.end(), notifiedObject);
+	if (it == attachedObjects.end())
+		return;
+
+	switch (code)
+	{
+	case Destroyed:
+	{
+		pLevel->removeObject(notifiedObject);
+		attachedObjects.erase(it);
+		delete notifiedObject;
+	}
+	break;
+	default:
+		break;
+	}
 }
 
 void GameObject::setExplosionSprite(Texture2D* sprite)
@@ -229,9 +334,23 @@ void GameObject::setHealthChangedCallback(void(*actionCallback)(float, float))
 	healthChanged = actionCallback;
 }
 
+void GameObject::setLevel(GameLevel* level)
+{
+	pLevel = level;
+	if(level)
+		pLevel->addNewObject(this);
+}
+
 void GameObject::setObjectType(int type)
 {
 	objectType = type;
+}
+
+void GameObject::setSprite(Texture2D* sprite)
+{
+	Sprite = sprite;
+	if (Sprite)
+		animationTimeStep = animationDuration / Sprite->numOfFrames;
 }
 
 void GameObject::setVisible(bool visible)
@@ -267,9 +386,24 @@ void GameObject::setInitialHealth(float hp)
 	initialHealth = hp;
 }
 
+void GameObject::setReadyForDeath(bool ready)
+{
+	readyForDeath = ready;
+}
+
 void GameObject::setExplosionTime(float time)
 {
 	explosionTime = time;
+}
+
+void GameObject::setSelfDestroyTime(float time)
+{
+	selfDestroyTime = time;
+}
+
+void GameObject::startSelfDestroying(bool start)
+{
+	selfDestroying = start;
 }
 
 void GameObject::setNonPlayerObject(bool nonPlayer)
@@ -292,6 +426,25 @@ void GameObject::setAIController(AIController* controller)
 void GameObject::setControlVelocityByRotation(bool control)
 {
 	controlVelocityByRot = control;
+}
+
+void GameObject::setDamageAsAttachment(bool damage)
+{
+	damageAsAttachment = damage;
+}
+
+void GameObject::setUseAnimation(bool animation)
+{
+	useAnimation = animation;
+}
+
+void GameObject::setAnimationDuration(float duration)
+{
+	animationDuration = duration;
+	animationTime = duration;
+
+	if (Sprite)
+		animationTimeStep = animationDuration / Sprite->numOfFrames;
 }
 
 GameLevel* GameObject::getLevel()
@@ -369,7 +522,28 @@ bool GameObject::isControlVelocityByRotation()
 	return controlVelocityByRot;
 }
 
+bool GameObject::isDamageAsAttachment()
+{
+	return damageAsAttachment;
+}
+
+bool GameObject::isUseAnimation()
+{
+	return useAnimation;
+}
+
+float GameObject::getAnimationDuration()
+{
+	return animationDuration;
+}
+
 void GameObject::clear()
 {
-	
+	for (int i = 0; i < attachedObjects.size(); ++i)
+	{
+		attachedObjects[i]->setParentObject(NULL);
+		attachedObjects[i]->setReadyForDeath(true);
+	}
+
+	attachedObjects.clear();
 }

@@ -19,11 +19,13 @@ StartLevelBehaviour::~StartLevelBehaviour()
 void StartLevelBehaviour::init()
 {
 	levelMode = StartLevelMode::Introducing;
+	// block user input from beginning of the level.
 	blockUserInput();
 }
 
 void StartLevelBehaviour::startBehaviour()
 {
+	// get all ai controlled spacecrafts and hide them.
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
 	{
 		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
@@ -32,16 +34,21 @@ void StartLevelBehaviour::startBehaviour()
 		// hide all ai controlled objects to start level with basic obstacles.
 		if (spacecraft->getAIController())
 			spacecraft->hideFromLevel(true);
+
+		// if this spacecraft is player controlled, save it and position it a little below the screen.
 		if (!spacecraft->isNonPlayerObject())
 		{
 			playerCraft = dynamic_cast<SpacecraftObject*>(spacecraft);
 			playerCraft->Position = glm::vec2(screenDimensions.x / 2 - playerCraft->Size.x / 2, screenDimensions.y + 50);
 		}
 	}
+
+	pLevel->playSound("BackgroundSound", true);
 }
 
 void StartLevelBehaviour::update(float delta)
 {
+	// handle only one mode in time.
 	switch (levelMode)
 	{
 	case StartLevelMode::Introducing:
@@ -56,6 +63,9 @@ void StartLevelBehaviour::update(float delta)
 	case StartLevelMode::SpaceCraftEnemyFighting:
 		updateSpaceCraftFightMode(delta);
 		break;
+	case StartLevelMode::EnergyBarriersShowing:
+		updateEnergyBarriersShowMode(delta);
+		break;
 	default:
 		break;
 	}
@@ -63,12 +73,14 @@ void StartLevelBehaviour::update(float delta)
 
 void StartLevelBehaviour::updateIntroduceMode(float delta)
 {
+	// In this mode we have to raise playerCraft object on the screen from below.
 	if (!playerCraft)
 		return;
 
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
+	// if playerCraft is not on specefied position, set it's velocity to force it to lift up.
 	if (playerCraft->Position.y > (screenDimensions.y - pLevel->getPlayerRestrictionHeight() / 2))
 	{
 		playerCraft->Velocity.y = -80.0f * screenRatio.y;
@@ -76,6 +88,8 @@ void StartLevelBehaviour::updateIntroduceMode(float delta)
 	}
 	else
 	{
+		// if playerCraft is on the position, reset it's velocity, enable physics,
+		// unblock user input and change level mode to the next.
 		playerCraft->Velocity.y = 0.0f;
 		playerCraft->setUsePhysics(true);
 		levelMode = StartLevelMode::MeteorFighting;
@@ -85,6 +99,7 @@ void StartLevelBehaviour::updateIntroduceMode(float delta)
 
 void StartLevelBehaviour::updateMeteorMode(float delta)
 {
+	// In this mode we have to check, if all meteorites was destroyed or gone behind sreen dimensions (not above the screen).
 	int numOfMeteorites = pLevel->getObjectsSizeByType(ObjectTypes::Meteorite);
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 
@@ -97,12 +112,15 @@ void StartLevelBehaviour::updateMeteorMode(float delta)
 
 			if (spacecraft->getAIController())
 			{
+				// show ai controlled spacecraft and position it a little above the screen.
 				spacecraft->hideFromLevel(false);
 				spacecraft->Position = glm::vec2(screenDimensions.x / 2 - spacecraft->Size.x / 2, -100);
+				// also block it's ai for a little time to be able to properly introduce this object on scene.
 				spacecraft->getAIController()->BlockAI();
 			}
 		}
 
+		// change to the next level mode.
 		levelMode = StartLevelMode::SpaceCraftEnemyIntroducing;
 		blockUserInput();
 	}
@@ -110,6 +128,7 @@ void StartLevelBehaviour::updateMeteorMode(float delta)
 
 void StartLevelBehaviour::updateSpaceCraftIntroduceMode(float delta)
 {
+	// In this mode we simply introducing all ai controlled spacecrafts on the screen.
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
@@ -138,16 +157,52 @@ void StartLevelBehaviour::updateSpaceCraftIntroduceMode(float delta)
 
 void StartLevelBehaviour::updateSpaceCraftFightMode(float delta)
 {
+	// In this mode a battle between player's spacecraft and enemies happens.
+	bool modePassed = true;
+	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
+	{
+		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
+		if (spacecraft->getAIController())
+		{
+			modePassed = false;
+			break;
+		}
+	}
+
+	if (modePassed)
+	{
+		levelMode = StartLevelMode::EnergyBarriersShowing;
+		for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::EnergyBarrier); ++i)
+			pLevel->getObjectByTypeIndex(ObjectTypes::EnergyBarrier, i)->hideFromLevel(false);
+	}
+}
+
+void StartLevelBehaviour::updateEnergyBarriersShowMode(float delta)
+{
 	
 }
 
 bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObject* obj2)
 {
+	// immediately discard non-destroyable objects.
+	switch (obj2->getObjectType())
+	{
+	case ObjectTypes::EnergyBarrier:
+		return false;
+		break;
+	default:
+		break;
+	}
+
 	switch (obj1->getObjectType())
 	{
+	case ObjectTypes::Basic:
+		return true;
+		break;
 	case ObjectTypes::LaserRay:
 	{
-		if (obj2->getObjectType() != ObjectTypes::LaserRay)
+		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
+			obj2->getObjectType() != ObjectTypes::EnergyBarrier)
 			return true;
 		else
 			return false;
@@ -155,7 +210,26 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 		break;
 	case ObjectTypes::Meteorite:
 	case ObjectTypes::SpaceCraft:
-		return true;
+		if (obj2->getObjectType() != ObjectTypes::EnergyBarrier && 
+			obj2->getObjectType() != ObjectTypes::ElectricShock)
+			return true;
+		else
+			return false;
+		break;
+	case ObjectTypes::EnergyBarrier:
+		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
+			obj2->getObjectType() != ObjectTypes::ElectricShock)
+			return true;
+		else
+			return false;
+		break;
+	case ObjectTypes::ElectricShock:
+		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
+			obj2->getObjectType() != ObjectTypes::ElectricShock &&
+			obj2->getObjectType() != ObjectTypes::EnergyBarrier)
+			return true;
+		else
+			return false;
 		break;
 	default:
 		break;
