@@ -188,6 +188,8 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	switch (obj2->getObjectType())
 	{
 	case ObjectTypes::EnergyBarrier:
+	case ObjectTypes::BlastWave:
+	case ObjectTypes::ElectricShock:
 		return false;
 		break;
 	default:
@@ -201,8 +203,7 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 		break;
 	case ObjectTypes::LaserRay:
 	{
-		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
-			obj2->getObjectType() != ObjectTypes::EnergyBarrier)
+		if (obj2->getObjectType() != ObjectTypes::LaserRay)
 			return true;
 		else
 			return false;
@@ -210,23 +211,22 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 		break;
 	case ObjectTypes::Meteorite:
 	case ObjectTypes::SpaceCraft:
-		if (obj2->getObjectType() != ObjectTypes::EnergyBarrier && 
-			obj2->getObjectType() != ObjectTypes::ElectricShock)
-			return true;
-		else
-			return false;
+		return true;
 		break;
 	case ObjectTypes::EnergyBarrier:
-		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
-			obj2->getObjectType() != ObjectTypes::ElectricShock)
+		if (obj2->getObjectType() != ObjectTypes::LaserRay)
 			return true;
 		else
 			return false;
 		break;
 	case ObjectTypes::ElectricShock:
-		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
-			obj2->getObjectType() != ObjectTypes::ElectricShock &&
-			obj2->getObjectType() != ObjectTypes::EnergyBarrier)
+		if (obj2->getObjectType() != ObjectTypes::LaserRay)
+			return true;
+		else
+			return false;
+		break;
+	case ObjectTypes::BlastWave:
+		if (obj2->getObjectType() != ObjectTypes::LaserRay)
 			return true;
 		else
 			return false;

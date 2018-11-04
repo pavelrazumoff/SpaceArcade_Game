@@ -25,6 +25,7 @@ void MainApp::loadShaders()
 	res_manager.LoadTexture("Images//generatorLeft.png", "leftGenerator", useGammaCorrection);
 	res_manager.LoadTexture("Images//generatorRight.png", "rightGenerator", useGammaCorrection);
 	res_manager.LoadTexture("Images//electric_shock.png", "electricShock", useGammaCorrection);
+	res_manager.LoadTexture("Images//blast_wave.png", "blastWave", useGammaCorrection);
 
 	Texture2D* tex = res_manager.GetTexture("explosion");
 	tex->numOfColumns = 8;
@@ -40,6 +41,11 @@ void MainApp::loadShaders()
 	tex->numOfColumns = 5;
 	tex->numOfRows = 2;
 	tex->numOfFrames = 8;
+
+	tex = res_manager.GetTexture("blastWave");
+	tex->numOfColumns = 6;
+	tex->numOfRows = 2;
+	tex->numOfFrames = 11;
 
 	// sounds.
 	res_manager.addSound("Sounds//sound1_0.mp3", "BackgroundSound");

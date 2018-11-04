@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "BlastWaveObject.h"
 
 class EnergyBarrierObject : public GameObject
 {
@@ -27,12 +28,15 @@ public:
 	virtual void hideFromLevel(bool hide);
 	void setGenerators(GameObject* left, GameObject* right);
 	void setElectricShock(GameObject* obj);
+	void setBlastWave(BlastWaveObject* wave);
 
 	void attachElectricShockToObject(GameObject* obj);
+	void spawnBlastWave(int generatorIndex);
 
 protected:
 	GameObject* generators[2];		// 0 - left, 1 - right.
 	GameObject* electricShock = NULL;
+	BlastWaveObject* blastWave = NULL;
 
 	std::vector<GameObject*> attachedShockers;
 	std::vector<float> shockersTime;

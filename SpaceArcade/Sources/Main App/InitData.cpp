@@ -413,12 +413,14 @@ void MainApp::initScene()
 	enemySpaceCraft->setAIController(spacecraftAI);
 	enemySpaceCraft->setControlVelocityByRotation(true);
 	enemySpaceCraft->setObjectType(ObjectTypes::SpaceCraft);
+	enemySpaceCraft->setHealth(200.0f);
+	enemySpaceCraft->setInitialHealth(200.0f);
 
 	pLaserRay = enemySpaceCraft->getLaserRay();
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f), false);
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 30; ++i)
 	{
 		EnergyBarrierObject* barrier = new EnergyBarrierObject();
 		barrier->init(&base_level, glm::vec2(rand() % (screenWidth - 170 + 1) + 10, rand() % (0 + 1000 + 1) - 1000),
@@ -456,5 +458,12 @@ void MainApp::initScene()
 		electricShock->setSelfDestroyTime(1.5f);
 
 		barrier->setElectricShock(electricShock);
+
+		BlastWaveObject* blastWave = new BlastWaveObject();
+		blastWave->init(&base_level, glm::vec2(0.0f, 0.0f), glm::vec2(128, 128), res_manager.GetTexture("blastWave"), glm::vec2(0.0f, 0.0f));
+		blastWave->setAnimationDuration(0.5f);
+		blastWave->setSelfDestroyTime(0.5f);
+
+		barrier->setBlastWave(blastWave);
 	}
 }

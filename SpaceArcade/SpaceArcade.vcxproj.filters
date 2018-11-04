@@ -141,6 +141,9 @@
     <ClInclude Include="Sources\Main App\Game\EnergyBarrierObject.h">
       <Filter>Header Files\Main App\Game</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\BlastWaveObject.h">
+      <Filter>Header Files\Main App\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image.cpp">
@@ -228,6 +231,9 @@
       <Filter>Source Files\Miscellaneous</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Main App\Game\EnergyBarrierObject.cpp">
+      <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\BlastWaveObject.cpp">
       <Filter>Source Files\Main App\Game</Filter>
     </ClCompile>
   </ItemGroup>

@@ -96,7 +96,7 @@ void GameObject::update(float delta)
 				animationTime = animationDuration;
 		}
 
-		if (selfDestroying)
+		if (selfDestroying && selfDestroyTime > 0.0f)
 		{
 			selfDestroyTime -= delta;
 			if (selfDestroyTime <= 0.0f)
@@ -539,6 +539,7 @@ float GameObject::getAnimationDuration()
 
 void GameObject::clear()
 {
+	// disconnect attached objects from this object and let them to self-destruct manually through level.
 	for (int i = 0; i < attachedObjects.size(); ++i)
 	{
 		attachedObjects[i]->setParentObject(NULL);

@@ -9,6 +9,7 @@ class AIController;
 enum NotifyCode
 {
 	Destroyed = 0,
+	BlastFinished
 };
 
 enum ObjectTypes
@@ -19,7 +20,8 @@ enum ObjectTypes
 	Meteorite,
 	SpaceCraft,
 	EnergyBarrier,
-	ElectricShock
+	ElectricShock,
+	BlastWave
 };
 
 class GameObject

@@ -5,7 +5,7 @@
 
 EnergyBarrierObject::EnergyBarrierObject()
 {
-	damage = 0.0f;
+	damage = 0.1f;
 	usePhysics = false;
 	useAnimation = true;
 	objectType = ObjectTypes::EnergyBarrier;
@@ -130,25 +130,33 @@ void EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
 			break;
 		}
 
-	if (generatorIndex < 0)
-		return;
-
 	switch (code)
 	{
-	case Destroyed:
+	case NotifyCode::Destroyed:
 	{
+		if (generatorIndex < 0)
+			return;
+
 		pLevel->removeObject(notifiedObject);
 		generators[generatorIndex] = NULL;
 		delete notifiedObject;
 
 		if (generators[0] || generators[1])
-			setVisible(false);
-		else
 		{
-			readyForDeath = true;
+			setVisible(false);
+
+			if (generators[0])
+				spawnBlastWave(0);
+			else
+				spawnBlastWave(1);
 		}
+		else
+			readyForDeath = true;
 	}
-	break;
+		break;
+	case NotifyCode::BlastFinished:
+		readyForDeath = true;
+		break;
 	default:
 		break;
 	}
@@ -180,6 +188,12 @@ void EnergyBarrierObject::setElectricShock(GameObject* obj)
 	electricShock->setDamageAsAttachment(true);
 }
 
+void EnergyBarrierObject::setBlastWave(BlastWaveObject* wave)
+{
+	blastWave = wave;
+	blastWave->hideFromLevel(true);
+}
+
 void EnergyBarrierObject::attachElectricShockToObject(GameObject* obj)
 {
 	auto it = find(objectsWithShockers.begin(), objectsWithShockers.end(), obj);
@@ -196,8 +210,21 @@ void EnergyBarrierObject::attachElectricShockToObject(GameObject* obj)
 	objectsWithShockers.push_back(obj);
 }
 
+void EnergyBarrierObject::spawnBlastWave(int generatorIndex)
+{
+	//BlastWaveObject* wave = (BlastWaveObject*)blastWave->clone();
+	generators[generatorIndex]->setVisible(false);
+	blastWave->startSelfDestroying(true);
+	blastWave->setSender(this);
+	blastWave->hideFromLevel(false);
+	blastWave->Position = generators[generatorIndex]->Position +
+		glm::vec2(generators[generatorIndex]->Size.x / 2, generators[generatorIndex]->Size.y / 2) -
+		glm::vec2(blastWave->Size.x / 2, blastWave->Size.y / 2);
+}
+
 void EnergyBarrierObject::clear()
 {
+	// disconnect generators from this object and let them to self-destruct manually through level.
 	for(int i = 0; i < 2; ++i)
 		if (generators[i])
 		{
@@ -205,6 +232,12 @@ void EnergyBarrierObject::clear()
 			generators[i]->setReadyForDeath(true);
 			generators[i] = NULL;
 		}
+
+	if (blastWave)
+	{
+		blastWave->setSender(NULL);
+		blastWave = NULL;
+	}
 
 	if (electricShock)
 	{

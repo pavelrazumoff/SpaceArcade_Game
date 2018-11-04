@@ -212,7 +212,8 @@ void GameLevel::doCollisions()
 	}
 
 	std::vector<QTRectangle> returnObjects;
-	
+	std::map<GameObject*, std::vector<GameObject*>> collidedList;
+
 	for (int i = 0; i < objects.size(); ++i)
 	{
 		if (objects[i]->isDamagingObject() && objects[i]->getHealth() > 0.0f &&
@@ -235,11 +236,21 @@ void GameLevel::doCollisions()
 				if (objects[i] == objects[currentIndex])
 					continue;
 
+				auto it = collidedList.find(objects[currentIndex]);
+				if (it != collidedList.end())
+				{
+					auto it2 = find(it->second.begin(), it->second.end(), objects[i]);
+					if (it2 != it->second.end())
+						continue;
+				}
+
 				// check if two objects can do damage (exclude cases when damaging object collides with stars for example)
 				// and also check collision for two objects.
 				if (objects[currentIndex]->isDamagingObject() && objects[currentIndex]->getHealth() > 0.0f &&
 					!objects[currentIndex]->isHiddenFromLevel() && !objects[currentIndex]->isOffTheScreen(screenDimensions))
 				{
+					collidedList[objects[i]].push_back(objects[currentIndex]);
+
 					glm::vec2 diff;
 					if (objects[i]->checkCollision(objects[currentIndex], diff))
 					{
