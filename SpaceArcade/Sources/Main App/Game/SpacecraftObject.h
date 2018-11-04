@@ -33,6 +33,7 @@ public:
 	void setControlVelocityByRotation(bool control);
 	void setMaxEnergy(float energy);
 	void setUsedEnergy(float energy);
+	void setLaserSoundName(std::string name);
 
 	float getMaxEnergy();
 	float getUsedEnergy();
@@ -43,6 +44,7 @@ public:
 protected:
 	GameObject* laser_ray;
 	std::vector<GameObject*> laser_rays;
+	std::string laserSoundName;
 
 	float maxEnergy = 100.0f;
 	float usedEnergy = 0.0f;

@@ -49,6 +49,11 @@ void MainApp::loadShaders()
 
 	// sounds.
 	res_manager.addSound("Sounds//sound1_0.mp3", "BackgroundSound");
+	res_manager.addSound("Sounds//laser_effect.mp3", "LaserSound");
+	res_manager.addSound("Sounds//laser_effectEnemy.mp3", "LaserEnemySound");
+	res_manager.addSound("Sounds//explosion_effect1_0.mp3", "ExplosionEffect");
+	res_manager.addSound("Sounds//explosion_effect1_1.mp3", "ExplosionEffect2");
+	res_manager.addSound("Sounds//electricExplosion_effect.mp3", "ElectricExplosionEffect");
 
 	// gui.
 	res_manager.LoadTexture("Images//Interface//playGameButton.png", "playGameButton", false);

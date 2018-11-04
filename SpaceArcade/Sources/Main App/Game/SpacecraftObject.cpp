@@ -61,9 +61,9 @@ void SpacecraftObject::update(float delta)
 		if (usePhysics && (abs(Velocity.x) > 0 || abs(Velocity.y) > 0))
 		{
 			if (abs(Velocity.x) > 0)
-				Velocity.x = glm::sign(Velocity.x) * (abs(Velocity.x) - (impulseFactor * 1.5) * delta);
+				Velocity.x = glm::sign(Velocity.x) * (abs(Velocity.x) - (appliedImpulse * 1.5) * delta);
 			if (abs(Velocity.y) > 0)
-				Velocity.y = glm::sign(Velocity.y) * (abs(Velocity.y) - (impulseFactor * 1.5) * delta);
+				Velocity.y = glm::sign(Velocity.y) * (abs(Velocity.y) - (appliedImpulse * 1.5) * delta);
 
 			if (abs(Velocity.x) < 10)
 				Velocity.x = 0;
@@ -140,7 +140,7 @@ void SpacecraftObject::resize()
 
 void SpacecraftObject::handleInput(GLFWwindow *window, float delta)
 {
-	if (health <= 0.0f || abs(Velocity.x) > (impulseFactor / 2) || abs(Velocity.y) > (impulseFactor / 2))
+	if (health <= 0.0f || abs(Velocity.x) > (appliedImpulse / 2) || abs(Velocity.y) > (appliedImpulse / 2))
 		return;
 
 	glm::vec4 indents = pLevel->getScreenIndents();
@@ -237,6 +237,11 @@ void SpacecraftObject::setUsedEnergy(float energy)
 	usedEnergy = energy;
 }
 
+void SpacecraftObject::setLaserSoundName(std::string name)
+{
+	laserSoundName = name;
+}
+
 float SpacecraftObject::getMaxEnergy()
 {
 	return maxEnergy;
@@ -265,7 +270,9 @@ void SpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, 
 		model = glm::rotate(model, glm::radians(InitialRotation), glm::vec3(0.0f, 0.0f, 1.0f));
 		normalizedDiff = model * glm::vec4(normalizedDiff, 0.0f, 1.0f);
 	}
-	Velocity = normalizedDiff * glm::vec2(impulseFactor);
+
+	this->applyImpulse(otherObj->getImpulseFactor());
+	Velocity = normalizedDiff * glm::vec2(appliedImpulse);
 }
 
 void SpacecraftObject::spawnLaserRay()
@@ -284,6 +291,9 @@ void SpacecraftObject::spawnLaserRay()
 	laser_rays.push_back(laser_ray->clone());
 	laser_rays.back()->Position = glm::vec2(Position.x + Size.x / 2 - laser_ray->Size.x / 2, Position.y);
 	laser_rays.back()->InitialRotation = this->InitialRotation;
+
+	if (laserSoundName.compare(""))
+		pLevel->playSound(laserSoundName, false);
 }
 
 void SpacecraftObject::clear()

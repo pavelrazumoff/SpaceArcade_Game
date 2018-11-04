@@ -5,7 +5,8 @@
 
 BlastWaveObject::BlastWaveObject()
 {
-	damage = 2.0f;
+	damage = 1.0f;
+	impulseFactor = 300;
 	usePhysics = true;
 	useAnimation = true;
 	objectType = ObjectTypes::BlastWave;
@@ -72,6 +73,16 @@ void BlastWaveObject::resize()
 void BlastWaveObject::setSender(GameObject* sender)
 {
 	pSender = sender;
+}
+
+void BlastWaveObject::startSelfDestroying(bool start)
+{
+	selfDestroying = start;
+	if (explosionSoundName.compare("") && !isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
+	{
+		pLevel->playSound(explosionSoundName, false);
+		explosionSoundName = "";
+	}
 }
 
 void BlastWaveObject::clear()

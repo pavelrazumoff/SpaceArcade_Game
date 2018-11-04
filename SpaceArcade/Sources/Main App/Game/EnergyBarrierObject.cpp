@@ -212,7 +212,6 @@ void EnergyBarrierObject::attachElectricShockToObject(GameObject* obj)
 
 void EnergyBarrierObject::spawnBlastWave(int generatorIndex)
 {
-	//BlastWaveObject* wave = (BlastWaveObject*)blastWave->clone();
 	generators[generatorIndex]->setVisible(false);
 	blastWave->startSelfDestroying(true);
 	blastWave->setSender(this);

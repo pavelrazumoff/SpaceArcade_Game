@@ -51,6 +51,7 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->setUseAnimation(this->isUseAnimation());
 	obj->setAnimationDuration(this->getAnimationDuration());
 	obj->setDamageAsAttachment(this->isDamageAsAttachment());
+	obj->setImpulseFactor(this->impulseFactor);
 }
 
 void GameObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity, bool addToLevel)
@@ -334,6 +335,11 @@ void GameObject::setHealthChangedCallback(void(*actionCallback)(float, float))
 	healthChanged = actionCallback;
 }
 
+void GameObject::setExplosionSoundName(std::string name)
+{
+	explosionSoundName = name;
+}
+
 void GameObject::setLevel(GameLevel* level)
 {
 	pLevel = level;
@@ -377,6 +383,10 @@ void GameObject::setHealth(float hp)
 {
 	health = hp;
 
+	if (health <= 0.0f && explosionSoundName.compare("") &&
+		!isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
+		pLevel->playSound(explosionSoundName, false);
+	
 	if (healthChanged)
 		healthChanged(this->health, this->initialHealth);
 }
@@ -445,6 +455,16 @@ void GameObject::setAnimationDuration(float duration)
 
 	if (Sprite)
 		animationTimeStep = animationDuration / Sprite->numOfFrames;
+}
+
+void GameObject::setImpulseFactor(float impulse)
+{
+	impulseFactor = impulse;
+}
+
+void GameObject::applyImpulse(float impulse)
+{
+	appliedImpulse = impulse;
 }
 
 GameLevel* GameObject::getLevel()
@@ -535,6 +555,11 @@ bool GameObject::isUseAnimation()
 float GameObject::getAnimationDuration()
 {
 	return animationDuration;
+}
+
+float GameObject::getImpulseFactor()
+{
+	return impulseFactor;
 }
 
 void GameObject::clear()

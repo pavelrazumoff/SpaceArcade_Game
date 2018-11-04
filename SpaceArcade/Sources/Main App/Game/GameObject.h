@@ -53,6 +53,7 @@ public:
 
 	void setExplosionSprite(Texture2D* sprite);
 	void setHealthChangedCallback(void(*actionCallback)(float, float));
+	void setExplosionSoundName(std::string name);
 
 	void setLevel(GameLevel* level);
 	void setObjectType(int type);
@@ -66,7 +67,7 @@ public:
 	void setReadyForDeath(bool ready);
 	void setExplosionTime(float time);
 	void setSelfDestroyTime(float time);
-	void startSelfDestroying(bool start);
+	virtual void startSelfDestroying(bool start);
 	void setNonPlayerObject(bool nonPlayer);
 	void setUsePhysics(bool physics);
 	void setAIController(AIController* controller);
@@ -74,6 +75,8 @@ public:
 	void setDamageAsAttachment(bool damage);
 	void setUseAnimation(bool animation);
 	void setAnimationDuration(float duration);
+	void setImpulseFactor(float impulse);
+	void applyImpulse(float impulse);
 
 	GameLevel* getLevel();
 	glm::mat4 getModel();
@@ -92,6 +95,7 @@ public:
 	bool isDamageAsAttachment();
 	bool isUseAnimation();
 	float getAnimationDuration();
+	float getImpulseFactor();
 
 	bool isOffTheScreen(glm::vec2 screenDimensions);
 	bool getReadyForDeath();
@@ -150,8 +154,10 @@ protected:
 	int currentExplosionFrame = 0;
 	float explosionTimeStep = 0.0f;
 	bool readyForDeath = false;
+	std::string explosionSoundName;
 
 	float impulseFactor = 200;
+	float appliedImpulse = 0;
 
 	void(*healthChanged)(float, float) = NULL;
 };

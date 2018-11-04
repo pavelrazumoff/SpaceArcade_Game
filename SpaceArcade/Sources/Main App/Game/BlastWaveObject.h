@@ -20,6 +20,7 @@ public:
 	virtual void update(float delta);
 
 	void setSender(GameObject* sender);
+	virtual void startSelfDestroying(bool start);
 
 protected:
 	GameObject* pSender = NULL;

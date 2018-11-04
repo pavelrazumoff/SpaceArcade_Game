@@ -364,6 +364,11 @@ void MainApp::initScene()
 	base_level.setPlayerRestrictionHeight(screenHeight / 2.5f);
 	base_level.setSoundEnginePointer(res_manager.getSoundEngine());
 	base_level.addSound("BackgroundSound", res_manager.getSoundPath("BackgroundSound"));
+	base_level.addSound("LaserSound", res_manager.getSoundPath("LaserSound"));
+	base_level.addSound("LaserEnemySound", res_manager.getSoundPath("LaserEnemySound"));
+	base_level.addSound("ExplosionEffect", res_manager.getSoundPath("ExplosionEffect"));
+	base_level.addSound("ExplosionEffect2", res_manager.getSoundPath("ExplosionEffect2"));
+	base_level.addSound("ElectricExplosionEffect", res_manager.getSoundPath("ElectricExplosionEffect"));
 
 	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(&base_level);
 	levelBehaviours.push_back(basicBehaviour);
@@ -378,6 +383,8 @@ void MainApp::initScene()
 	pSpaceCraft->setHealthChangedCallback(healthBarChanged);
 	pSpaceCraft->setEnergyChangedCallback(energyBarChanged);
 	pSpaceCraft->setNonPlayerObject(false);
+	pSpaceCraft->setLaserSoundName("LaserSound");
+	pSpaceCraft->setExplosionSoundName("ExplosionEffect");
 
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayBlue"), glm::vec2(0.0f, -400.0f), false);
@@ -392,6 +399,7 @@ void MainApp::initScene()
 		asteroid->setExplosionSprite(res_manager.GetTexture("explosion"));
 		asteroid->setUsePhysics(true);
 		asteroid->setObjectType(ObjectTypes::Meteorite);
+		asteroid->setExplosionSoundName("ExplosionEffect2");
 		//asteroid->hideFromLevel(true);
 
 		asteroid->init(&base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (0 + 3000 + 1) - 3000),
@@ -415,12 +423,14 @@ void MainApp::initScene()
 	enemySpaceCraft->setObjectType(ObjectTypes::SpaceCraft);
 	enemySpaceCraft->setHealth(200.0f);
 	enemySpaceCraft->setInitialHealth(200.0f);
+	enemySpaceCraft->setLaserSoundName("LaserEnemySound");
+	enemySpaceCraft->setExplosionSoundName("ExplosionEffect");
 
 	pLaserRay = enemySpaceCraft->getLaserRay();
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
 	pLaserRay->init(&base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager.GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f), false);
 
-	for (int i = 0; i < 30; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		EnergyBarrierObject* barrier = new EnergyBarrierObject();
 		barrier->init(&base_level, glm::vec2(rand() % (screenWidth - 170 + 1) + 10, rand() % (0 + 1000 + 1) - 1000),
@@ -440,6 +450,7 @@ void MainApp::initScene()
 			generators[j]->setExplosionSprite(res_manager.GetTexture("explosion"));
 			generators[j]->setUsePhysics(true);
 			generators[j]->setObjectType(ObjectTypes::Basic);
+			generators[j]->setExplosionSoundName("ExplosionEffect2");
 
 			generators[j]->init(&base_level, glm::vec2(0.0f, 0.0f), glm::vec2(33, 32), res_manager.GetTexture(texes[j]), glm::vec2(0.0f, 0.0f));
 		}
@@ -463,6 +474,7 @@ void MainApp::initScene()
 		blastWave->init(&base_level, glm::vec2(0.0f, 0.0f), glm::vec2(128, 128), res_manager.GetTexture("blastWave"), glm::vec2(0.0f, 0.0f));
 		blastWave->setAnimationDuration(0.5f);
 		blastWave->setSelfDestroyTime(0.5f);
+		blastWave->setExplosionSoundName("ElectricExplosionEffect");
 
 		barrier->setBlastWave(blastWave);
 	}
