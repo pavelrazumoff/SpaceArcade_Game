@@ -35,9 +35,9 @@ public:
 protected:
 	SpacecraftObject* controlledSpacecraft = NULL;
 
-	// this is the position, to which pawn will go, if target enemy isn't set.
+	// this is the position, to which pawn will go if target enemy isn't set.
 	// when using team control, this position is defined in controller's area bounds.
-	// the position is set in (0, 1) bounds.
+	// the position is set in (0, 1) normalized bounds.
 	glm::vec2 SourcePosition;
 
 	// if true - enemy target is in the fire area and this ship can fire on it.

@@ -107,8 +107,10 @@ void BasicShipAIController::followTargetEnemy(float delta)
 void BasicShipAIController::returnToSourcePosition(float delta)
 {
 	GameLevel* pLevel = controlledPawn->getLevel();
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 
-	glm::vec2 returnPosition = glm::vec2(SourcePosition.x * (controlledArea.z - controlledArea.x) + controlledArea.x, controlledPawn->Position.y);
+	glm::vec2 returnPosition = glm::vec2((SourcePosition.x * (controlledArea.z - controlledArea.x) + controlledArea.x) * screenDimensions.x,
+		controlledPawn->Position.y);
 	glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 

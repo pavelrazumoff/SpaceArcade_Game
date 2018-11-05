@@ -41,6 +41,7 @@ protected:
 	GameObject* controlledPawn = NULL;
 	GameObject* targetEnemy = NULL;
 
+	// defines the normalized area, in that pawn can be navigated.
 	glm::vec4 controlledArea;
 
 	// active on default.

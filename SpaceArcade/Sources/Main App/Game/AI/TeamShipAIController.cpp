@@ -64,6 +64,7 @@ void TeamShipAIController::followTargetEnemy(float delta)
 	// every single ai controller will be monitoring specific area plot.
 	glm::vec2 screenDimensions = targetEnemy->getLevel()->getRenderer()->getCurrentScreenDimensions();
 	int areaWidth = screenDimensions.x / controllers.size();
+	float areaStep = areaWidth / screenDimensions.x;
 
 	// check, which ai controller is the nearest for the target enemy.
 	int areaIndex = targetEnemy->Position.x / areaWidth;
@@ -80,7 +81,7 @@ void TeamShipAIController::followTargetEnemy(float delta)
 	{
 		if (i != areaIndex)
 			controllers[i]->setTargetEnemy(NULL);
-		controllers[i]->setControlledArea(glm::vec4(areaWidth * i, 0.0f, areaWidth * (i + 1), screenDimensions.y));
+		controllers[i]->setControlledArea(glm::vec4(areaStep * i, 0.0f, areaStep * (i + 1), 1.0f));
 	}
 }
 

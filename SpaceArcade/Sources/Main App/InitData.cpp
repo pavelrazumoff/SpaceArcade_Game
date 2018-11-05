@@ -421,6 +421,7 @@ void MainApp::initScene()
 		BasicShipAIController* spacecraftAI = new BasicShipAIController();
 		aiControllers.push_back(spacecraftAI);
 		spacecraftAI->setSourcePosition(glm::vec2(0.5f, 0.5f));
+		spacecraftAI->setControlledArea(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 
 		SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
 		enemySpaceCraft->init(base_level, glm::vec2(0.0f, 0.0f), glm::vec2(85, 92), res_manager->GetTexture("spacecraftEnemy"), glm::vec2(0.0f, 0.0f));
