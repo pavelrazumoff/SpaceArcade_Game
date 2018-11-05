@@ -66,9 +66,19 @@ void StartLevelBehaviour::update(float delta)
 	case StartLevelMode::EnergyBarriersShowing:
 		updateEnergyBarriersShowMode(delta);
 		break;
+	case StartLevelMode::TeamCraftEnemyIntroducing:
+		updateSpaceCraftIntroduceMode(delta);
+		break;
+	case StartLevelMode::TeamCraftEnemyFighting:
+		updateSpaceCraftFightMode(delta);
+		break;
 	default:
 		break;
 	}
+
+	// update complex ai controllers, such as team controllers.
+	for (int i = 0; i < complexControllers.size(); ++i)
+		complexControllers[i]->update(delta);
 }
 
 void StartLevelBehaviour::updateIntroduceMode(float delta)
@@ -92,7 +102,7 @@ void StartLevelBehaviour::updateIntroduceMode(float delta)
 		// unblock user input and change level mode to the next.
 		playerCraft->Velocity.y = 0.0f;
 		playerCraft->setUsePhysics(true);
-		levelMode = StartLevelMode::MeteorFighting;
+		levelMode++;
 		unblockUserInput();
 	}
 }
@@ -101,11 +111,11 @@ void StartLevelBehaviour::updateMeteorMode(float delta)
 {
 	// In this mode we have to check, if all meteorites was destroyed or gone behind sreen dimensions (not above the screen).
 	int numOfMeteorites = pLevel->getObjectsSizeByType(ObjectTypes::Meteorite);
-	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 
 	// show all ai controlled objects when all meteorites was destroyed or simply gone away.
 	if (numOfMeteorites == 0)
 	{
+		glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 		for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
 		{
 			GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
@@ -114,14 +124,17 @@ void StartLevelBehaviour::updateMeteorMode(float delta)
 			{
 				// show ai controlled spacecraft and position it a little above the screen.
 				spacecraft->hideFromLevel(false);
-				spacecraft->Position = glm::vec2(screenDimensions.x / 2 - spacecraft->Size.x / 2, -100);
+				spacecraft->Position = glm::vec2(screenDimensions.x / 2 - 42, -100.0f);
+				spacecraft->getAIController()->setTargetEnemy(playerCraft);
 				// also block it's ai for a little time to be able to properly introduce this object on scene.
 				spacecraft->getAIController()->BlockAI();
+
+				break;
 			}
 		}
 
 		// change to the next level mode.
-		levelMode = StartLevelMode::SpaceCraftEnemyIntroducing;
+		levelMode++;
 		blockUserInput();
 	}
 }
@@ -132,12 +145,30 @@ void StartLevelBehaviour::updateSpaceCraftIntroduceMode(float delta)
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
+	int craftNum = 0;
+	int currentIndex = 0;
+
+	switch (levelMode)
+	{
+	case StartLevelMode::SpaceCraftEnemyIntroducing:
+		craftNum = 1;
+		break;
+	case StartLevelMode::TeamCraftEnemyIntroducing:
+		craftNum = 2;
+		break;
+	default:
+		break;
+	}
+
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
 	{
 		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
 
 		if (spacecraft->getAIController())
 		{
+			if (currentIndex >= craftNum)
+				break;
+
 			if (spacecraft->Position.y < (screenDimensions.y / 3 - spacecraft->Size.y / 2))
 			{
 				spacecraft->Velocity.y = -100.0f * screenRatio.y;
@@ -148,9 +179,11 @@ void StartLevelBehaviour::updateSpaceCraftIntroduceMode(float delta)
 				spacecraft->Velocity.y = 0.0f;
 				spacecraft->setUsePhysics(true);
 				spacecraft->getAIController()->unblockAI();
-				levelMode = StartLevelMode::SpaceCraftEnemyFighting;
+				levelMode++;
 				unblockUserInput();
 			}
+
+			currentIndex++;
 		}
 	}
 }
@@ -158,20 +191,33 @@ void StartLevelBehaviour::updateSpaceCraftIntroduceMode(float delta)
 void StartLevelBehaviour::updateSpaceCraftFightMode(float delta)
 {
 	// In this mode a battle between player's spacecraft and enemies happens.
-	bool modePassed = true;
+	int currentNum = 0;
+
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
 	{
 		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
 		if (spacecraft->getAIController())
-		{
-			modePassed = false;
-			break;
-		}
+			currentNum++;
 	}
 
-	if (modePassed)
+	switch (levelMode)
 	{
-		levelMode = StartLevelMode::EnergyBarriersShowing;
+	case StartLevelMode::SpaceCraftEnemyFighting:
+		if (currentNum > 2)
+			return;
+		break;
+	case StartLevelMode::TeamCraftEnemyFighting:
+		if (currentNum > 0)
+			return;
+		break;
+	default:
+		break;
+	}
+
+	levelMode++;
+
+	if (levelMode == StartLevelMode::EnergyBarriersShowing)
+	{
 		for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::EnergyBarrier); ++i)
 			pLevel->getObjectByTypeIndex(ObjectTypes::EnergyBarrier, i)->hideFromLevel(false);
 	}
@@ -179,7 +225,35 @@ void StartLevelBehaviour::updateSpaceCraftFightMode(float delta)
 
 void StartLevelBehaviour::updateEnergyBarriersShowMode(float delta)
 {
-	
+	int numOfBarriers = pLevel->getObjectsSizeByType(ObjectTypes::EnergyBarrier);
+
+	// show all ai controlled objects when all meteorites was destroyed or simply gone away.
+	if (numOfBarriers == 0)
+	{
+		int currentIndex = 0;
+		glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+
+		for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
+		{
+			GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
+
+			if (spacecraft->getAIController())
+			{
+				// show ai controlled spacecraft and position it a little above the screen.
+				spacecraft->hideFromLevel(false);
+				spacecraft->Position = glm::vec2(screenDimensions.x / 4 + currentIndex * (screenDimensions.x / 2) - 42, -100.0f);
+				// also block it's ai for a little time to be able to properly introduce this object on scene.
+				spacecraft->getAIController()->BlockAI();
+
+				if (++currentIndex >= 2)
+					break;
+			}
+		}
+
+		// change to the next level mode.
+		levelMode++;
+		blockUserInput();
+	}
 }
 
 bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObject* obj2)

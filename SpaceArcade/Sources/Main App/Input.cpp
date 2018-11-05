@@ -6,7 +6,7 @@ void MainApp::processInput(GLFWwindow *window)
 		glfwSetWindowShouldClose(window, true);
 	
 	if(currentPage == PageType::Game)
-		base_level.handleInput(window, deltaTime);
+		base_level->handleInput(window, deltaTime);
 }
 
 void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -43,7 +43,7 @@ void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, 
 	}
 
 	if (currentPage == PageType::Game)
-		base_level.processKey(key, action, &key_pressed);
+		base_level->processKey(key, action, &key_pressed);
 	else
 	{
 		for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)

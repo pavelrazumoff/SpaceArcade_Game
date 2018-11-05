@@ -144,6 +144,9 @@
     <ClInclude Include="Sources\Main App\Game\BlastWaveObject.h">
       <Filter>Header Files\Main App\Game</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\AI\TeamShipAIController.h">
+      <Filter>Header Files\Main App\Game\AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image.cpp">
@@ -235,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Main App\Game\BlastWaveObject.cpp">
       <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\AI\TeamShipAIController.cpp">
+      <Filter>Source Files\Main App\Game\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

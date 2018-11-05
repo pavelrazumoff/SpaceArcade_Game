@@ -70,6 +70,23 @@ void EnergyBarrierObject::update(float delta)
 			i--;
 		}
 	}
+
+	if (!onceAppears && !isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
+	{
+		onceAppears = true;
+		if(!generatorSound)
+			generatorSound = pLevel->playSound("GeneratorEffect", true);
+	}else
+		if (onceAppears && isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
+		{
+			onceAppears = false;
+			if (generatorSound)
+			{
+				generatorSound->stop();
+				generatorSound->drop();
+				generatorSound = NULL;
+			}
+		}
 }
 
 void EnergyBarrierObject::draw(bool useInstanced, int amount)
@@ -194,6 +211,11 @@ void EnergyBarrierObject::setBlastWave(BlastWaveObject* wave)
 	blastWave->hideFromLevel(true);
 }
 
+void EnergyBarrierObject::setGeneratorSoundName(std::string name)
+{
+	generatorSoundName = name;
+}
+
 void EnergyBarrierObject::attachElectricShockToObject(GameObject* obj)
 {
 	auto it = find(objectsWithShockers.begin(), objectsWithShockers.end(), obj);
@@ -223,6 +245,12 @@ void EnergyBarrierObject::spawnBlastWave(int generatorIndex)
 
 void EnergyBarrierObject::clear()
 {
+	if (generatorSound)
+	{
+		generatorSound->stop();
+		generatorSound = NULL;
+	}
+
 	// disconnect generators from this object and let them to self-destruct manually through level.
 	for(int i = 0; i < 2; ++i)
 		if (generators[i])

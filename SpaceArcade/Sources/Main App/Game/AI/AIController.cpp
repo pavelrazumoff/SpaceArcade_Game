@@ -54,6 +54,11 @@ void AIController::setTargetEnemy(GameObject* target)
 	targetEnemy = target;
 }
 
+void AIController::setControlledArea(glm::vec4 area)
+{
+	controlledArea = area;
+}
+
 GameObject* AIController::getPawn()
 {
 	return controlledPawn;
@@ -62,6 +67,11 @@ GameObject* AIController::getPawn()
 GameObject* AIController::getTargetEnemy()
 {
 	return targetEnemy;
+}
+
+glm::vec4 AIController::getControlledArea()
+{
+	return controlledArea;
 }
 
 void AIController::clear()

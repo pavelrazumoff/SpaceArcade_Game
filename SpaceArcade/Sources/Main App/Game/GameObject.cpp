@@ -564,6 +564,12 @@ float GameObject::getImpulseFactor()
 
 void GameObject::clear()
 {
+	if (aiController)
+	{
+		aiController->BlockAI();
+		aiController->setPawn(NULL);
+	}
+
 	// disconnect attached objects from this object and let them to self-destruct manually through level.
 	for (int i = 0; i < attachedObjects.size(); ++i)
 	{

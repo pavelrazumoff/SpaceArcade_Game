@@ -33,10 +33,13 @@ void BasicShipAIController::init()
 
 void BasicShipAIController::update(float delta)
 {
-	if (!isActive || controlledPawn->getHealth() <= 0.0f)
+	if (!isActive || (controlledPawn && controlledPawn->getHealth() <= 0.0f))
 		return;
 
 	followTargetEnemy(delta);
+
+	if (!targetEnemy)
+		returnToSourcePosition(delta);
 
 	// if target is in the fire area.
 	if (readyToFire)
@@ -55,7 +58,10 @@ void BasicShipAIController::update(float delta)
 void BasicShipAIController::followTargetEnemy(float delta)
 {
 	if (!targetEnemy || controlledPawn->getHealth() <= 0.0f)
+	{
+		readyToFire = false;
 		return;
+	}
 
 	// if target was destroyed, reset target pointer by making this ship untargeted.
 	if (targetEnemy->getHealth() <= 0.0f)
@@ -98,6 +104,26 @@ void BasicShipAIController::followTargetEnemy(float delta)
 		controlledPawn->Velocity.x = 0.0f;
 }
 
+void BasicShipAIController::returnToSourcePosition(float delta)
+{
+	GameLevel* pLevel = controlledPawn->getLevel();
+
+	glm::vec2 returnPosition = glm::vec2(SourcePosition.x * (controlledArea.z - controlledArea.x) + controlledArea.x, controlledPawn->Position.y);
+	glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
+
+	glm::vec2 shift = glm::vec2(delta * controlledPawn->VelocityScale.x * initialScreenRatio.x, delta * controlledPawn->VelocityScale.y * initialScreenRatio.y);
+
+	if (abs(controlledPawn->Position.x - returnPosition.x) > 5.0f)
+	{
+		// move this ship to the source position.
+		if (controlledPawn->Position.x < returnPosition.x)
+			controlledPawn->Position.x += shift.x;
+		else
+			controlledPawn->Position.x -= shift.x;
+	}
+}
+
 void BasicShipAIController::setPawn(GameObject* pawn)
 {
 	controlledPawn = pawn;
@@ -110,9 +136,19 @@ void BasicShipAIController::setFireFrequency(float freq)
 	timeToFire = freq;
 }
 
+void BasicShipAIController::setSourcePosition(glm::vec2 pos)
+{
+	SourcePosition = pos;
+}
+
 float BasicShipAIController::getFireFrequency()
 {
 	return fireFrequency;
+}
+
+glm::vec2 BasicShipAIController::getSourcePosition()
+{
+	return SourcePosition;
 }
 
 void BasicShipAIController::clear()

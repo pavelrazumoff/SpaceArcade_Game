@@ -63,14 +63,15 @@ void MainApp::init()
 	//uncomment it if don't load skyboxes.
 	//stbi_set_flip_vertically_on_load(true);
 
-	res_manager.init();
+	res_manager = new ResourceManager();
+	res_manager->init();
 
 	loadShaders();
 	loadTextures();
 	loadFonts();
 	initBuffers();
 
-	renderer.init(res_manager.GetShader("Sprite"), screenWidth, screenHeight);
+	renderer.init(res_manager->GetShader("Sprite"), screenWidth, screenHeight);
 
 	initGUI();
 	initScene();
@@ -78,7 +79,7 @@ void MainApp::init()
 
 void MainApp::loadFonts()
 {
-	res_manager.loadFont("Fonts/PT Sans Narrow.ttf", "SansNarrow", 26);
+	res_manager->loadFont("Fonts/PT Sans Narrow.ttf", "SansNarrow", 26);
 }
 
 void MainApp::update()
@@ -89,7 +90,7 @@ void MainApp::update()
 	lastFrame = currentFrame;
 
 	if(currentPage == PageType::Game)
-		base_level.update(deltaTime);
+		base_level->update(deltaTime);
 }
 
 void MainApp::updateHealthBar(float health, float initialHealth)
@@ -132,8 +133,8 @@ void MainApp::resize(int width, int height)
 		for (int i = 0; i < it->second.size(); ++i)
 			it->second[i]->resize();
 
-	if(base_level.isStarted())
-		base_level.resize();
+	if(base_level->isStarted())
+		base_level->resize();
 }
 
 void MainApp::setFullscreenMode(bool fullscreen)
@@ -168,16 +169,11 @@ void MainApp::setFullscreenMode(bool fullscreen)
 
 void MainApp::startGame()
 {
-	base_level.startLevel();
+	base_level->startLevel();
 }
 
 void MainApp::clearBuffers()
 {
-	for (int i = 0; i < aiControllers.size(); ++i)
-		delete aiControllers[i];
-	
-	aiControllers.clear();
-
 	for (int i = 0; i < levelBehaviours.size(); ++i)
 		delete levelBehaviours[i];
 
@@ -188,6 +184,17 @@ void MainApp::clearBuffers()
 			delete it->second[i];
 
 	gui_objects.clear();
+
+	delete base_level;
+	base_level = NULL;
+
+	for (int i = 0; i < aiControllers.size(); ++i)
+		delete aiControllers[i];
+
+	aiControllers.clear();
+
+	delete res_manager;
+	res_manager = NULL;
 
 	for (int i = 0; i < 2; ++i)
 		glDeleteFramebuffers(1, &pingpongFBO[i]);

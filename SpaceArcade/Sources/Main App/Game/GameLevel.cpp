@@ -313,18 +313,12 @@ void GameLevel::addSound(std::string soundName, std::string soundPath)
 	soundNames[soundName] = soundPath;
 }
 
-void GameLevel::playSound(std::string soundName, bool loop)
+ISound* GameLevel::playSound(std::string soundName, bool loop)
 {
 	auto it = soundNames.find(soundName);
 	if (it != soundNames.end())
-		sounds[soundName] = pSoundEngine->play2D(soundNames[soundName].c_str(), loop);
-}
-
-void GameLevel::stopSound(std::string soundName)
-{
-	auto it = sounds.find(soundName);
-	if (it != sounds.end())
-		it->second->drop();
+		return pSoundEngine->play2D(soundNames[soundName].c_str(), loop, false, true);
+	return NULL;
 }
 
 void GameLevel::setBehaviour(LevelBehaviour* behaviour)
@@ -446,6 +440,30 @@ GameObject* GameLevel::getObjectByTypeIndex(int obj_type, int index)
 		}
 
 	return NULL;
+}
+
+std::vector<GameObject*> GameLevel::getObstaclesInArea(glm::vec4 area, GameObject* excludeObject)
+{
+	// It returns all objects, that is in the specified area (x, y, x + w, y + h).
+	std::vector<GameObject*> obstacles;
+
+	for (int i = 0; i < objects.size(); ++i)
+	{
+		if (objects[i] == excludeObject)
+			continue;
+
+		// Collision x-axis?
+		bool collisionX = objects[i]->Position.x + objects[i]->Size.x >= area.x &&
+			area.z >= objects[i]->Position.x;
+		// Collision y-axis?
+		bool collisionY = objects[i]->Position.y + objects[i]->Size.y >= area.y &&
+			area.w >= objects[i]->Position.y;
+
+		if (collisionX && collisionY)
+			obstacles.push_back(objects[i]);
+	}
+
+	return obstacles;
 }
 
 glm::vec4 GameLevel::getScreenIndents()

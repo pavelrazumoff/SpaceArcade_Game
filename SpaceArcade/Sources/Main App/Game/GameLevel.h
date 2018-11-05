@@ -16,7 +16,6 @@ public:
 	void									resize();
 	void									clear();
 
-	// Render level
 	void									draw();
 	void									update(float delta);
 	void									updateInstances();
@@ -31,8 +30,7 @@ public:
 	void									removeObject(GameObject* obj);
 
 	void									addSound(std::string soundName, std::string soundPath);
-	void									playSound(std::string soundName, bool loop);
-	void									stopSound(std::string soundName);
+	ISound*									playSound(std::string soundName, bool loop);
 
 	void									setBehaviour(LevelBehaviour* behaviour);
 	void									setScreenIndents(glm::vec4 indents);
@@ -48,6 +46,8 @@ public:
 	int										getIndexByObject(GameObject* obj);
 	int										getObjectsSizeByType(int obj_type);
 	GameObject*								getObjectByTypeIndex(int obj_type, int index);
+
+	std::vector<GameObject*>				getObstaclesInArea(glm::vec4 area, GameObject* excludeObject = NULL);
 
 	glm::vec4								getScreenIndents();
 	float									getPlayerRestrictionHeight();
@@ -78,7 +78,6 @@ private:
 
 	ISoundEngine*							pSoundEngine = NULL;
 	std::map<std::string, std::string>		soundNames;
-	std::map<std::string, ISound*>			sounds;
 
 	bool									wasStarted = false;
 };

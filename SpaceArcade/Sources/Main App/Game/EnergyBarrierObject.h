@@ -29,6 +29,7 @@ public:
 	void setGenerators(GameObject* left, GameObject* right);
 	void setElectricShock(GameObject* obj);
 	void setBlastWave(BlastWaveObject* wave);
+	void setGeneratorSoundName(std::string name);
 
 	void attachElectricShockToObject(GameObject* obj);
 	void spawnBlastWave(int generatorIndex);
@@ -38,7 +39,12 @@ protected:
 	GameObject* electricShock = NULL;
 	BlastWaveObject* blastWave = NULL;
 
+	std::string generatorSoundName;
+	ISound* generatorSound = NULL;
+
 	std::vector<GameObject*> attachedShockers;
 	std::vector<float> shockersTime;
 	std::vector<GameObject*> objectsWithShockers;
+
+	bool onceAppears = false;		// false - was off the screen, true - on screen.
 };

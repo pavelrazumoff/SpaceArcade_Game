@@ -14,7 +14,9 @@ enum StartLevelMode
 	MeteorFighting,
 	SpaceCraftEnemyIntroducing,
 	SpaceCraftEnemyFighting,
-	EnergyBarriersShowing
+	EnergyBarriersShowing,
+	TeamCraftEnemyIntroducing,
+	TeamCraftEnemyFighting
 };
 
 class StartLevelBehaviour : public LevelBehaviour

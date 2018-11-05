@@ -3,7 +3,7 @@
 #include "../Miscellaneous/Camera.h"
 #include "../Miscellaneous/ResourceManager.h"
 #include "Game/GameLevel.h"
-#include "Game/AI/BasicShipAIController.h"
+#include "Game/AI/TeamShipAIController.h"
 #include "Game/AI/StartLevelBehaviour.h"
 #include "GUI/GUICheckBox.h"
 #include "GUI/GUILayout.h"
@@ -105,7 +105,7 @@ public:
 	std::map<int, std::vector<GUIObject*>> gui_objects;
 
 	// Game Data.
-	GameLevel base_level;
+	GameLevel* base_level = NULL;
 	std::vector<AIController*> aiControllers;
 	std::vector<LevelBehaviour*> levelBehaviours;
 
@@ -147,7 +147,7 @@ private:
 	bool lbutton_down = false;
 	bool key_pressed = false;
 
-	ResourceManager res_manager;
+	ResourceManager* res_manager = NULL;
 	SpriteRenderer renderer;
 
 	GUIObject* pHealthBar = NULL;

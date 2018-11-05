@@ -31,13 +31,17 @@ public:
 	virtual void setPawn(GameObject* pawn);
 	// sets target enemy object that derived ai class can use to targeting on.
 	void setTargetEnemy(GameObject* target);
+	void setControlledArea(glm::vec4 area);
 
 	GameObject* getPawn();
 	GameObject* getTargetEnemy();
+	glm::vec4 getControlledArea();
 
 protected:
 	GameObject* controlledPawn = NULL;
 	GameObject* targetEnemy = NULL;
+
+	glm::vec4 controlledArea;
 
 	// active on default.
 	bool isActive = true;

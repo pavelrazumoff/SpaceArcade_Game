@@ -45,11 +45,11 @@ void MainApp::render()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Here we have to render to final fbo with two outputs.
-	res_manager.Shaders["Final"].use();
+	res_manager->Shaders["Final"].use();
 	glBindVertexArray(quadVAO);
 	glDisable(GL_DEPTH_TEST);
 
-	res_manager.Shaders["Final"].setInt("screenTexture", 0);
+	res_manager->Shaders["Final"].setInt("screenTexture", 0);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, screenTexture);
@@ -66,13 +66,13 @@ void MainApp::render()
 	if (useBloom)
 	{
 		unsigned int amount = 10;
-		res_manager.Shaders["Blur"].use();
+		res_manager->Shaders["Blur"].use();
 
 		for (unsigned int i = 0; i < amount; i++)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-			res_manager.Shaders["Blur"].setInt("horizontal", horizontal);
-			res_manager.Shaders["Blur"].setInt("image", 0);
+			res_manager->Shaders["Blur"].setInt("horizontal", horizontal);
+			res_manager->Shaders["Blur"].setInt("image", 0);
 			glBindTexture(GL_TEXTURE_2D, first_iteration ? finalTextures[1] : pingpongColorbuffers[!horizontal]);  // bind texture of other framebuffer (or scene if first iteration)
 
 			glBindVertexArray(quadVAO);
@@ -88,15 +88,15 @@ void MainApp::render()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	res_manager.Shaders["Screen"].use();
-	res_manager.Shaders["Screen"].setBool("gammaCorrection", useGammaCorrection);
-	res_manager.Shaders["Screen"].setBool("useHDR", useHDR);
-	res_manager.Shaders["Screen"].setInt("useBloom", useBloom);
-	res_manager.Shaders["Screen"].setFloat("exposure", 1.0f);
+	res_manager->Shaders["Screen"].use();
+	res_manager->Shaders["Screen"].setBool("gammaCorrection", useGammaCorrection);
+	res_manager->Shaders["Screen"].setBool("useHDR", useHDR);
+	res_manager->Shaders["Screen"].setInt("useBloom", useBloom);
+	res_manager->Shaders["Screen"].setFloat("exposure", 1.0f);
 
-	res_manager.Shaders["Screen"].setInt("screenTexture", 0);
-	res_manager.Shaders["Screen"].setInt("bloomTexture", 1);
-	res_manager.Shaders["Screen"].setInt("ssaoTexture", 2);
+	res_manager->Shaders["Screen"].setInt("screenTexture", 0);
+	res_manager->Shaders["Screen"].setInt("bloomTexture", 1);
+	res_manager->Shaders["Screen"].setInt("ssaoTexture", 2);
 
 	glBindVertexArray(quadVAO);
 
@@ -134,7 +134,7 @@ void MainApp::render()
 
 void MainApp::drawScene()
 {
-	base_level.draw();
+	base_level->draw();
 }
 
 void MainApp::drawMenuBackground()
@@ -142,8 +142,8 @@ void MainApp::drawMenuBackground()
 	// draw skybox as last.
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content.
 
-	Shader cubemapShader = res_manager.GetShader("Skybox");
-	Texture2D* backgroundCubemap = res_manager.GetCubemap("BlueSpace");
+	Shader cubemapShader = res_manager->GetShader("Skybox");
+	Texture2D* backgroundCubemap = res_manager->GetCubemap("BlueSpace");
 	cubemapShader.use();
 
 	glm::mat4 modelMat = glm::mat4();
@@ -192,7 +192,7 @@ void MainApp::RenderText(std::string fontType, std::string text, GLfloat x, GLfl
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); c++)
 	{
-		Character ch = res_manager.Fonts[fontType][*c];
+		Character ch = res_manager->Fonts[fontType][*c];
 		GLfloat xpos = x + ch.Bearing.x * scale;
 		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 		GLfloat w = ch.Size.x * scale;

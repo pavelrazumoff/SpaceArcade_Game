@@ -32,9 +32,12 @@ public:
 	GameLevel* getLevel();
 	bool isUserInputBlocked();
 
+	void addComplexAIController(AIController* controller);
+
 protected:
 	// pointer to the controlling level.
 	GameLevel* pLevel = NULL;
+	std::vector<AIController*> complexControllers;
 
 	// false - all user input is blocked.
 	bool userInput = true;
