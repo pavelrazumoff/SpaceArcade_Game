@@ -150,6 +150,12 @@
     <ClInclude Include="Sources\Main App\Game\ImprovementBoxObject.h">
       <Filter>Header Files\Main App\Game</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\BossSpacecraftObject.h">
+      <Filter>Header Files\Main App\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\AI\BossShipAIController.h">
+      <Filter>Header Files\Main App\Game\AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image.cpp">
@@ -247,6 +253,12 @@
     </ClCompile>
     <ClCompile Include="Sources\Main App\Game\ImprovementBoxObject.cpp">
       <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\BossSpacecraftObject.cpp">
+      <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\AI\BossShipAIController.cpp">
+      <Filter>Source Files\Main App\Game\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -123,7 +123,7 @@ void GameObject::update(float delta)
 		{
 			// when object goes out of screen bounds when it already overstepped top side of the screen, destroy it.
 			glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
-			if (Position.y > 0.0f && (Position.x < 0.0f || Position.x > screenDimensions.x || Position.y > screenDimensions.y))
+			if (Position.y > 0.0f && (Position.x + Size.x < 0.0f || Position.x > screenDimensions.x || Position.y > screenDimensions.y))
 				setHealth(0.0f);
 		}
 	}

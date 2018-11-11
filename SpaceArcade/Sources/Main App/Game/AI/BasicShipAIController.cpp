@@ -48,7 +48,8 @@ void BasicShipAIController::update(float delta)
 		// if it is time to fire, dew it.
 		if (timeToFire <= 0.0f)
 		{
-			controlledSpacecraft->spawnLaserRay();
+			if(controlledSpacecraft)
+				controlledSpacecraft->spawnLaserRay();
 			// drop fire timing.
 			timeToFire = fireFrequency;
 		}
@@ -75,7 +76,7 @@ void BasicShipAIController::followTargetEnemy(float delta)
 	GameLevel* pLevel = controlledPawn->getLevel();
 
 	// if target isn't in the fire area.
-	if (abs(controlledPawn->Position.x - targetEnemy->Position.x) > 20.0f)
+	if (abs(controlledPawn->Position.x + controlledPawn->Size.x / 2 - (targetEnemy->Position.x + targetEnemy->Size.x / 2)) > 20.0f)
 	{
 		glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 		glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
@@ -83,7 +84,7 @@ void BasicShipAIController::followTargetEnemy(float delta)
 		glm::vec2 shift = glm::vec2(delta * controlledPawn->VelocityScale.x * initialScreenRatio.x, delta * controlledPawn->VelocityScale.y * initialScreenRatio.y);
 
 		// move this ship after target.
-		if (controlledPawn->Position.x < targetEnemy->Position.x)
+		if (controlledPawn->Position.x + controlledPawn->Size.x / 2 < (targetEnemy->Position.x + targetEnemy->Size.x / 2))
 			controlledPawn->Position.x += shift.x;
 		else
 			controlledPawn->Position.x -= shift.x;
@@ -100,7 +101,7 @@ void BasicShipAIController::followTargetEnemy(float delta)
 	}
 
 	// if difference between this ship and target is small, stop it.
-	if (abs(controlledPawn->Position.x - targetEnemy->Position.x) < 5.0f)
+	if (abs(controlledPawn->Position.x + controlledPawn->Size.x / 2 - (targetEnemy->Position.x + targetEnemy->Size.x / 2)) < 5.0f)
 		controlledPawn->Velocity.x = 0.0f;
 }
 

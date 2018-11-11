@@ -19,6 +19,7 @@ enum ObjectTypes
 	LaserRay,
 	Meteorite,
 	SpaceCraft,
+	BossSpaceCraft,
 	EnergyBarrier,
 	ElectricShock,
 	EnergyShield,

@@ -1,5 +1,5 @@
 #pragma once
-#include "SpacecraftObject.h"
+#include "BossSpacecraftObject.h"
 #include "EnergyBarrierObject.h"
 #include "ImprovementBoxObject.h"
 #include "../../Miscellaneous/QuadTree.h"

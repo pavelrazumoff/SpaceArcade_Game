@@ -17,6 +17,9 @@ enum StartLevelMode
 	EnergyBarriersShowing,
 	TeamCraftEnemyIntroducing,
 	TeamCraftEnemyFighting,
+	BossSpaceCraftIntroducing,
+	BossSpaceCraftFighting,
+	BossSpaceCraftLeaving,
 	End
 };
 
@@ -41,6 +44,9 @@ public:
 	void updateSpaceCraftIntroduceMode(float delta);
 	void updateSpaceCraftFightMode(float delta);
 	void updateEnergyBarriersShowMode(float delta);
+	void updateBossSpaceCraftIntroduceMode(float delta);
+	void updateBossSpaceCraftFightMode(float delta);
+	void updateBossSpaceCraftLeaveMode(float delta);
 
 	void updateParallelEvents(float delta);
 
@@ -48,6 +54,7 @@ public:
 	void spawnHealthKits(float delta);
 	void spawnEnemies(float delta);
 	void spawnEnergyBarriers(float delta);
+	void spawnEnemyBoss(float delta);
 
 	void iterateLevel();
 
@@ -82,6 +89,11 @@ protected:
 
 	int maxNumOfTeamEnemies = 0;
 	int numOfTeamEnemies = 0;
+
+	int maxNumOfBossEnemies = 1;
+	int numOfBossEnemies = 0;
+	float bossHealthThreshold;
+	float bossHealthThresholdStep;
 
 	// energy barriers data.
 	int maxNumOfBarriers = 0;
