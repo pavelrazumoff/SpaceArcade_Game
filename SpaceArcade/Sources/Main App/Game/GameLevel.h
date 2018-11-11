@@ -1,6 +1,7 @@
 #pragma once
 #include "SpacecraftObject.h"
 #include "EnergyBarrierObject.h"
+#include "ImprovementBoxObject.h"
 #include "../../Miscellaneous/QuadTree.h"
 
 class LevelBehaviour;

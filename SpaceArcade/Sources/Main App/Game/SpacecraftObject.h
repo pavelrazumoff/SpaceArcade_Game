@@ -27,27 +27,43 @@ public:
 	void setLaserRay(GameObject* laser);
 
 	GameObject* getLaserRay();
+	GameObject* getRocket();
 
 	void setEnergyChangedCallback(void(*actionCallback)(float, float));
+	void setRocketIntegrityChangedCallback(void(*actionCallback)(int, int));
 
 	void setControlVelocityByRotation(bool control);
 	void setMaxEnergy(float energy);
 	void setUsedEnergy(float energy);
+	void setRocketDetail(int detail);
+	void setRocketStartVelocity(glm::vec2 vel);
+	void setRocketRelativePosition(glm::vec2 pos, int rocket_index);
 	void setLaserSoundName(std::string name);
+	void setRocketSoundName(std::string name);
 
 	float getMaxEnergy();
 	float getUsedEnergy();
+	int getRocketIntegrity();
 
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 	void spawnLaserRay();
+	void spawnRocket();
 
 protected:
 	GameObject* laser_ray;
+	GameObject* rocket;
 	std::vector<GameObject*> laser_rays;
+	std::vector<GameObject*> rockets;
 	std::string laserSoundName;
+	std::string rocketSoundName;
 
 	float maxEnergy = 100.0f;
 	float usedEnergy = 0.0f;
 	bool exceedMaxEnergy = false;
 	void(*energyChanged)(float, float) = NULL;
+
+	int rocketIntegrity = 0;					// 100 - one rocket is construct and can be fired. 3x rockets is max.
+	glm::vec2 rocketStartVelocity;
+	glm::vec2 rocketRelativePoses[3];
+	void(*rocketIntegrityChanged)(int, int) = NULL;
 };

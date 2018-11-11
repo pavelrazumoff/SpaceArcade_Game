@@ -5,7 +5,7 @@ GUICheckBox::GUICheckBox()
 
 }
 
-GUICheckBox::GUICheckBox(SpriteRenderer* renderer) : GUIButton(renderer)
+GUICheckBox::GUICheckBox(SpriteRenderer* renderer, ISoundEngine* soundEngine) : GUIButton(renderer, soundEngine)
 {
 
 }

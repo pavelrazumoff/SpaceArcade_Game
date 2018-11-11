@@ -19,6 +19,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 void healthBarChanged(float health, float initialHealth);
 void energyBarChanged(float usedEnergy, float maxEnergy);
+void rocketIntegrityChanged(int integrity, int maxIntegrity);
 
 void showScene();
 void showSettings();
@@ -73,6 +74,7 @@ public:
 
 	void updateHealthBar(float health, float initialHealth);
 	void updateEnergyBar(float usedEnergy, float maxEnergy);
+	void updateRocketIntegrity(int integrity, int maxIntegrity);
 
 	// input.
 	void processInput(GLFWwindow *window);
@@ -106,7 +108,6 @@ public:
 
 	// Game Data.
 	GameLevel* base_level = NULL;
-	std::vector<AIController*> aiControllers;
 	std::vector<LevelBehaviour*> levelBehaviours;
 
 	int currentPage = PageType::MainMenu;
@@ -152,4 +153,5 @@ private:
 
 	GUIObject* pHealthBar = NULL;
 	GUIObject* pEnergyBar = NULL;
+	GUIObject* pRocketBars[3];
 };

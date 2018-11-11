@@ -14,9 +14,19 @@ SpacecraftObject::SpacecraftObject()
 	laser_ray->setIsDamagingObject(true);
 	laser_ray->setDamage(20.0f);
 	laser_ray->setHealth(1.0f); // destroys momentally.
-	laser_ray->setInitialHealth(1.0f);
+	laser_ray->setMaxHealth(1.0f);
 	laser_ray->setUsePhysics(false);
 	laser_ray->setParentObject(this);
+	laser_ray->setObjectType(ObjectTypes::LaserRay);
+
+	rocket = new GameObject();
+	rocket->setIsDamagingObject(true);
+	rocket->setDamage(200.0f);
+	rocket->setHealth(1.0f); // destroys momentally.
+	rocket->setMaxHealth(1.0f);
+	rocket->setUsePhysics(false);
+	rocket->setParentObject(this);
+	rocket->setObjectType(ObjectTypes::Rocket);
 }
 
 SpacecraftObject::SpacecraftObject(bool createChildren)
@@ -101,12 +111,28 @@ void SpacecraftObject::update(float delta)
 			i--;
 		}
 	}
+
+	for (int i = 0; i < rockets.size(); ++i)
+	{
+		rockets[i]->InitialRotation = this->InitialRotation;
+		rockets[i]->update(delta);
+		if (rockets[i]->isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
+		{
+			GameObject* currentRocket = rockets[i];
+			pLevel->removeObject(currentRocket);
+			delete currentRocket;
+			rockets.erase(rockets.begin() + i);
+			i--;
+		}
+	}
 }
 
 void SpacecraftObject::draw(bool useInstanced, int amount)
 {
 	for (int i = 0; i < laser_rays.size(); ++i)
 		laser_rays[i]->draw(useInstanced, amount);
+	for (int i = 0; i < rockets.size(); ++i)
+		rockets[i]->draw(useInstanced, amount);
 	GameObject::draw(useInstanced, amount);
 }
 
@@ -119,6 +145,7 @@ void SpacecraftObject::resize()
 
 	Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
 	Velocity = glm::vec2(Velocity.x * screenRatio.x, Velocity.y * screenRatio.y);
+	rocketStartVelocity = glm::vec2(rocketStartVelocity.x * screenRatio.x, rocketStartVelocity.y * screenRatio.y);
 
 	if (!pLevel->getBehaviour()->isUserInputBlocked())
 	{
@@ -134,6 +161,9 @@ void SpacecraftObject::resize()
 
 	for (int i = 0; i < laser_rays.size(); ++i)
 		laser_rays[i]->Position = glm::vec2(laser_rays[i]->Position.x * screenRatio.x, laser_rays[i]->Position.y * screenRatio.y);
+
+	for (int i = 0; i < rockets.size(); ++i)
+		rockets[i]->Position = glm::vec2(rockets[i]->Position.x * screenRatio.x, rockets[i]->Position.y * screenRatio.y);
 
 	laser_ray->resize();
 }
@@ -178,6 +208,12 @@ void SpacecraftObject::processKey(int key, int action, bool* key_pressed)
 		spawnLaserRay();
 		*key_pressed = true;
 	}
+
+	if (key == GLFW_KEY_R && action == GLFW_PRESS && *key_pressed == false)
+	{
+		spawnRocket();
+		*key_pressed = true;
+	}
 }
 
 void SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
@@ -188,14 +224,22 @@ void SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 
 	it = find(laser_rays.begin(), laser_rays.end(), notifiedObject);
 	if (it == laser_rays.end())
-		return;
+	{
+		it = find(rockets.begin(), rockets.end(), notifiedObject);
+		if (it == rockets.end())
+			return;
+	}
 
 	switch (code)
 	{
 	case Destroyed:
 	{
 		pLevel->removeObject(notifiedObject);
-		laser_rays.erase(it);
+		if (notifiedObject->getObjectType() == ObjectTypes::LaserRay)
+			laser_rays.erase(it);
+		else
+			if (notifiedObject->getObjectType() == ObjectTypes::Rocket)
+				rockets.erase(it);
 		delete notifiedObject;
 	}
 		break;
@@ -216,9 +260,19 @@ GameObject* SpacecraftObject::getLaserRay()
 	return laser_ray;
 }
 
+GameObject* SpacecraftObject::getRocket()
+{
+	return rocket;
+}
+
 void SpacecraftObject::setEnergyChangedCallback(void(*actionCallback)(float, float))
 {
 	energyChanged = actionCallback;
+}
+
+void SpacecraftObject::setRocketIntegrityChangedCallback(void(*actionCallback)(int, int))
+{
+	rocketIntegrityChanged = actionCallback;
 }
 
 void SpacecraftObject::setControlVelocityByRotation(bool control)
@@ -237,9 +291,47 @@ void SpacecraftObject::setUsedEnergy(float energy)
 	usedEnergy = energy;
 }
 
+void SpacecraftObject::setRocketDetail(int detail)
+{
+	if (rocketIntegrity / 100 < detail / 100 && rocketIntegrity < 300)
+	{
+		GameObject* newRocket = rocket->clone();
+		newRocket->setCollisionCheck(false);
+		newRocket->RelativePosition = rocketRelativePoses[rocketIntegrity / 100];
+		attachNewObject(newRocket, false);
+
+		rocketIntegrity = 100 * (detail / 100);
+	}
+	else
+		rocketIntegrity = detail;
+
+	if (rocketIntegrity > 300)
+		rocketIntegrity = 300;
+
+	if (rocketIntegrityChanged)
+		rocketIntegrityChanged(rocketIntegrity, 100);
+}
+
+void SpacecraftObject::setRocketStartVelocity(glm::vec2 vel)
+{
+	rocketStartVelocity = vel;
+}
+
+void SpacecraftObject::setRocketRelativePosition(glm::vec2 pos, int rocket_index)
+{
+	if (rocket_index < 0 || rocket_index > 2)
+		return;
+	rocketRelativePoses[rocket_index] = pos;
+}
+
 void SpacecraftObject::setLaserSoundName(std::string name)
 {
 	laserSoundName = name;
+}
+
+void SpacecraftObject::setRocketSoundName(std::string name)
+{
+	rocketSoundName = name;
 }
 
 float SpacecraftObject::getMaxEnergy()
@@ -250,6 +342,11 @@ float SpacecraftObject::getMaxEnergy()
 float SpacecraftObject::getUsedEnergy()
 {
 	return usedEnergy;
+}
+
+int SpacecraftObject::getRocketIntegrity()
+{
+	return rocketIntegrity;
 }
 
 void SpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -296,6 +393,27 @@ void SpacecraftObject::spawnLaserRay()
 		pLevel->playSound(laserSoundName, false);
 }
 
+void SpacecraftObject::spawnRocket()
+{
+	for(int i = 0; i < attachedObjects.size(); ++i)
+		if (attachedObjects[i]->getObjectType() == ObjectTypes::Rocket)
+		{
+			rockets.push_back(attachedObjects[i]);
+			removeAttachedObject(rockets.back());
+			rockets.back()->Velocity = rocketStartVelocity;
+			rockets.back()->Position = this->Position + rockets.back()->RelativePosition;
+			rockets.back()->setCollisionCheck(true);
+
+			rocketIntegrity -= 100;
+			if (rocketIntegrityChanged)
+				rocketIntegrityChanged(rocketIntegrity, 100);
+			if (rocketSoundName.compare(""))
+				pLevel->playSound(rocketSoundName, false);
+
+			break;
+		}
+}
+
 void SpacecraftObject::clear()
 {
 	for (int i = 0; i < laser_rays.size(); ++i)
@@ -303,9 +421,20 @@ void SpacecraftObject::clear()
 
 	laser_rays.clear();
 
+	for (int i = 0; i < rockets.size(); ++i)
+		rockets[i]->setParentObject(NULL);
+
+	rockets.clear();
+
 	if (laser_ray)
 	{
 		delete laser_ray;
 		laser_ray = NULL;
+	}
+
+	if (rocket)
+	{
+		delete rocket;
+		rocket = NULL;
 	}
 }

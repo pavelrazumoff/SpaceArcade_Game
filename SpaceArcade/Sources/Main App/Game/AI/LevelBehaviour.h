@@ -8,12 +8,13 @@
 */
 
 #include "../GameLevel.h"
+#include "../../../Miscellaneous/ResourceManager.h"
 
 class LevelBehaviour
 {
 public:
 	LevelBehaviour();
-	LevelBehaviour(GameLevel* level);
+	LevelBehaviour(GameLevel* level, ResourceManager* resManager);
 	virtual ~LevelBehaviour();
 
 	virtual void init();
@@ -37,6 +38,7 @@ public:
 protected:
 	// pointer to the controlling level.
 	GameLevel* pLevel = NULL;
+	ResourceManager* pResourceManager = NULL;
 	std::vector<AIController*> complexControllers;
 
 	// false - all user input is blocked.
@@ -44,4 +46,5 @@ protected:
 
 	// holds current sublevel.
 	int levelMode = -1;
+	int levelIteration = 0;
 };

@@ -5,7 +5,7 @@ class GUICheckBox : public GUIButton
 {
 public:
 	GUICheckBox();
-	GUICheckBox(SpriteRenderer* renderer);
+	GUICheckBox(SpriteRenderer* renderer, ISoundEngine* soundEngine = NULL);
 	virtual ~GUICheckBox();
 
 	virtual void init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool resizable);

@@ -5,7 +5,7 @@ class GUIObject
 {
 public:
 	GUIObject();
-	GUIObject(SpriteRenderer* renderer);
+	GUIObject(SpriteRenderer* renderer, ISoundEngine* soundEngine = NULL);
 	virtual ~GUIObject();
 
 	virtual void init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool resizable);
@@ -19,6 +19,9 @@ public:
 	virtual void processKey(int key, int action);
 	virtual void processMouseMove(GLFWwindow* window, float xpos, float ypos);
 	virtual void processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos);
+
+	void addSound(std::string soundName, std::string soundPath);
+	ISound*	playSound(std::string soundName, bool loop);
 
 	virtual bool checkForIntersect(float xpos, float ypos);
 
@@ -83,6 +86,9 @@ protected:
 
 	Texture2D* Texture = NULL;
 	SpriteRenderer* renderer = NULL;
+
+	ISoundEngine* pSoundEngine = NULL;
+	std::map<std::string, std::string> soundNames;
 
 	GUIObject* parent = NULL;
 	std::vector<GUIObject*> children;

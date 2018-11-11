@@ -16,14 +16,15 @@ enum StartLevelMode
 	SpaceCraftEnemyFighting,
 	EnergyBarriersShowing,
 	TeamCraftEnemyIntroducing,
-	TeamCraftEnemyFighting
+	TeamCraftEnemyFighting,
+	End
 };
 
 class StartLevelBehaviour : public LevelBehaviour
 {
 public:
 	StartLevelBehaviour();
-	StartLevelBehaviour(GameLevel* level);
+	StartLevelBehaviour(GameLevel* level, ResourceManager* resManager);
 	virtual ~StartLevelBehaviour();
 
 	virtual void init();
@@ -41,8 +42,49 @@ public:
 	void updateSpaceCraftFightMode(float delta);
 	void updateEnergyBarriersShowMode(float delta);
 
+	void updateParallelEvents(float delta);
+
+	void spawnMeteorites(float delta);
+	void spawnHealthKits(float delta);
+	void spawnEnemies(float delta);
+	void spawnEnergyBarriers(float delta);
+
+	void iterateLevel();
+
 	virtual bool checkForCollisionAddiction(GameObject* obj1, GameObject* obj2);
+
+	void setMaxNumberOfMeteorites(int number);
+	void setMaxNumberOfHealthKits(int number);
+	void setMaxNumberOfBarriers(int number);
+	void setMaxNumberOfTeamEnemies(int number);
+
+	void setMeteoritesZone(glm::vec2 zone);
+	void setEnergyBarriersZone(glm::vec2 zone);
+
+	void addController(AIController* controller);
 
 protected:
 	SpacecraftObject* playerCraft = NULL;
+	std::vector<AIController*> aiControllers;
+
+	// meteorites data.
+	int maxNumOfMeteorites = 0;
+	int numOfCreatedMeteorites = 0;
+	glm::vec2 meteoritesZone = glm::vec2(0, 300);		// min, max.
+
+	// kits data.
+	int maxNumOfHealthKits = 3;
+	int numOfCreatedHealthKits = 0;
+
+	// enemies data.
+	int maxNumOfBasicEnemies = 1;
+	int numOfBasicEnemies = 0;
+
+	int maxNumOfTeamEnemies = 0;
+	int numOfTeamEnemies = 0;
+
+	// energy barriers data.
+	int maxNumOfBarriers = 0;
+	int numOfCreatedBarriers = 0;
+	glm::vec2 barriersZone = glm::vec2(0, 300);		// min, max.
 };

@@ -107,7 +107,10 @@ Shader ResourceManager::GetShader(std::string name)
 
 Texture2D* ResourceManager::GetTexture(std::string name)
 {
-	return Textures[name];
+	auto it = Textures.find(name);
+	if (it != Textures.end())
+		return Textures[name];
+	return NULL;
 }
 
 Texture2D* ResourceManager::GetCubemap(std::string name)

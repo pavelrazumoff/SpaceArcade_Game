@@ -4,9 +4,10 @@ GUIObject::GUIObject() : minimumSize(glm::vec2(0)), maximumSize(glm::vec2(100000
 {
 }
 
-GUIObject::GUIObject(SpriteRenderer* renderer) : minimumSize(glm::vec2(0)), maximumSize(glm::vec2(1000000))
+GUIObject::GUIObject(SpriteRenderer* renderer, ISoundEngine* soundEngine) : minimumSize(glm::vec2(0)), maximumSize(glm::vec2(1000000))
 {
 	this->renderer = renderer;
+	this->pSoundEngine = soundEngine;
 }
 
 GUIObject::~GUIObject()
@@ -117,6 +118,19 @@ void GUIObject::processMouseClick(GLFWwindow* window, int button, int action, fl
 {
 	for (int i = 0; i < children.size(); ++i)
 		children[i]->processMouseClick(window, button, action, xpos, ypos);
+}
+
+void GUIObject::addSound(std::string soundName, std::string soundPath)
+{
+	soundNames[soundName] = soundPath;
+}
+
+ISound* GUIObject::playSound(std::string soundName, bool loop)
+{
+	auto it = soundNames.find(soundName);
+	if (it != soundNames.end())
+		return pSoundEngine->play2D(soundNames[soundName].c_str(), loop, false, true);
+	return NULL;
 }
 
 bool GUIObject::checkForIntersect(float xpos, float ypos)

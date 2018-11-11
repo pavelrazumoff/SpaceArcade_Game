@@ -5,11 +5,12 @@ LevelBehaviour::LevelBehaviour()
 	
 }
 
-LevelBehaviour::LevelBehaviour(GameLevel* level)
+LevelBehaviour::LevelBehaviour(GameLevel* level, ResourceManager* resManager)
 {
 	pLevel = level;
 	if (level)
 		level->setBehaviour(this);
+	pResourceManager = resManager;
 }
 
 LevelBehaviour::~LevelBehaviour()
@@ -19,7 +20,6 @@ LevelBehaviour::~LevelBehaviour()
 
 void LevelBehaviour::init()
 {
-
 }
 
 void LevelBehaviour::startBehaviour()

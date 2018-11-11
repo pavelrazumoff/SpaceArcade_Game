@@ -115,7 +115,7 @@ void MainApp::initGUI()
 
 	for (int i = 0; i < 3; ++i)
 	{
-		buttons[i] = new GUIButton(&renderer);
+		buttons[i] = new GUIButton(&renderer, res_manager->getSoundEngine());
 		menuLayout->addChild(buttons[i]);
 
 		buttons[i]->init(res_manager->GetTexture(textureNames[i]), glm::vec2(0.0f, 0.0f), spriteSize, true);
@@ -123,6 +123,7 @@ void MainApp::initGUI()
 		buttons[i]->setMinimumSize(glm::vec2(193, 60));
 		buttons[i]->setHoveredTexture(res_manager->GetTexture(textureNames_0[i]));
 		buttons[i]->setPressedTexture(res_manager->GetTexture(textureNames_1[i]));
+		buttons[i]->addSound("ClickEffect", res_manager->getSoundPath("ClickEffect"));
 	}
 
 	buttons[0]->setActionCallback(showScene);
@@ -300,11 +301,6 @@ void MainApp::initGUI()
 		screenBottomLayouts[i]->setLayoutFillPercent(bottomScreenPercents[i]);
 	}
 
-	std::string barCaptions[] = {
-		"Health",
-		"Energy"
-	};
-
 	std::string captionTexes[] = {
 		"healthCaption",
 		"energyCaption"
@@ -330,7 +326,7 @@ void MainApp::initGUI()
 		barFrame->addChild(barLayouts[i]);
 
 		barLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
-		barLayouts[i]->setIndents(glm::vec4(3, 7, 3, 7));
+		barLayouts[i]->setIndents(glm::vec4(3, 3, 3, 3));
 		barLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
 		barLayouts[i]->setAlignment(GUILayout_Alignment::Left);
 		barLayouts[i]->setUseParentDimensions(true);
@@ -340,13 +336,51 @@ void MainApp::initGUI()
 	barLayouts[0]->addChild(pHealthBar);
 
 	pHealthBar->init(res_manager->GetTexture("healthBar"), glm::vec2(0.0f, 0.0f), glm::vec2(250.0f, 30.0f), true);
-	pHealthBar->setSizeRatio(8.5f, true);
+	pHealthBar->setMinimumHeight(5.0f);
 
 	pEnergyBar = new GUIObject(&renderer);
 	barLayouts[1]->addChild(pEnergyBar);
 
 	pEnergyBar->init(res_manager->GetTexture("energyBar"), glm::vec2(0.0f, 0.0f), glm::vec2(250.0f, 30.0f), true);
-	pEnergyBar->setSizeRatio(8.5f, true);
+	pEnergyBar->setMinimumHeight(5.0f);
+
+	// Create rocket stats.
+	// create horizontal layout for rocket frames.
+	GUILayout* rocketsLayout = new GUILayout(&renderer);
+	screenBottomLayouts[1]->addChild(rocketsLayout);
+
+	rocketsLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	rocketsLayout->setIndents(glm::vec4(0, 0, 0, 0));
+	rocketsLayout->setMinimumHeight(45.0f);
+	rocketsLayout->setMaximumHeight(60.0f);
+	rocketsLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	rocketsLayout->setAlignment(GUILayout_Alignment::Left);
+	rocketsLayout->setSpace(20.0f);
+	//rocketsLayout->setColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.5f)); // debug color.
+
+	for (int i = 0; i < 3; ++i)
+	{
+		GUIObject* rocketFrame = new GUIObject(&renderer);
+		rocketsLayout->addChild(rocketFrame);
+
+		rocketFrame->init(res_manager->GetTexture("rocketFrame"), glm::vec2(0.0f, 0.0f), glm::vec2(60.0f, 60.0f), true);
+		rocketFrame->setSizeRatio(1.0f, true);
+
+		GUILayout* rocketBarLayout = new GUILayout(&renderer);
+		rocketFrame->addChild(rocketBarLayout);
+
+		rocketBarLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		rocketBarLayout->setTypeLayout(GUILayout_Type::Horizontal);
+		rocketBarLayout->setAlignment(GUILayout_Alignment::Left);
+		rocketBarLayout->setUseParentDimensions(true);
+
+		pRocketBars[i] = new GUIObject(&renderer);
+		rocketBarLayout->addChild(pRocketBars[i]);
+
+		pRocketBars[i]->init(res_manager->GetTexture("rocketContent"), glm::vec2(0.0f, 0.0f), glm::vec2(60.0f, 60.0f), true);
+		pRocketBars[i]->setSizeRatio(1.0f, true);
+		pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), true);
+	}
 
 	mainMenuLayout->resize();
 	settingsLayout->resize();
@@ -366,13 +400,14 @@ void MainApp::initScene()
 	base_level->setSoundEnginePointer(res_manager->getSoundEngine());
 	base_level->addSound("BackgroundSound", res_manager->getSoundPath("BackgroundSound"));
 	base_level->addSound("LaserSound", res_manager->getSoundPath("LaserSound"));
+	base_level->addSound("RocketSound", res_manager->getSoundPath("RocketSound"));
 	base_level->addSound("LaserEnemySound", res_manager->getSoundPath("LaserEnemySound"));
 	base_level->addSound("ExplosionEffect", res_manager->getSoundPath("ExplosionEffect"));
 	base_level->addSound("ExplosionEffect2", res_manager->getSoundPath("ExplosionEffect2"));
 	base_level->addSound("ElectricExplosionEffect", res_manager->getSoundPath("ElectricExplosionEffect"));
 	base_level->addSound("GeneratorEffect", res_manager->getSoundPath("GeneratorEffect"));
 
-	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(base_level);
+	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(base_level, res_manager);
 	levelBehaviours.push_back(basicBehaviour);
 
 	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
@@ -384,113 +419,38 @@ void MainApp::initScene()
 	pSpaceCraft->setExplosionSprite(res_manager->GetTexture("explosion"));
 	pSpaceCraft->setHealthChangedCallback(healthBarChanged);
 	pSpaceCraft->setEnergyChangedCallback(energyBarChanged);
+	pSpaceCraft->setRocketIntegrityChangedCallback(rocketIntegrityChanged);
 	pSpaceCraft->setNonPlayerObject(false);
 	pSpaceCraft->setLaserSoundName("LaserSound");
+	pSpaceCraft->setRocketSoundName("RocketSound");
 	pSpaceCraft->setExplosionSoundName("ExplosionEffect");
+	pSpaceCraft->setRocketStartVelocity(glm::vec2(0.0f, -450.0f));
 
-	pLaserRay->setObjectType(ObjectTypes::LaserRay);
 	pLaserRay->init(base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager->GetTexture("laserRayBlue"), glm::vec2(0.0f, -400.0f), false);
 	
-	for (int i = 0; i < 100; ++i)
-	{
-		GameObject* asteroid = new GameObject();
-		asteroid->setHealth(20.0f);
-		asteroid->setInitialHealth(20.0f);
-		asteroid->setDamage(10.0f);
-		asteroid->setExplosionTime(1.0f);
-		asteroid->setExplosionSprite(res_manager->GetTexture("explosion"));
-		asteroid->setUsePhysics(true);
-		asteroid->setObjectType(ObjectTypes::Meteorite);
-		asteroid->setExplosionSoundName("ExplosionEffect2");
-		//asteroid->hideFromLevel(true);
+	GameObject* pRocket = pSpaceCraft->getRocket();
+	pRocket->init(base_level, glm::vec2(0, 0), glm::vec2(16, 40), res_manager->GetTexture("rocket"), glm::vec2(0.0f, 0.0f), false);
+	pRocket->setExplosionTime(1.0f);
+	pRocket->setExplosionSprite(res_manager->GetTexture("explosion"));
 
-		asteroid->init(base_level, glm::vec2(rand() % (screenWidth - 100 + 1) + 50, rand() % (0 + 3000 + 1) - 3000),
-			glm::vec2(46, 47), res_manager->GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (150 - 50 + 1) + 50));
+	pSpaceCraft->setRocketRelativePosition(glm::vec2(42, 12), 0);
+	pSpaceCraft->setRocketRelativePosition(glm::vec2(4, 12), 1);
+	pSpaceCraft->setRocketRelativePosition(glm::vec2(22, -5), 2);
 
-		asteroid->InitialRotation = rand() % 360;
-		asteroid->Rotation = 10.0f;
-	}
+	basicBehaviour->setMaxNumberOfMeteorites(30);
+	basicBehaviour->setMaxNumberOfHealthKits(1);
+	basicBehaviour->setMaxNumberOfBarriers(3);
+	basicBehaviour->setMaxNumberOfTeamEnemies(2);
 
-	TeamShipAIController* teamController = new TeamShipAIController();
-	aiControllers.push_back(teamController);
-	basicBehaviour->addComplexAIController(teamController);
-	teamController->setTargetEnemy(pSpaceCraft);
+	basicBehaviour->setMeteoritesZone(glm::vec2(0.0f, 1000.0f));
+	basicBehaviour->setEnergyBarriersZone(glm::vec2(0.0f, 500.0f));
 
-	for (int i = 0; i < 3; ++i)
-	{
-		BasicShipAIController* spacecraftAI = new BasicShipAIController();
-		aiControllers.push_back(spacecraftAI);
-		spacecraftAI->setSourcePosition(glm::vec2(0.5f, 0.5f));
-		spacecraftAI->setControlledArea(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	/*
+	GameObject* energyShield = new GameObject();
 
-		SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
-		enemySpaceCraft->init(base_level, glm::vec2(0.0f, 0.0f), glm::vec2(85, 92), res_manager->GetTexture("spacecraftEnemy"), glm::vec2(0.0f, 0.0f));
-		enemySpaceCraft->InitialRotation = 180.0f;
-		enemySpaceCraft->VelocityScale = glm::vec2(200.0f, 100.0f);
-		enemySpaceCraft->setExplosionSprite(res_manager->GetTexture("explosion"));
-		enemySpaceCraft->setAIController(spacecraftAI);
-		enemySpaceCraft->setControlVelocityByRotation(true);
-		enemySpaceCraft->setObjectType(ObjectTypes::SpaceCraft);
-		enemySpaceCraft->setHealth(200.0f);
-		enemySpaceCraft->setInitialHealth(200.0f);
-		enemySpaceCraft->setLaserSoundName("LaserEnemySound");
-		enemySpaceCraft->setExplosionSoundName("ExplosionEffect");
-
-		pLaserRay = enemySpaceCraft->getLaserRay();
-		pLaserRay->setObjectType(ObjectTypes::LaserRay);
-		pLaserRay->init(base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager->GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f), false);
-
-		if(i > 0)
-			teamController->addController(spacecraftAI);
-	}
-
-	for (int i = 0; i < 10; ++i)
-	{
-		EnergyBarrierObject* barrier = new EnergyBarrierObject();
-		barrier->init(base_level, glm::vec2(rand() % (screenWidth - 170 + 1) + 10, rand() % (0 + 1000 + 1) - 1000),
-			glm::vec2(131, 35), res_manager->GetTexture("energyBarrier"), glm::vec2(0.0f, 60.0f));
-		barrier->setAnimationDuration(0.5f);
-		barrier->hideFromLevel(true);
-		barrier->setGeneratorSoundName("GeneratorEffect");
-
-		GameObject* generators[2];
-		std::string texes[] = { "leftGenerator", "rightGenerator" };
-		for (int j = 0; j < 2; ++j)
-		{
-			generators[j] = new GameObject();
-			generators[j]->setHealth(40.0f);
-			generators[j]->setInitialHealth(40.0f);
-			generators[j]->setDamage(10.0f);
-			generators[j]->setExplosionTime(1.0f);
-			generators[j]->setExplosionSprite(res_manager->GetTexture("explosion"));
-			generators[j]->setUsePhysics(true);
-			generators[j]->setObjectType(ObjectTypes::Basic);
-			generators[j]->setExplosionSoundName("ExplosionEffect2");
-
-			generators[j]->init(base_level, glm::vec2(0.0f, 0.0f), glm::vec2(33, 32), res_manager->GetTexture(texes[j]), glm::vec2(0.0f, 0.0f));
-		}
-
-		barrier->setGenerators(generators[0], generators[1]);
-
-		GameObject* electricShock = new GameObject();
-		electricShock->setDamage(0.1f);
-		electricShock->setHealth(1000.0f);
-		electricShock->setUsePhysics(false);
-		electricShock->setObjectType(ObjectTypes::ElectricShock);
-		electricShock->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(96, 84), res_manager->GetTexture("electricShock"), glm::vec2(0.0f, 0.0f));
-		electricShock->RelativePosition = glm::vec2(0.0f, 0.0f);
-		electricShock->setAnimationDuration(0.5f);
-		electricShock->setUseAnimation(true);
-		electricShock->setSelfDestroyTime(1.5f);
-
-		barrier->setElectricShock(electricShock);
-
-		BlastWaveObject* blastWave = new BlastWaveObject();
-		blastWave->init(base_level, glm::vec2(0.0f, 0.0f), glm::vec2(128, 128), res_manager->GetTexture("blastWave"), glm::vec2(0.0f, 0.0f));
-		blastWave->setAnimationDuration(0.5f);
-		blastWave->setSelfDestroyTime(0.5f);
-		blastWave->setExplosionSoundName("ElectricExplosionEffect");
-
-		barrier->setBlastWave(blastWave);
-	}
+	energyShield->init(base_level, glm::vec2(400, 100), glm::vec2(400, 157), res_manager->GetTexture("energyShield"), glm::vec2(0.0f, 0.0f));
+	energyShield->setUseAnimation(true);
+	energyShield->setAnimationDuration(0.5f);
+	energyShield->setUseBackAndForthAnimation(true);
+	energyShield->setObjectType(ObjectTypes::EnergyShield);*/
 }

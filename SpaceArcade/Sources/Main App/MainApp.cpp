@@ -111,6 +111,26 @@ void MainApp::updateEnergyBar(float usedEnergy, float maxEnergy)
 	}
 }
 
+void MainApp::updateRocketIntegrity(int integrity, int maxIntegrity)
+{
+	float currentIntegrity = integrity;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (pRocketBars[i])
+		{
+			if(currentIntegrity >= maxIntegrity)
+				pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), true);
+			else
+			{
+				float percent = currentIntegrity / (float)maxIntegrity;
+				pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f - percent, 0.0f), true);
+			}
+
+			currentIntegrity -= maxIntegrity;
+		}
+	}
+}
+
 void MainApp::resize(int width, int height)
 {
 	// Calls when window is resizing.
@@ -174,11 +194,6 @@ void MainApp::startGame()
 
 void MainApp::clearBuffers()
 {
-	for (int i = 0; i < levelBehaviours.size(); ++i)
-		delete levelBehaviours[i];
-
-	levelBehaviours.clear();
-
 	for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)
 		for (int i = 0; i < it->second.size(); ++i)
 			delete it->second[i];
@@ -188,10 +203,10 @@ void MainApp::clearBuffers()
 	delete base_level;
 	base_level = NULL;
 
-	for (int i = 0; i < aiControllers.size(); ++i)
-		delete aiControllers[i];
+	for (int i = 0; i < levelBehaviours.size(); ++i)
+		delete levelBehaviours[i];
 
-	aiControllers.clear();
+	levelBehaviours.clear();
 
 	delete res_manager;
 	res_manager = NULL;

@@ -90,6 +90,11 @@ void energyBarChanged(float usedEnergy, float maxEnergy)
 	app.updateEnergyBar(usedEnergy, maxEnergy);
 }
 
+void rocketIntegrityChanged(int integrity, int maxIntegrity)
+{
+	app.updateRocketIntegrity(integrity, maxIntegrity);
+}
+
 void showScene()
 {
 	app.currentPage = PageType::Game;

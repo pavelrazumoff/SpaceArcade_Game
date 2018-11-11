@@ -5,7 +5,7 @@ GUITextBox::GUITextBox()
 
 }
 
-GUITextBox::GUITextBox(SpriteRenderer* renderer) : GUIObject(renderer)
+GUITextBox::GUITextBox(SpriteRenderer* renderer, ISoundEngine* soundEngine) : GUIObject(renderer, soundEngine)
 {
 
 }

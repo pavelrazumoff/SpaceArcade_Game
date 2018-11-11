@@ -38,7 +38,7 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->setIsDamagingObject(this->isDamagingObject());
 	obj->setDamage(this->getDamage());
 	obj->setHealth(this->getHealth());
-	obj->setInitialHealth(this->getInitialHealth());
+	obj->setMaxHealth(this->getMaxHealth());
 	obj->setParentObject(this->getParentObject());
 	obj->setExplosionTime(this->explosionTime);
 	obj->setExplosionSprite(this->ExplosionSprite);
@@ -46,9 +46,12 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->startSelfDestroying(this->selfDestroying);
 	obj->setNonPlayerObject(this->nonPlayerObject);
 	obj->setUsePhysics(this->isUsePhysics());
+	obj->setCollisionCheck(this->collisionCheck);
 	obj->setAIController(this->getAIController());
 	obj->setControlVelocityByRotation(this->isControlVelocityByRotation());
 	obj->setUseAnimation(this->isUseAnimation());
+	obj->setUseBackAndForthAnimation(this->useBackAndForthAnim);
+	obj->setAnimationOrder(this->animationOrder);
 	obj->setAnimationDuration(this->getAnimationDuration());
 	obj->setDamageAsAttachment(this->isDamageAsAttachment());
 	obj->setImpulseFactor(this->impulseFactor);
@@ -79,23 +82,12 @@ void GameObject::update(float delta)
 				currentExplosionFrame = ExplosionSprite->numOfFrames - 1;
 		}
 		if (explosionTime <= 0.0f)
-			readyForDeath = true;
+			setReadyForDeath(true);
 	}
 
 	if (health > 0.0f)
 	{
-		if (useAnimation)
-		{
-			if (animationTime > 0.0f)
-			{
-				animationTime -= delta;
-				currentAnimationFrame = Sprite->numOfFrames - animationTime / animationTimeStep;
-				if(currentAnimationFrame >= Sprite->numOfFrames)
-					currentAnimationFrame = Sprite->numOfFrames - 1;
-			}
-			else
-				animationTime = animationDuration;
-		}
+		updateAnimation(delta);
 
 		if (selfDestroying && selfDestroyTime > 0.0f)
 		{
@@ -162,18 +154,67 @@ void GameObject::updateModelMatrix()
 	model = glm::scale(model, glm::vec3(Size, 1.0f)); // Last scale
 }
 
+void GameObject::updateAnimation(float delta)
+{
+	if (!useAnimation)
+		return;
+	
+	// if animation order is forward playing.
+	if (animationOrder)
+	{
+		if (animationTime > 0.0f)
+			animationTime -= delta;
+		else
+		{
+			if (!useBackAndForthAnim)
+				animationTime = animationDuration;
+			else
+			{
+				animationTime = 0.0f;
+				animationOrder = !animationOrder;
+			}
+		}
+	}
+	else
+	{
+		// animation order is backward playing.
+		if (animationTime < animationDuration)
+			animationTime += delta;
+		else
+		{
+			if (!useBackAndForthAnim)
+				animationTime = 0.0f;
+			else
+			{
+				animationTime = animationDuration;
+				animationOrder = !animationOrder;
+			}
+		}
+	}
+
+	currentAnimationFrame = Sprite->numOfFrames - animationTime / animationTimeStep;
+	if (currentAnimationFrame >= Sprite->numOfFrames)
+		currentAnimationFrame = Sprite->numOfFrames - 1;
+}
+
 void GameObject::draw(bool useInstanced, int amount)
 {
 	// prepare renderer for drawing instances, if it has to.
 	pLevel->getRenderer()->setUseInstanced(useInstanced, amount);
+
+	for (int i = 0; i < attachedOnBottom.size(); ++i)
+		attachedOnBottom[i]->draw(useInstanced, amount);
 
 	if(visible && health > 0.0f)
 		pLevel->getRenderer()->DrawSprite(this->Sprite, this->model, glm::vec4(0.0f), currentAnimationFrame);
 	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
 		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->model, glm::vec4(0.0f), currentExplosionFrame);
 
-	for (int i = 0; i < attachedObjects.size(); ++i)
-		attachedObjects[i]->draw(useInstanced, amount);
+	for (int i = 0; i < attachedOnTop.size(); ++i)
+		attachedOnTop[i]->draw(useInstanced, amount);
+
+	//for (int i = 0; i < attachedObjects.size(); ++i)
+	//	attachedObjects[i]->draw(useInstanced, amount);
 	
 	// drop renderer from drawing instances.
 	pLevel->getRenderer()->dropInstanced();
@@ -243,18 +284,24 @@ void GameObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool c
 {
 	if (health <= 0.0f && explosionTime <= 0.0f)
 	{
-		readyForDeath = true;
+		if (!readyForDeath)
+			setReadyForDeath(true);
 		return;
 	}
 }
 
-void GameObject::attachNewObject(GameObject* obj)
+void GameObject::attachNewObject(GameObject* obj, bool onTop)
 {
 	auto it = find(attachedObjects.begin(), attachedObjects.end(), obj);
 	if (it == attachedObjects.end())
 	{
 		attachedObjects.push_back(obj);
 		obj->setParentObject(this);
+
+		if (onTop)
+			attachedOnTop.push_back(obj);
+		else
+			attachedOnBottom.push_back(obj);
 	}
 }
 
@@ -263,6 +310,24 @@ void GameObject::removeAttachedObject(GameObject* obj)
 	auto it = find(attachedObjects.begin(), attachedObjects.end(), obj);
 	if (it != attachedObjects.end())
 		attachedObjects.erase(it);
+
+	it = find(attachedOnTop.begin(), attachedOnTop.end(), obj);
+	if (it != attachedOnTop.end())
+		attachedOnTop.erase(it);
+
+	it = find(attachedOnBottom.begin(), attachedOnBottom.end(), obj);
+	if (it != attachedOnBottom.end())
+		attachedOnBottom.erase(it);
+}
+
+void GameObject::addPostDeathObject(GameObject* obj)
+{
+	auto it = find(postDeathObjects.begin(), postDeathObjects.end(), obj);
+	if (it == postDeathObjects.end())
+	{
+		postDeathObjects.push_back(obj);
+		obj->hideFromLevel(true);
+	}
 }
 
 int GameObject::getAttachedObjectsSize()
@@ -270,11 +335,23 @@ int GameObject::getAttachedObjectsSize()
 	return attachedObjects.size();
 }
 
+int GameObject::getPostDeathObjectsSize()
+{
+	return postDeathObjects.size();
+}
+
 GameObject* GameObject::getAttachedObjectByIndex(int index)
 {
 	if (index < 0 || index >= attachedObjects.size())
 		return NULL;
 	return attachedObjects[index];
+}
+
+GameObject* GameObject::getPostDeathObjectByIndex(int index)
+{
+	if (index < 0 || index >= postDeathObjects.size())
+		return NULL;
+	return postDeathObjects[index];
 }
 
 bool GameObject::isObjectAttachedTo(GameObject* obj)
@@ -315,6 +392,15 @@ void GameObject::notify(GameObject* notifiedObject, NotifyCode code)
 	{
 		pLevel->removeObject(notifiedObject);
 		attachedObjects.erase(it);
+
+		it = find(attachedOnTop.begin(), attachedOnTop.end(), notifiedObject);
+		if (it != attachedOnTop.end())
+			attachedOnTop.erase(it);
+
+		it = find(attachedOnBottom.begin(), attachedOnBottom.end(), notifiedObject);
+		if (it != attachedOnBottom.end())
+			attachedOnBottom.erase(it);
+
 		delete notifiedObject;
 	}
 	break;
@@ -381,24 +467,33 @@ void GameObject::setDamage(float damage)
 
 void GameObject::setHealth(float hp)
 {
-	health = hp;
+	if (hp > maxHealth)
+		health = maxHealth;
+	else
+		health = hp;
 
 	if (health <= 0.0f && explosionSoundName.compare("") &&
 		!isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
 		pLevel->playSound(explosionSoundName, false);
 	
 	if (healthChanged)
-		healthChanged(this->health, this->initialHealth);
+		healthChanged(this->health, this->maxHealth);
 }
 
-void GameObject::setInitialHealth(float hp)
+void GameObject::setMaxHealth(float hp)
 {
-	initialHealth = hp;
+	maxHealth = hp;
 }
 
 void GameObject::setReadyForDeath(bool ready)
 {
 	readyForDeath = ready;
+	// here we have to be able to spawn some object before death.
+	for (int i = 0; i < postDeathObjects.size(); ++i)
+	{
+		postDeathObjects[i]->hideFromLevel(false);
+		postDeathObjects[i]->Position = this->Position;
+	}
 }
 
 void GameObject::setExplosionTime(float time)
@@ -426,6 +521,11 @@ void GameObject::setUsePhysics(bool physics)
 	usePhysics = physics;
 }
 
+void GameObject::setCollisionCheck(bool check)
+{
+	collisionCheck = check;
+}
+
 void GameObject::setAIController(AIController* controller)
 {
 	aiController = controller;
@@ -446,6 +546,16 @@ void GameObject::setDamageAsAttachment(bool damage)
 void GameObject::setUseAnimation(bool animation)
 {
 	useAnimation = animation;
+}
+
+void GameObject::setUseBackAndForthAnimation(bool backForth)
+{
+	useBackAndForthAnim = backForth;
+}
+
+void GameObject::setAnimationOrder(bool order)
+{
+	animationOrder = order;
 }
 
 void GameObject::setAnimationDuration(float duration)
@@ -507,9 +617,9 @@ float GameObject::getHealth()
 	return health;
 }
 
-float GameObject::getInitialHealth()
+float GameObject::getMaxHealth()
 {
-	return initialHealth;
+	return maxHealth;
 }
 
 bool GameObject::getReadyForDeath()
@@ -532,6 +642,11 @@ bool GameObject::isUsePhysics()
 	return usePhysics;
 }
 
+bool GameObject::isCheckingCollision()
+{
+	return collisionCheck;
+}
+
 AIController* GameObject::getAIController()
 {
 	return aiController;
@@ -550,6 +665,16 @@ bool GameObject::isDamageAsAttachment()
 bool GameObject::isUseAnimation()
 {
 	return useAnimation;
+}
+
+bool GameObject::isUseBackAndForthAnimation()
+{
+	return useBackAndForthAnim;
+}
+
+bool GameObject::getAnimationOrder()
+{
+	return animationOrder;
 }
 
 float GameObject::getAnimationDuration()
@@ -578,4 +703,6 @@ void GameObject::clear()
 	}
 
 	attachedObjects.clear();
+	attachedOnTop.clear();
+	attachedOnBottom.clear();
 }

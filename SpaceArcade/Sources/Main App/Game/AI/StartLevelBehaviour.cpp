@@ -1,12 +1,14 @@
 #include "StartLevelBehaviour.h"
-#include "AIController.h"
+#include "BasicShipAIController.h"
+#include "TeamShipAIController.h"
 
 StartLevelBehaviour::StartLevelBehaviour()
 {
 	init();
 }
 
-StartLevelBehaviour::StartLevelBehaviour(GameLevel* level) : LevelBehaviour(level)
+StartLevelBehaviour::StartLevelBehaviour(GameLevel* level, ResourceManager* resManager) :
+	LevelBehaviour(level, resManager)
 {
 	init();
 }
@@ -18,6 +20,8 @@ StartLevelBehaviour::~StartLevelBehaviour()
 
 void StartLevelBehaviour::init()
 {
+	LevelBehaviour::init();
+
 	levelMode = StartLevelMode::Introducing;
 	// block user input from beginning of the level.
 	blockUserInput();
@@ -79,6 +83,8 @@ void StartLevelBehaviour::update(float delta)
 	// update complex ai controllers, such as team controllers.
 	for (int i = 0; i < complexControllers.size(); ++i)
 		complexControllers[i]->update(delta);
+
+	updateParallelEvents(delta);
 }
 
 void StartLevelBehaviour::updateIntroduceMode(float delta)
@@ -115,24 +121,6 @@ void StartLevelBehaviour::updateMeteorMode(float delta)
 	// show all ai controlled objects when all meteorites was destroyed or simply gone away.
 	if (numOfMeteorites == 0)
 	{
-		glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
-		for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
-		{
-			GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
-
-			if (spacecraft->getAIController())
-			{
-				// show ai controlled spacecraft and position it a little above the screen.
-				spacecraft->hideFromLevel(false);
-				spacecraft->Position = glm::vec2(screenDimensions.x / 2 - 42, -100.0f);
-				spacecraft->getAIController()->setTargetEnemy(playerCraft);
-				// also block it's ai for a little time to be able to properly introduce this object on scene.
-				spacecraft->getAIController()->BlockAI();
-
-				break;
-			}
-		}
-
 		// change to the next level mode.
 		levelMode++;
 		blockUserInput();
@@ -145,20 +133,8 @@ void StartLevelBehaviour::updateSpaceCraftIntroduceMode(float delta)
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
-	int craftNum = 0;
-	int currentIndex = 0;
-
-	switch (levelMode)
-	{
-	case StartLevelMode::SpaceCraftEnemyIntroducing:
-		craftNum = 1;
-		break;
-	case StartLevelMode::TeamCraftEnemyIntroducing:
-		craftNum = 2;
-		break;
-	default:
-		break;
-	}
+	spawnEnemies(delta);
+	bool updateLevel = true;
 
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
 	{
@@ -166,26 +142,24 @@ void StartLevelBehaviour::updateSpaceCraftIntroduceMode(float delta)
 
 		if (spacecraft->getAIController())
 		{
-			if (currentIndex >= craftNum)
-				break;
-
 			if (spacecraft->Position.y < (screenDimensions.y / 3 - spacecraft->Size.y / 2))
 			{
 				spacecraft->Velocity.y = -100.0f * screenRatio.y;
 				spacecraft->setUsePhysics(false);
+				updateLevel = false;
 			}
 			else
 			{
 				spacecraft->Velocity.y = 0.0f;
 				spacecraft->setUsePhysics(true);
 				spacecraft->getAIController()->unblockAI();
-				levelMode++;
 				unblockUserInput();
 			}
-
-			currentIndex++;
 		}
 	}
+
+	if(updateLevel)
+		levelMode++;
 }
 
 void StartLevelBehaviour::updateSpaceCraftFightMode(float delta)
@@ -197,29 +171,22 @@ void StartLevelBehaviour::updateSpaceCraftFightMode(float delta)
 	{
 		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
 		if (spacecraft->getAIController())
-			currentNum++;
-	}
-
-	switch (levelMode)
-	{
-	case StartLevelMode::SpaceCraftEnemyFighting:
-		if (currentNum > 2)
 			return;
-		break;
-	case StartLevelMode::TeamCraftEnemyFighting:
-		if (currentNum > 0)
-			return;
-		break;
-	default:
-		break;
 	}
 
 	levelMode++;
 
-	if (levelMode == StartLevelMode::EnergyBarriersShowing)
+	switch (levelMode)
 	{
-		for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::EnergyBarrier); ++i)
-			pLevel->getObjectByTypeIndex(ObjectTypes::EnergyBarrier, i)->hideFromLevel(false);
+	case StartLevelMode::EnergyBarriersShowing:
+		spawnEnergyBarriers(delta);
+		return;
+	case StartLevelMode::End:
+		levelMode = StartLevelMode::MeteorFighting;
+		iterateLevel();
+		return;
+	default:
+		break;
 	}
 }
 
@@ -230,30 +197,283 @@ void StartLevelBehaviour::updateEnergyBarriersShowMode(float delta)
 	// show all ai controlled objects when all meteorites was destroyed or simply gone away.
 	if (numOfBarriers == 0)
 	{
-		int currentIndex = 0;
-		glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
-
-		for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
-		{
-			GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
-
-			if (spacecraft->getAIController())
-			{
-				// show ai controlled spacecraft and position it a little above the screen.
-				spacecraft->hideFromLevel(false);
-				spacecraft->Position = glm::vec2(screenDimensions.x / 4 + currentIndex * (screenDimensions.x / 2) - 42, -100.0f);
-				// also block it's ai for a little time to be able to properly introduce this object on scene.
-				spacecraft->getAIController()->BlockAI();
-
-				if (++currentIndex >= 2)
-					break;
-			}
-		}
-
 		// change to the next level mode.
 		levelMode++;
 		blockUserInput();
 	}
+}
+
+void StartLevelBehaviour::updateParallelEvents(float delta)
+{
+	// this function is called simultaneously to the other modes.
+	// it updates all events that are parallel to the current mode.
+	spawnMeteorites(delta);
+	spawnHealthKits(delta);
+}
+
+void StartLevelBehaviour::spawnMeteorites(float delta)
+{
+	// create some meteorites by groups.
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
+
+	int meteoriteDiff = maxNumOfMeteorites - numOfCreatedMeteorites;
+	if (meteoriteDiff <= 0)
+		return;
+	
+	int randomIndices[10];
+
+	for (int i = 0; i < 10; ++i)
+		randomIndices[i] = rand() % (100);
+
+	glm::vec2 detailSizes[] = {
+		glm::vec2(15, 37),
+		glm::vec2(24, 28),
+		glm::vec2(24, 36)
+	};
+
+	ImprovementStruct rocketKit;
+	rocketKit.rocketDetail = 40;
+	rocketKit.useRocketDetail = true;
+
+	int numOfMeteorites = 5;
+	if (meteoriteDiff < numOfMeteorites)
+		numOfMeteorites = meteoriteDiff;
+
+	for (int i = 0; i < numOfMeteorites; ++i)
+	{
+		GameObject* asteroid = new GameObject();
+		asteroid->setHealth(20.0f);
+		asteroid->setMaxHealth(20.0f);
+		asteroid->setDamage(10.0f);
+		asteroid->setExplosionTime(1.0f);
+		asteroid->setExplosionSprite(pResourceManager->GetTexture("explosion"));
+		asteroid->setUsePhysics(true);
+		asteroid->setObjectType(ObjectTypes::Meteorite);
+		asteroid->setExplosionSoundName("ExplosionEffect2");
+		//asteroid->hideFromLevel(true);
+
+		asteroid->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 100 + 1) + 50,
+			rand() % (int)(meteoritesZone.x + meteoritesZone.y + 1) - meteoritesZone.y), glm::vec2(46, 47),
+			pResourceManager->GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (150 - 50 + 1) + 50));
+
+		asteroid->InitialRotation = rand() % 360;
+		asteroid->Rotation = 10.0f;
+
+		asteroid->resize();
+
+		for (int j = 0; j < 10; ++j)
+			if (i == randomIndices[j])
+			{
+				ImprovementBoxObject* rocketDetail = new ImprovementBoxObject();
+
+				rocketDetail->init(pLevel, glm::vec2(0.0f, 0.0f), detailSizes[i % 3], pResourceManager->GetTexture("rocketDetail1_" + std::to_string(i % 3)),
+					glm::vec2(rand() % (20 + 1) - 20, rand() % (170 - 60 + 1) + 60));
+
+				rocketDetail->InitialRotation = rand() % 360;
+				rocketDetail->Rotation = 15.0f;
+				rocketDetail->setImprovement(rocketKit);
+
+				rocketDetail->resize();
+				asteroid->addPostDeathObject(rocketDetail);
+				break;
+			}
+	}
+
+	numOfCreatedMeteorites += numOfMeteorites;
+}
+
+void StartLevelBehaviour::spawnHealthKits(float delta)
+{
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
+	int kitsDiff = maxNumOfHealthKits - numOfCreatedHealthKits;
+
+	if (kitsDiff <= 0)
+		return;
+
+	for (int i = 0; i < kitsDiff; ++i)
+	{
+		ImprovementBoxObject* box = new ImprovementBoxObject();
+
+		box->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 300 + 1) + 100, rand() % (-1500 + 6000 + 1) - 6000),
+			glm::vec2(45, 45), pResourceManager->GetTexture("healthKit"), glm::vec2(0.0f, 70.0f));
+
+		box->InitialRotation = rand() % 360;
+		box->Rotation = 15.0f;
+
+		ImprovementStruct healthKit;
+		healthKit.health = 30.0f;
+		healthKit.useHealth = true;
+
+		box->setImprovement(healthKit);
+
+		box->resize();
+	}
+
+	numOfCreatedHealthKits = maxNumOfHealthKits;
+}
+
+void StartLevelBehaviour::spawnEnemies(float delta)
+{
+	int craftNum = 0;
+	TeamShipAIController* teamController = NULL;
+
+	switch (levelMode)
+	{
+	case StartLevelMode::SpaceCraftEnemyIntroducing:
+		craftNum = maxNumOfBasicEnemies - numOfBasicEnemies;
+		numOfBasicEnemies = maxNumOfBasicEnemies;
+		break;
+	case StartLevelMode::TeamCraftEnemyIntroducing:
+		craftNum = maxNumOfTeamEnemies - numOfTeamEnemies;
+		numOfTeamEnemies = maxNumOfTeamEnemies;
+		break;
+	default:
+		break;
+	}
+
+	if (craftNum <= 0)
+		return;
+
+	if (levelMode == StartLevelMode::TeamCraftEnemyIntroducing)
+	{
+		teamController = new TeamShipAIController();
+		addController(teamController);
+		addComplexAIController(teamController);
+		teamController->setTargetEnemy(playerCraft);
+	}
+
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	float zoneWidth = screenDimensions.x / craftNum;
+
+	for (int i = 0; i < craftNum; ++i)
+	{
+		BasicShipAIController* spacecraftAI = new BasicShipAIController();
+		addController(spacecraftAI);
+		spacecraftAI->setSourcePosition(glm::vec2(0.5f, 0.5f));
+		spacecraftAI->setControlledArea(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+
+		SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
+		enemySpaceCraft->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(85, 92), pResourceManager->GetTexture("spacecraftEnemy"), glm::vec2(0.0f, 0.0f));
+		enemySpaceCraft->InitialRotation = 180.0f;
+		enemySpaceCraft->VelocityScale = glm::vec2(200.0f, 100.0f);
+		enemySpaceCraft->setExplosionSprite(pResourceManager->GetTexture("explosion"));
+		enemySpaceCraft->setAIController(spacecraftAI);
+		enemySpaceCraft->setControlVelocityByRotation(true);
+		enemySpaceCraft->setObjectType(ObjectTypes::SpaceCraft);
+		enemySpaceCraft->setHealth(200.0f);
+		enemySpaceCraft->setMaxHealth(200.0f);
+		enemySpaceCraft->setLaserSoundName("LaserEnemySound");
+		enemySpaceCraft->setExplosionSoundName("ExplosionEffect");
+
+		GameObject* pLaserRay = enemySpaceCraft->getLaserRay();
+		pLaserRay->setObjectType(ObjectTypes::LaserRay);
+		pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f), false);
+
+		if (levelMode == StartLevelMode::TeamCraftEnemyIntroducing)
+			teamController->addController(spacecraftAI);
+
+		// resize it just before setting actual position.
+		enemySpaceCraft->resize();
+
+		// show ai controlled spacecraft and position it a little above the screen.
+		enemySpaceCraft->Position = glm::vec2(zoneWidth / 2 + i * zoneWidth - 42, -100.0f);
+		if (levelMode == StartLevelMode::SpaceCraftEnemyIntroducing)
+			enemySpaceCraft->getAIController()->setTargetEnemy(playerCraft);
+
+		// also block its ai for a little time to be able to properly introduce this object on scene.
+		enemySpaceCraft->getAIController()->BlockAI();
+	}
+}
+
+void StartLevelBehaviour::spawnEnergyBarriers(float delta)
+{
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
+	int barriersDiff = maxNumOfBarriers - numOfCreatedBarriers;
+
+	if (barriersDiff <= 0)
+		return;
+
+	for (int i = 0; i < barriersDiff; ++i)
+	{
+		EnergyBarrierObject* barrier = new EnergyBarrierObject();
+		barrier->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 170 + 1) + 10,
+			rand() % (int)(barriersZone.x + barriersZone.y + 1) - barriersZone.y), glm::vec2(131, 35),
+			pResourceManager->GetTexture("energyBarrier"), glm::vec2(0.0f, 60.0f));
+		barrier->setAnimationDuration(0.5f);
+		barrier->setGeneratorSoundName("GeneratorEffect");
+
+		GameObject* generators[2];
+		std::string texes[] = { "leftGenerator", "rightGenerator" };
+		for (int j = 0; j < 2; ++j)
+		{
+			generators[j] = new GameObject();
+			generators[j]->setHealth(40.0f);
+			generators[j]->setMaxHealth(40.0f);
+			generators[j]->setDamage(10.0f);
+			generators[j]->setExplosionTime(1.0f);
+			generators[j]->setExplosionSprite(pResourceManager->GetTexture("explosion"));
+			generators[j]->setUsePhysics(true);
+			generators[j]->setObjectType(ObjectTypes::Basic);
+			generators[j]->setExplosionSoundName("ExplosionEffect2");
+
+			generators[j]->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(33, 32), pResourceManager->GetTexture(texes[j]), glm::vec2(0.0f, 0.0f));
+		}
+
+		barrier->setGenerators(generators[0], generators[1]);
+
+		GameObject* electricShock = new GameObject();
+		electricShock->setDamage(0.1f);
+		electricShock->setHealth(1000.0f);
+		electricShock->setUsePhysics(false);
+		electricShock->setObjectType(ObjectTypes::ElectricShock);
+		electricShock->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(96, 84), pResourceManager->GetTexture("electricShock"), glm::vec2(0.0f, 0.0f));
+		electricShock->RelativePosition = glm::vec2(0.0f, 0.0f);
+		electricShock->setAnimationDuration(0.5f);
+		electricShock->setUseAnimation(true);
+		electricShock->setSelfDestroyTime(1.5f);
+
+		barrier->setElectricShock(electricShock);
+
+		BlastWaveObject* blastWave = new BlastWaveObject();
+		blastWave->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(128, 128), pResourceManager->GetTexture("blastWave"), glm::vec2(0.0f, 0.0f));
+		blastWave->setAnimationDuration(0.5f);
+		blastWave->setSelfDestroyTime(0.5f);
+		blastWave->setExplosionSoundName("ElectricExplosionEffect");
+
+		barrier->setBlastWave(blastWave);
+		blastWave->resize();
+		barrier->resize();
+	}
+
+	numOfCreatedBarriers = maxNumOfBarriers;
+}
+
+void StartLevelBehaviour::iterateLevel()
+{
+	levelIteration++;
+
+	// meteorites.
+	numOfCreatedMeteorites = 0;
+	maxNumOfMeteorites += 10;
+	meteoritesZone.y *= 1.2f;
+
+	// health kits.
+	numOfCreatedHealthKits = 0;
+	if (levelIteration % 2 == 0)
+		maxNumOfHealthKits++;
+
+	// energy barriers.
+	numOfCreatedBarriers = 0;
+	maxNumOfBarriers += 2;
+	barriersZone.y *= 1.2f;
+
+	// basic enemies.
+	numOfBasicEnemies = 0;
+
+	// team enemies.
+	numOfTeamEnemies = 0;
+	if (levelIteration % 2 == 0)
+		maxNumOfTeamEnemies++;
 }
 
 bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObject* obj2)
@@ -261,9 +481,11 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	// immediately discard non-destroyable objects.
 	switch (obj2->getObjectType())
 	{
-	case ObjectTypes::EnergyBarrier:
 	case ObjectTypes::BlastWave:
 	case ObjectTypes::ElectricShock:
+	case ObjectTypes::ImprovementBox:
+	case ObjectTypes::EnergyBarrier:
+	case ObjectTypes::None:
 		return false;
 		break;
 	default:
@@ -276,12 +498,12 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 		return true;
 		break;
 	case ObjectTypes::LaserRay:
-	{
-		if (obj2->getObjectType() != ObjectTypes::LaserRay)
+		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
+			obj2->getObjectType() != ObjectTypes::Rocket &&
+			obj2->getObjectType() != ObjectTypes::EnergyShield)
 			return true;
 		else
 			return false;
-	}
 		break;
 	case ObjectTypes::Meteorite:
 	case ObjectTypes::SpaceCraft:
@@ -294,16 +516,33 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 			return false;
 		break;
 	case ObjectTypes::ElectricShock:
-		if (obj2->getObjectType() != ObjectTypes::LaserRay)
+		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
+			obj2->getObjectType() != ObjectTypes::EnergyShield)
 			return true;
 		else
 			return false;
 		break;
 	case ObjectTypes::BlastWave:
+		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
+			obj2->getObjectType() != ObjectTypes::EnergyShield)
+			return true;
+		else
+			return false;
+		break;
+	case ObjectTypes::ImprovementBox:
+		if (obj2->getObjectType() == ObjectTypes::SpaceCraft)
+			return true;
+		else
+			return false;
+		break;
+	case ObjectTypes::Rocket:
 		if (obj2->getObjectType() != ObjectTypes::LaserRay)
 			return true;
 		else
 			return false;
+		break;
+	case ObjectTypes::EnergyShield:
+		return true;
 		break;
 	default:
 		break;
@@ -312,7 +551,45 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	return false;
 }
 
+void StartLevelBehaviour::setMaxNumberOfMeteorites(int number)
+{
+	maxNumOfMeteorites = number;
+}
+
+void StartLevelBehaviour::setMaxNumberOfHealthKits(int number)
+{
+	maxNumOfHealthKits = number;
+}
+
+void StartLevelBehaviour::setMaxNumberOfBarriers(int number)
+{
+	maxNumOfBarriers = number;
+}
+
+void StartLevelBehaviour::setMaxNumberOfTeamEnemies(int number)
+{
+	maxNumOfTeamEnemies = number;
+}
+
+void StartLevelBehaviour::setMeteoritesZone(glm::vec2 zone)
+{
+	meteoritesZone = zone;
+}
+
+void StartLevelBehaviour::setEnergyBarriersZone(glm::vec2 zone)
+{
+	barriersZone = zone;
+}
+
+void StartLevelBehaviour::addController(AIController* controller)
+{
+	aiControllers.push_back(controller);
+}
+
 void StartLevelBehaviour::clear()
 {
+	for (int i = 0; i < aiControllers.size(); ++i)
+		delete aiControllers[i];
 
+	aiControllers.clear();
 }

@@ -5,7 +5,7 @@ GUIButton::GUIButton()
 
 }
 
-GUIButton::GUIButton(SpriteRenderer* renderer) : GUIObject(renderer)
+GUIButton::GUIButton(SpriteRenderer* renderer, ISoundEngine* soundEngine) : GUIObject(renderer, soundEngine)
 {
 
 }
@@ -56,6 +56,7 @@ void GUIButton::processMouseMove(GLFWwindow* window, float xpos, float ypos)
 		switch (buttonState)
 		{
 		case GUI_ButtonState::DefaultState:
+			playSound("ClickEffect", false);
 			buttonState = GUI_ButtonState::HoveredState;
 			break;
 		default:

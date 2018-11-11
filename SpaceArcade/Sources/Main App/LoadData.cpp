@@ -26,6 +26,16 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//generatorRight.png", "rightGenerator", useGammaCorrection);
 	res_manager->LoadTexture("Images//electric_shock.png", "electricShock", useGammaCorrection);
 	res_manager->LoadTexture("Images//blast_wave.png", "blastWave", useGammaCorrection);
+	res_manager->LoadTexture("Images//health_kit.png", "healthKit", useGammaCorrection);
+	res_manager->LoadTexture("Images//energy_shield.png", "energyShield", useGammaCorrection);
+	res_manager->LoadTexture("Images//rocket.png", "rocket", useGammaCorrection);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		std::string path = "Images//rocket_detail1_" + std::to_string(i) + ".png";
+		std::string name = "rocketDetail1_" + std::to_string(i);
+		res_manager->LoadTexture(path.c_str(), name.c_str(), useGammaCorrection);
+	}
 
 	Texture2D* tex = res_manager->GetTexture("explosion");
 	tex->numOfColumns = 8;
@@ -47,14 +57,21 @@ void MainApp::loadShaders()
 	tex->numOfRows = 2;
 	tex->numOfFrames = 11;
 
+	tex = res_manager->GetTexture("energyShield");
+	tex->numOfColumns = 1;
+	tex->numOfRows = 5;
+	tex->numOfFrames = 5;
+
 	// sounds.
 	res_manager->addSound("Sounds//sound1_0.mp3", "BackgroundSound");
 	res_manager->addSound("Sounds//laser_effect.mp3", "LaserSound");
+	res_manager->addSound("Sounds//rocketFire_effect.wav", "RocketSound");
 	res_manager->addSound("Sounds//laser_effectEnemy.mp3", "LaserEnemySound");
 	res_manager->addSound("Sounds//explosion_effect1_0.mp3", "ExplosionEffect");
 	res_manager->addSound("Sounds//explosion_effect1_1.mp3", "ExplosionEffect2");
 	res_manager->addSound("Sounds//electricExplosion_effect.mp3", "ElectricExplosionEffect");
 	res_manager->addSound("Sounds//generator_effect.wav", "GeneratorEffect");
+	res_manager->addSound("Sounds//click_effect.wav", "ClickEffect");
 
 	// gui.
 	res_manager->LoadTexture("Images//Interface//playGameButton.png", "playGameButton", false);
@@ -81,7 +98,9 @@ void MainApp::loadShaders()
 
 	res_manager->LoadTexture("Images//Interface//healthBar.png", "healthBar", false);
 	res_manager->LoadTexture("Images//Interface//energyBar.png", "energyBar", false);
+	res_manager->LoadTexture("Images//Interface//rocketContent.png", "rocketContent", false);
 	res_manager->LoadTexture("Images//Interface//barFrame.png", "barFrame", false);
+	res_manager->LoadTexture("Images//Interface//rocketFrame.png", "rocketFrame", false);
 	res_manager->LoadTexture("Images//Interface//healthCaption.png", "healthCaption", false);
 	res_manager->LoadTexture("Images//Interface//energyCaption.png", "energyCaption", false);
 

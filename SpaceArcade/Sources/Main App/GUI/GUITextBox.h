@@ -5,7 +5,7 @@ class GUITextBox : public GUIObject
 {
 public:
 	GUITextBox();
-	GUITextBox(SpriteRenderer* renderer);
+	GUITextBox(SpriteRenderer* renderer, ISoundEngine* soundEngine = NULL);
 	virtual ~GUITextBox();
 
 	virtual void init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool resizable);

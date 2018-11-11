@@ -67,11 +67,11 @@ void GameLevel::updateInstances()
 		// if this object type uses instancing.
 		if (useInstancing[it->first])
 		{
-			// go through all objects if this type and check, if every object is appropriate for rendering.
+			// go through all objects of this type and check, if every object is appropriate for rendering.
 			for (int i = 0; i < it->second.size(); ++i)
 				if (!it->second[i]->getParentObject() && !it->second[i]->isHiddenFromLevel() && !it->second[i]->isOffTheScreen(screenDimensions))
 				{
-					// if this object is not explosing yet, put it to the instanced array,
+					// if this object is not exploding yet, put it to the instanced array,
 					// else put to the normals.
 					if (it->second[i]->getHealth() > 0.0f)
 						instancedObjects[it->first].push_back(it->second[i]);
@@ -199,7 +199,8 @@ void GameLevel::doCollisions()
 	for (int i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->isDamagingObject() && objects[i]->getHealth() > 0.0f &&
-			!objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions))
+			!objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions) &&
+			objects[i]->isCheckingCollision())
 		{
 			rect.x = objects[i]->Position.x;
 			rect.y = objects[i]->Position.y;
@@ -217,7 +218,8 @@ void GameLevel::doCollisions()
 	for (int i = 0; i < objects.size(); ++i)
 	{
 		if (objects[i]->isDamagingObject() && objects[i]->getHealth() > 0.0f &&
-			!objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions))
+			!objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions) &&
+			objects[i]->isCheckingCollision())
 		{
 			QTRectangle rect;
 			rect.x = objects[i]->Position.x;
@@ -286,7 +288,9 @@ void GameLevel::addNewObject(GameObject* obj)
 {
 	objects.push_back(obj);
 	typeObjects[obj->getObjectType()].push_back(obj);
-	objectsMatrices[obj->getObjectType()] = NULL;
+
+	if(typeObjects[obj->getObjectType()].size() == 0)
+		objectsMatrices[obj->getObjectType()] = NULL;
 }
 
 void GameLevel::removeObject(GameObject* obj)
@@ -352,12 +356,12 @@ void GameLevel::setInstancesTransforms(int object_type, glm::mat4* transforms, i
 		objectsMatrices[object_type] = NULL;
 	}
 
+	objectsMatrices[object_type] = transforms;
+
 	// if there is no current type in types array or there is no objects of this type, return.
 	auto it = typeObjects.find(object_type);
 	if (it == typeObjects.end() || it->second.size() == 0)
 		return;
-
-	objectsMatrices[object_type] = transforms;
 
 	// configure instanced array
 	// -------------------------

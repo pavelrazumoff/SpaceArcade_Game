@@ -21,7 +21,10 @@ enum ObjectTypes
 	SpaceCraft,
 	EnergyBarrier,
 	ElectricShock,
-	BlastWave
+	EnergyShield,
+	BlastWave,
+	ImprovementBox,
+	Rocket
 };
 
 class GameObject
@@ -42,6 +45,7 @@ public:
 	virtual void draw(bool useInstanced = false, int amount = 0);
 	virtual void update(float delta);
 	virtual void updateModelMatrix();
+	virtual void updateAnimation(float delta);
 
 	virtual void handleInput(GLFWwindow *window, float delta);
 	virtual void processKey(int key, int action, bool* key_pressed);
@@ -63,17 +67,20 @@ public:
 	void setIsDamagingObject(bool damaging);
 	void setDamage(float damage);
 	void setHealth(float hp);
-	void setInitialHealth(float hp);
+	void setMaxHealth(float hp);
 	void setReadyForDeath(bool ready);
 	void setExplosionTime(float time);
 	void setSelfDestroyTime(float time);
 	virtual void startSelfDestroying(bool start);
 	void setNonPlayerObject(bool nonPlayer);
 	void setUsePhysics(bool physics);
+	void setCollisionCheck(bool check);
 	void setAIController(AIController* controller);
 	virtual void setControlVelocityByRotation(bool control);
 	void setDamageAsAttachment(bool damage);
 	void setUseAnimation(bool animation);
+	void setUseBackAndForthAnimation(bool backForth);
+	void setAnimationOrder(bool order);
 	void setAnimationDuration(float duration);
 	void setImpulseFactor(float impulse);
 	void applyImpulse(float impulse);
@@ -86,14 +93,17 @@ public:
 	bool isDamagingObject();
 	float getDamage();
 	float getHealth();
-	float getInitialHealth();
+	float getMaxHealth();
 	float getExplosionTime();
 	bool isNonPlayerObject();
 	bool isUsePhysics();
+	bool isCheckingCollision();
 	AIController* getAIController();
 	bool isControlVelocityByRotation();
 	bool isDamageAsAttachment();
 	bool isUseAnimation();
+	bool isUseBackAndForthAnimation();
+	bool getAnimationOrder();
 	float getAnimationDuration();
 	float getImpulseFactor();
 
@@ -105,11 +115,14 @@ public:
 	virtual void makeCollision(GameObject* obj);
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 
-	void attachNewObject(GameObject* obj);
+	void attachNewObject(GameObject* obj, bool onTop = true);
 	void removeAttachedObject(GameObject* obj);
+	void addPostDeathObject(GameObject* obj);
 
 	int getAttachedObjectsSize();
+	int getPostDeathObjectsSize();
 	GameObject* getAttachedObjectByIndex(int index);
+	GameObject* getPostDeathObjectByIndex(int index);
 	bool isObjectAttachedTo(GameObject* obj);
 
 	// Object state
@@ -127,6 +140,9 @@ protected:
 	AIController* aiController = NULL;
 
 	std::vector<GameObject*> attachedObjects;
+	std::vector<GameObject*> attachedOnTop;
+	std::vector<GameObject*> attachedOnBottom;
+	std::vector<GameObject*> postDeathObjects;		// spawned after death of this object (when readyForDeath = true).
 
 	glm::mat4 model;
 
@@ -136,16 +152,19 @@ protected:
 	bool damagingObject = true;
 	float damage = 1.0f;
 	float health = 100.0f;
-	float initialHealth = 100.0f;
+	float maxHealth = 100.0f;
 	float explosionTime = 0.0f;
 	float selfDestroyTime = 0.0f;
 	bool selfDestroying = false;
 	bool nonPlayerObject = true;
 	bool usePhysics = false;
+	bool collisionCheck = true;
 	bool controlVelocityByRot = false;
 	bool damageAsAttachment = false;
-	bool useAnimation = false;
 
+	bool useAnimation = false;
+	bool useBackAndForthAnim = false;
+	bool animationOrder = true;				// true - forward, false - backward.
 	int currentAnimationFrame = 0;
 	float animationDuration = 0.0f;
 	float animationTime = 0.0f;

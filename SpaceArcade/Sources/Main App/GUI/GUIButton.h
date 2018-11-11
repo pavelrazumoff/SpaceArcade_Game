@@ -13,7 +13,7 @@ class GUIButton : public GUIObject
 {
 public:
 	GUIButton();
-	GUIButton(SpriteRenderer* renderer);
+	GUIButton(SpriteRenderer* renderer, ISoundEngine* soundEngine = NULL);
 	virtual ~GUIButton();
 
 	virtual void init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool resizable);

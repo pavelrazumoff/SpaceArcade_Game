@@ -136,6 +136,7 @@
     <ClInclude Include="Sources\Main App\Game\EnergyBarrierObject.h" />
     <ClInclude Include="Sources\Main App\Game\GameLevel.h" />
     <ClInclude Include="Sources\Main App\Game\GameObject.h" />
+    <ClInclude Include="Sources\Main App\Game\ImprovementBoxObject.h" />
     <ClInclude Include="Sources\Main App\Game\SpacecraftObject.h" />
     <ClInclude Include="Sources\Main App\GUI\GUIButton.h" />
     <ClInclude Include="Sources\Main App\GUI\GUICheckBox.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="Sources\Main App\Game\EnergyBarrierObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\GameLevel.cpp" />
     <ClCompile Include="Sources\Main App\Game\GameObject.cpp" />
+    <ClCompile Include="Sources\Main App\Game\ImprovementBoxObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\SpacecraftObject.cpp" />
     <ClCompile Include="Sources\Main App\GUI\GUIButton.cpp" />
     <ClCompile Include="Sources\Main App\GUI\GUICheckBox.cpp" />

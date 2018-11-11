@@ -147,6 +147,9 @@
     <ClInclude Include="Sources\Main App\Game\AI\TeamShipAIController.h">
       <Filter>Header Files\Main App\Game\AI</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\ImprovementBoxObject.h">
+      <Filter>Header Files\Main App\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image.cpp">
@@ -241,6 +244,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Main App\Game\AI\TeamShipAIController.cpp">
       <Filter>Source Files\Main App\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\ImprovementBoxObject.cpp">
+      <Filter>Source Files\Main App\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
