@@ -137,7 +137,7 @@ void EnergyBarrierObject::makeReaction(glm::vec2 difference, GameObject* otherOb
 	GameObject::makeReaction(difference, otherObj, collisionChecker);
 }
 
-void EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
+bool EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
 {
 	int generatorIndex = -1;
 	for (int i = 0; i < 2; ++i)
@@ -152,7 +152,7 @@ void EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
 	case NotifyCode::Destroyed:
 	{
 		if (generatorIndex < 0)
-			return;
+			return false;
 
 		pLevel->removeObject(notifiedObject);
 		generators[generatorIndex] = NULL;
@@ -169,6 +169,8 @@ void EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
 		}
 		else
 			readyForDeath = true;
+
+		return true;
 	}
 		break;
 	case NotifyCode::BlastFinished:
@@ -177,6 +179,8 @@ void EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
 	default:
 		break;
 	}
+
+	return false;
 }
 
 void EnergyBarrierObject::hideFromLevel(bool hide)

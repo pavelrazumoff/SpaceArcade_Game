@@ -224,7 +224,7 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::BossSpaceCraft); ++i)
 	{
-		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
+		BossSpacecraftObject* spacecraft = (BossSpacecraftObject*)pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
 
 		if (spacecraft->getAIController())
 		{
@@ -238,6 +238,7 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 			{
 				spacecraft->Velocity.y = 0.0f;
 				spacecraft->setUsePhysics(true);
+				spacecraft->enableShield(true);
 				spacecraft->getAIController()->unblockAI();
 				unblockUserInput();
 			}
@@ -251,6 +252,7 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 {
 	// In this mode a battle between player's spacecraft and enemies happens.
+	bool isBossAlive = false;
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::BossSpaceCraft); ++i)
 	{
 		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
@@ -260,6 +262,9 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 				return;
 			else
 			{
+				if (spacecraft->getHealth() > 0.0f)
+					isBossAlive = true;
+
 				bossHealthThreshold -= bossHealthThresholdStep;
 				if (bossHealthThreshold < 0.0f)
 					bossHealthThreshold = 0.0f;
@@ -268,8 +273,13 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 		}
 	}
 
-	levelMode++;
-	blockUserInput();
+	if (isBossAlive)
+	{
+		levelMode++;
+		blockUserInput();
+	}
+	else
+		levelMode += 2;		// skip boss leaving mode.
 }
 
 void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
@@ -282,7 +292,7 @@ void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
 
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::BossSpaceCraft); ++i)
 	{
-		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
+		BossSpacecraftObject* spacecraft = (BossSpacecraftObject*)pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
 
 		if (spacecraft->getAIController() && spacecraft->getHealth() > 0.0f)
 		{
@@ -296,6 +306,7 @@ void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
 			{
 				spacecraft->Velocity.y = 0.0f;
 				unblockUserInput();
+				spacecraft->enableShield(false);
 			}
 		}
 	}
@@ -324,7 +335,7 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 	int randomIndices[10];
 
 	for (int i = 0; i < 10; ++i)
-		randomIndices[i] = rand() % (100);
+		randomIndices[i] = rand() % (30);
 
 	glm::vec2 detailSizes[] = {
 		glm::vec2(15, 37),
@@ -526,6 +537,17 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 		bossSpaceCraft->addLaserStartPoint(laserPoints[i]);
 	bossSpaceCraft->setIndexOfPreferredLaserPoint(4);
 
+	GameObject* energyShield = new GameObject();
+
+	energyShield->init(pLevel, glm::vec2(0, 0), glm::vec2(289, 249), pResourceManager->GetTexture("energyShield"), glm::vec2(0.0f, 0.0f));
+	energyShield->RelativePosition = glm::vec2(-35, -47);
+	energyShield->setUseAnimation(true);
+	energyShield->setAnimationDuration(0.5f);
+	energyShield->setUseBackAndForthAnimation(true);
+	energyShield->setObjectType(ObjectTypes::EnergyShield);
+
+	bossSpaceCraft->setEnergyShield(energyShield);
+
 	// resize it just before setting actual position.
 	bossSpaceCraft->resize();
 
@@ -663,8 +685,13 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 		break;
 	case ObjectTypes::Meteorite:
 	case ObjectTypes::SpaceCraft:
-	case ObjectTypes::BossSpaceCraft:
 		return true;
+		break;
+	case ObjectTypes::BossSpaceCraft:
+		if (obj2->getObjectType() != ObjectTypes::EnergyShield)
+			return true;
+		else
+			return false;
 		break;
 	case ObjectTypes::EnergyBarrier:
 		if (obj2->getObjectType() != ObjectTypes::LaserRay)
@@ -687,7 +714,7 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 			return false;
 		break;
 	case ObjectTypes::ImprovementBox:
-		if (obj2->getObjectType() == ObjectTypes::SpaceCraft && !obj2->getAIController())
+		if (obj2->getObjectType() == ObjectTypes::SpaceCraft)
 			return true;
 		else
 			return false;
@@ -699,7 +726,10 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 			return false;
 		break;
 	case ObjectTypes::EnergyShield:
-		return true;
+		if (obj2->getObjectType() != ObjectTypes::BossSpaceCraft)
+			return true;
+		else
+			return false;
 		break;
 	default:
 		break;

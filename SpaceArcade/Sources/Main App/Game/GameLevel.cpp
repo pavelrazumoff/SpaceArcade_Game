@@ -307,8 +307,6 @@ void GameLevel::removeObject(GameObject* obj)
 		auto it3 = find(it2->second.begin(), it2->second.end(), obj);
 		if (it3 != it2->second.end())
 			it2->second.erase(it3);
-		else
-			std::cout << "Not Destroyed, type: " << obj->getObjectType() << "\n";
 	}
 }
 

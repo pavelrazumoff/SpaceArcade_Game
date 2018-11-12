@@ -23,7 +23,7 @@ public:
 	virtual void makeCollision(GameObject* obj);
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 
-	virtual void notify(GameObject* notifiedObject, NotifyCode code);
+	virtual bool notify(GameObject* notifiedObject, NotifyCode code);
 
 	virtual void hideFromLevel(bool hide);
 	void setGenerators(GameObject* left, GameObject* right);

@@ -54,7 +54,7 @@ public:
 	void setParentObject(GameObject* parent);
 	GameObject* getParentObject();
 
-	virtual void notify(GameObject* notifiedObject, NotifyCode code);
+	virtual bool notify(GameObject* notifiedObject, NotifyCode code);
 
 	void setExplosionSprite(Texture2D* sprite);
 	void setHealthChangedCallback(void(*actionCallback)(float, float));
@@ -121,8 +121,10 @@ public:
 	void addPostDeathObject(GameObject* obj);
 
 	int getAttachedObjectsSize();
+	int getAttachedObjectsSizeByType(int type);
 	int getPostDeathObjectsSize();
 	GameObject* getAttachedObjectByIndex(int index);
+	GameObject* getAttachedObjectByTypeIndex(int type, int index);
 	GameObject* getPostDeathObjectByIndex(int index);
 	bool isObjectAttachedTo(GameObject* obj);
 

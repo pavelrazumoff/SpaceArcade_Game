@@ -28,7 +28,7 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//electric_shock.png", "electricShock", useGammaCorrection);
 	res_manager->LoadTexture("Images//blast_wave.png", "blastWave", useGammaCorrection);
 	res_manager->LoadTexture("Images//health_kit.png", "healthKit", useGammaCorrection, &gameObjectsParams);
-	res_manager->LoadTexture("Images//energy_shield.png", "energyShield", useGammaCorrection);
+	res_manager->LoadTexture("Images//energy_shield.png", "energyShield", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//rocket.png", "rocket", useGammaCorrection, &gameObjectsParams);
 
 	for (int i = 0; i < 3; ++i)
@@ -58,6 +58,7 @@ void MainApp::loadShaders()
 	tex->numOfRows = 2;
 	tex->numOfFrames = 11;
 
+	
 	tex = res_manager->GetTexture("energyShield");
 	tex->numOfColumns = 1;
 	tex->numOfRows = 5;

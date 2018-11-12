@@ -19,16 +19,23 @@ public:
 	virtual void draw(bool useInstanced = false, int amount = 0);
 	virtual void update(float delta);
 
-	virtual void notify(GameObject* notifiedObject, NotifyCode code);
+	virtual bool notify(GameObject* notifiedObject, NotifyCode code);
 
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 
 	void spawnLaserRays();
+	void enableShield(bool enable);
+
+	void setEnergyShield(GameObject* shield);
+	GameObject* getEnergyShield();
 
 	void addLaserStartPoint(glm::vec2 pos);
 	void setIndexOfPreferredLaserPoint(int index);
 
 protected:
+	GameObject* pEnergyShieldTemplate = NULL;
+	GameObject* energyShield = NULL;
+
 	// relative laser starting positions.
 	std::vector<glm::vec2>	lasersStartPoints;
 	int indexOfPrefferedLaserPoint = 0;

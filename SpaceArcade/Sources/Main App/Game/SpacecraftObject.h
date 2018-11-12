@@ -22,7 +22,7 @@ public:
 	virtual void handleInput(GLFWwindow *window, float delta);
 	virtual void processKey(int key, int action, bool* key_pressed);
 
-	virtual void notify(GameObject* notifiedObject, NotifyCode code);
+	virtual bool notify(GameObject* notifiedObject, NotifyCode code);
 
 	void setLaserRay(GameObject* laser);
 
@@ -44,6 +44,7 @@ public:
 	float getMaxEnergy();
 	float getUsedEnergy();
 	int getRocketIntegrity();
+	int getRocketFreeIndex();
 
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 	void spawnLaserRay();
@@ -51,7 +52,7 @@ public:
 
 protected:
 	GameObject* laser_ray;
-	GameObject* rocket;
+	GameObject* pRocket;
 	std::vector<GameObject*> laser_rays;
 	std::vector<GameObject*> rockets;
 	std::string laserSoundName;

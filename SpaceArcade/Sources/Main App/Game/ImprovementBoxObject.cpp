@@ -65,7 +65,7 @@ void ImprovementBoxObject::makeReaction(glm::vec2 difference, GameObject* otherO
 		return;
 
 	SpacecraftObject* spacecraft = dynamic_cast<SpacecraftObject*>(otherObj);
-	if (!spacecraft)
+	if (!spacecraft || spacecraft->getAIController())
 		return;
 
 	improvement.improve(spacecraft);

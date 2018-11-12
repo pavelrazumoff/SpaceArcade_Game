@@ -46,21 +46,52 @@ void BossSpacecraftObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size,
 void BossSpacecraftObject::update(float delta)
 {
 	SpacecraftObject::update(delta);
+
+	if (energyShield)
+	{
+		energyShield->Position = this->Position + energyShield->RelativePosition;
+		energyShield->update(delta);
+	}
 }
 
 void BossSpacecraftObject::draw(bool useInstanced, int amount)
 {
 	SpacecraftObject::draw(useInstanced, amount);
+
+	if (energyShield && !energyShield->isHiddenFromLevel())
+		energyShield->draw(useInstanced, amount);
 }
 
 void BossSpacecraftObject::resize()
 {
 	SpacecraftObject::resize();
+
+	if (energyShield)
+		energyShield->resize();
 }
 
-void BossSpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
+bool BossSpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 {
-	SpacecraftObject::notify(notifiedObject, code);
+	if (SpacecraftObject::notify(notifiedObject, code))
+		return true;
+
+	switch (code)
+	{
+	case Destroyed:
+	{
+		pLevel->removeObject(notifiedObject);
+		if (notifiedObject == energyShield)
+			energyShield = NULL;
+		delete notifiedObject;
+
+		return true;
+	}
+	break;
+	default:
+		break;
+	}
+
+	return false;
 }
 
 void BossSpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -91,6 +122,37 @@ void BossSpacecraftObject::spawnLaserRays()
 		}
 }
 
+void BossSpacecraftObject::enableShield(bool enable)
+{
+	if (pEnergyShieldTemplate)
+	{
+		if (enable)
+		{
+			if (!energyShield)
+			{
+				energyShield = pEnergyShieldTemplate->clone();
+				energyShield->setParentObject(this);
+			}
+			else
+				energyShield->hideFromLevel(false);
+		}else
+			if (!enable && energyShield)
+				energyShield->hideFromLevel(true);
+	}
+}
+
+void BossSpacecraftObject::setEnergyShield(GameObject* shield)
+{
+	pEnergyShieldTemplate = shield;
+	pEnergyShieldTemplate->setParentObject(this);
+	pEnergyShieldTemplate->hideFromLevel(true);
+}
+
+GameObject* BossSpacecraftObject::getEnergyShield()
+{
+	return pEnergyShieldTemplate;
+}
+
 void BossSpacecraftObject::addLaserStartPoint(glm::vec2 pos)
 {
 	lasersStartPoints.push_back(pos);
@@ -103,5 +165,15 @@ void BossSpacecraftObject::setIndexOfPreferredLaserPoint(int index)
 
 void BossSpacecraftObject::clear()
 {
-	
+	if (energyShield)
+	{
+		energyShield->setParentObject(NULL);
+		energyShield = NULL;
+	}
+
+	if (pEnergyShieldTemplate)
+	{
+		delete pEnergyShieldTemplate;
+		pEnergyShieldTemplate = NULL;
+	}
 }

@@ -19,14 +19,14 @@ SpacecraftObject::SpacecraftObject()
 	laser_ray->setParentObject(this);
 	laser_ray->setObjectType(ObjectTypes::LaserRay);
 
-	rocket = new GameObject();
-	rocket->setIsDamagingObject(true);
-	rocket->setDamage(200.0f);
-	rocket->setHealth(1.0f); // destroys momentally.
-	rocket->setMaxHealth(1.0f);
-	rocket->setUsePhysics(false);
-	rocket->setParentObject(this);
-	rocket->setObjectType(ObjectTypes::Rocket);
+	pRocket = new GameObject();
+	pRocket->setIsDamagingObject(true);
+	pRocket->setDamage(200.0f);
+	pRocket->setHealth(1.0f); // destroys momentally.
+	pRocket->setMaxHealth(1.0f);
+	pRocket->setUsePhysics(false);
+	pRocket->setParentObject(this);
+	pRocket->setObjectType(ObjectTypes::Rocket);
 }
 
 SpacecraftObject::SpacecraftObject(bool createChildren)
@@ -216,9 +216,10 @@ void SpacecraftObject::processKey(int key, int action, bool* key_pressed)
 	}
 }
 
-void SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
+bool SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 {
-	GameObject::notify(notifiedObject, code);
+	if (GameObject::notify(notifiedObject, code))
+		return true;
 
 	std::vector<GameObject*>::iterator it;
 
@@ -227,7 +228,7 @@ void SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 	{
 		it = find(rockets.begin(), rockets.end(), notifiedObject);
 		if (it == rockets.end())
-			return;
+			return false;
 	}
 
 	switch (code)
@@ -241,11 +242,15 @@ void SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 			if (notifiedObject->getObjectType() == ObjectTypes::Rocket)
 				rockets.erase(it);
 		delete notifiedObject;
+
+		return true;
 	}
 		break;
 	default:
 		break;
 	}
+
+	return false;
 }
 
 void SpacecraftObject::setLaserRay(GameObject* laser)
@@ -262,7 +267,7 @@ GameObject* SpacecraftObject::getLaserRay()
 
 GameObject* SpacecraftObject::getRocket()
 {
-	return rocket;
+	return pRocket;
 }
 
 void SpacecraftObject::setEnergyChangedCallback(void(*actionCallback)(float, float))
@@ -295,9 +300,14 @@ void SpacecraftObject::setRocketDetail(int detail)
 {
 	if (rocketIntegrity / 100 < detail / 100 && rocketIntegrity < 300)
 	{
-		GameObject* newRocket = rocket->clone();
+		int rocketIndex = getRocketFreeIndex();
+		std::cout << "Rocket Index: " << rocketIndex << "\n";
+		if (rocketIndex < 0)
+			return;
+
+		GameObject* newRocket = pRocket->clone();
 		newRocket->setCollisionCheck(false);
-		newRocket->RelativePosition = rocketRelativePoses[rocketIntegrity / 100];
+		newRocket->RelativePosition = rocketRelativePoses[rocketIndex];
 		attachNewObject(newRocket, false);
 
 		rocketIntegrity = 100 * (detail / 100);
@@ -347,6 +357,30 @@ float SpacecraftObject::getUsedEnergy()
 int SpacecraftObject::getRocketIntegrity()
 {
 	return rocketIntegrity;
+}
+
+int SpacecraftObject::getRocketFreeIndex()
+{
+	int rocketsNum = getAttachedObjectsSizeByType(ObjectTypes::Rocket);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		bool occupied = false;
+		for (int j = 0; j < rocketsNum; ++j)
+		{
+			GameObject* rocket = getAttachedObjectByTypeIndex(ObjectTypes::Rocket, j);
+			if (rocket->RelativePosition == rocketRelativePoses[i])
+			{
+				occupied = true;
+				break;
+			}
+		}
+
+		if (!occupied)
+			return i;
+	}
+
+	return -1;
 }
 
 void SpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -432,9 +466,9 @@ void SpacecraftObject::clear()
 		laser_ray = NULL;
 	}
 
-	if (rocket)
+	if (pRocket)
 	{
-		delete rocket;
-		rocket = NULL;
+		delete pRocket;
+		pRocket = NULL;
 	}
 }

@@ -254,6 +254,9 @@ bool GameObject::checkCollision(GameObject* obj, glm::vec2& difference)
 		if (!attachedFirst && !attachedSecond)
 			return false;
 	}
+	else
+		if (this->parentObject && this->parentObject == obj->getParentObject())
+			return false;
 
 	// Collision x-axis?
 	bool collisionX = this->Position.x + this->Size.x >= obj->Position.x &&
@@ -335,6 +338,15 @@ int GameObject::getAttachedObjectsSize()
 	return attachedObjects.size();
 }
 
+int GameObject::getAttachedObjectsSizeByType(int type)
+{
+	int size = 0;
+	for (int i = 0; i < attachedObjects.size(); ++i)
+		if (attachedObjects[i]->getObjectType() == type)
+			size++;
+	return size;
+}
+
 int GameObject::getPostDeathObjectsSize()
 {
 	return postDeathObjects.size();
@@ -345,6 +357,19 @@ GameObject* GameObject::getAttachedObjectByIndex(int index)
 	if (index < 0 || index >= attachedObjects.size())
 		return NULL;
 	return attachedObjects[index];
+}
+
+GameObject* GameObject::getAttachedObjectByTypeIndex(int type, int index)
+{
+	for(int i = 0, k = 0; i < attachedObjects.size(); ++i)
+		if (attachedObjects[i]->getObjectType() == type)
+		{
+			if (k == index)
+				return attachedObjects[i];
+			k++;
+		}
+
+	return NULL;
 }
 
 GameObject* GameObject::getPostDeathObjectByIndex(int index)
@@ -380,11 +405,11 @@ GameObject* GameObject::getParentObject()
 	return parentObject;
 }
 
-void GameObject::notify(GameObject* notifiedObject, NotifyCode code)
+bool GameObject::notify(GameObject* notifiedObject, NotifyCode code)
 {
 	auto it = find(attachedObjects.begin(), attachedObjects.end(), notifiedObject);
 	if (it == attachedObjects.end())
-		return;
+		return false;
 
 	switch (code)
 	{
@@ -402,11 +427,15 @@ void GameObject::notify(GameObject* notifiedObject, NotifyCode code)
 			attachedOnBottom.erase(it);
 
 		delete notifiedObject;
+
+		return true;
 	}
 	break;
 	default:
 		break;
 	}
+
+	return false;
 }
 
 void GameObject::setExplosionSprite(Texture2D* sprite)

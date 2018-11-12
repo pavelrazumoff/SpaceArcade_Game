@@ -444,13 +444,4 @@ void MainApp::initScene()
 
 	basicBehaviour->setMeteoritesZone(glm::vec2(0.0f, 1000.0f));
 	basicBehaviour->setEnergyBarriersZone(glm::vec2(0.0f, 500.0f));
-
-	/*
-	GameObject* energyShield = new GameObject();
-
-	energyShield->init(base_level, glm::vec2(400, 100), glm::vec2(400, 157), res_manager->GetTexture("energyShield"), glm::vec2(0.0f, 0.0f));
-	energyShield->setUseAnimation(true);
-	energyShield->setAnimationDuration(0.5f);
-	energyShield->setUseBackAndForthAnimation(true);
-	energyShield->setObjectType(ObjectTypes::EnergyShield);*/
 }
