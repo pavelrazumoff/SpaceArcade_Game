@@ -396,6 +396,15 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 
 void StartLevelBehaviour::spawnHealthKits(float delta)
 {
+	// Spawn Health Kits every healthKitsFreq time.
+	currentHealthKitsTime += delta;
+
+	if (currentHealthKitsTime >= healthKitsFreq)
+	{
+		numOfCreatedHealthKits = 0;
+		currentHealthKitsTime = 0.0f;
+	}
+
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
 	int kitsDiff = maxNumOfHealthKits - numOfCreatedHealthKits;
 
@@ -406,7 +415,8 @@ void StartLevelBehaviour::spawnHealthKits(float delta)
 	{
 		ImprovementBoxObject* box = new ImprovementBoxObject();
 
-		box->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 300 + 1) + 100, rand() % (-1500 + 6000 + 1) - 6000),
+		float posY = healthKitsZone.x - i * (rand() % (int)(abs(healthKitsZone.y - healthKitsZone.x) / kitsDiff) + 500);
+		box->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 300 + 1) + 100, posY),
 			glm::vec2(45, 45), pResourceManager->GetTexture("healthKit"), glm::vec2(0.0f, 70.0f));
 
 		box->InitialRotation = rand() % 360;
@@ -636,8 +646,7 @@ void StartLevelBehaviour::iterateLevel()
 	meteoritesZone.y *= 1.2f;
 
 	// health kits.
-	numOfCreatedHealthKits = 0;
-	if (levelIteration % 2 == 0)
+	if (levelIteration % 4 == 0)
 		maxNumOfHealthKits++;
 
 	// energy barriers.
@@ -766,6 +775,16 @@ void StartLevelBehaviour::setMeteoritesZone(glm::vec2 zone)
 void StartLevelBehaviour::setEnergyBarriersZone(glm::vec2 zone)
 {
 	barriersZone = zone;
+}
+
+void StartLevelBehaviour::setHealthKitsZone(glm::vec2 zone)
+{
+	healthKitsZone = zone;
+}
+
+void StartLevelBehaviour::setHealthKitsSpawnFreq(float freq)
+{
+	healthKitsFreq = freq;
 }
 
 void StartLevelBehaviour::addController(AIController* controller)

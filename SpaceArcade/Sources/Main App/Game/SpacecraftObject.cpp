@@ -214,6 +214,12 @@ void SpacecraftObject::processKey(int key, int action, bool* key_pressed)
 		spawnRocket();
 		*key_pressed = true;
 	}
+
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS && *key_pressed == false)
+	{
+		constructRocket();
+		*key_pressed = true;
+	}
 }
 
 bool SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
@@ -301,7 +307,6 @@ void SpacecraftObject::setRocketDetail(int detail)
 	if (rocketIntegrity / 100 < detail / 100 && rocketIntegrity < 300)
 	{
 		int rocketIndex = getRocketFreeIndex();
-		std::cout << "Rocket Index: " << rocketIndex << "\n";
 		if (rocketIndex < 0)
 			return;
 
@@ -446,6 +451,30 @@ void SpacecraftObject::spawnRocket()
 
 			break;
 		}
+}
+
+void SpacecraftObject::constructRocket()
+{
+	int rocketIndex = getRocketFreeIndex();
+	if (rocketIndex < 0 || rocketIntegrity >= 300)
+		return;
+
+	setHealth(health - maxHealth / 2.5f);
+
+	if (health <= 0.0f)
+		return;
+
+	GameObject* newRocket = pRocket->clone();
+	newRocket->setCollisionCheck(false);
+	newRocket->RelativePosition = rocketRelativePoses[rocketIndex];
+	attachNewObject(newRocket, false);
+
+	rocketIntegrity += 100;
+	int leftDetails = rocketIntegrity % 100;
+	rocketIntegrity -= leftDetails;
+
+	if (rocketIntegrityChanged)
+		rocketIntegrityChanged(rocketIntegrity, 100);
 }
 
 void SpacecraftObject::clear()

@@ -116,6 +116,16 @@ void backToMainMenu()
 	app.currentPage = PageType::MainMenu;
 }
 
+void pauseScene()
+{
+	app.pauseGame();
+}
+
+void resumeScene()
+{
+	app.resumeGame();
+}
+
 void enableMultisampling(bool enable)
 {
 	app.useMultisampling = enable;

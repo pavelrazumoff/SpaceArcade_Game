@@ -37,8 +37,23 @@ void GameLevel::startLevel()
 	wasStarted = true;
 }
 
+void GameLevel::pauseLevel()
+{
+	wasPaused = true;
+}
+
+void GameLevel::resumeLevel()
+{
+	wasPaused = false;
+}
+
 void GameLevel::update(float delta)
 {
+	if (wasPaused)
+		return;
+
+	levelTime += delta;
+
 	if (behaviour)
 		behaviour->update(delta);
 
@@ -103,8 +118,8 @@ void GameLevel::draw()
 	cubemapShader.use();
 
 	glm::mat4 modelMat = glm::mat4();
-	modelMat = glm::rotate(modelMat, -(float)glfwGetTime() / 10, glm::vec3(1.0f, 0.0f, 0.0f));
-	modelMat = glm::rotate(modelMat, -(float)glfwGetTime() / 100, glm::vec3(0.0f, 1.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, -(float)levelTime / 10, glm::vec3(1.0f, 0.0f, 0.0f));
+	modelMat = glm::rotate(modelMat, -(float)levelTime / 100, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	cubemapShader.setMat4("model", modelMat);
 	glActiveTexture(GL_TEXTURE0);
@@ -161,10 +176,16 @@ void GameLevel::resize()
 	for (int i = 0; i < objects.size(); ++i)
 		if(!objects[i]->getParentObject())
 			objects[i]->resize();
+
+	for (int i = 0; i < objects.size(); ++i)
+		objects[i]->updateModelMatrix();
 }
 
 void GameLevel::handleInput(GLFWwindow *window, float delta)
 {
+	if (wasPaused)
+		return;
+
 	if (behaviour && behaviour->isUserInputBlocked())
 		return;
 
@@ -175,6 +196,9 @@ void GameLevel::handleInput(GLFWwindow *window, float delta)
 
 void GameLevel::processKey(int key, int action, bool* key_pressed)
 {
+	if (wasPaused)
+		return;
+
 	if (behaviour && behaviour->isUserInputBlocked())
 		return;
 

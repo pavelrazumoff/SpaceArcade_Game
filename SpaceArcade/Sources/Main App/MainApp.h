@@ -25,6 +25,8 @@ void showScene();
 void showSettings();
 void quitGame();
 void backToMainMenu();
+void pauseScene();
+void resumeScene();
 
 void enableMultisampling(bool enable);
 void enableGammaCorrection(bool enable);
@@ -36,7 +38,8 @@ enum PageType
 {
 	MainMenu = 0,
 	Settings,
-	Game
+	Game,
+	PauseGame
 };
 
 class MainApp
@@ -66,6 +69,7 @@ public:
 	void render();
 	void drawScene();
 	void drawSceneInterface();
+	void drawScenePausedInterface();
 	void drawMenuBackground();
 	void drawStartPage();
 	void drawSettingsPage();
@@ -97,6 +101,8 @@ public:
 	void setFullscreenMode(bool fullscreen);
 
 	void startGame();
+	void pauseGame();
+	void resumeGame();
 
 	GLFWwindow* getWindow();
 
@@ -154,4 +160,6 @@ private:
 	GUIObject* pHealthBar = NULL;
 	GUIObject* pEnergyBar = NULL;
 	GUIObject* pRocketBars[3];
+	GUIButton* pPauseButton = NULL;
+	GUIButton* pResumeButton = NULL;
 };

@@ -118,12 +118,16 @@ void MainApp::updateRocketIntegrity(int integrity, int maxIntegrity)
 	{
 		if (pRocketBars[i])
 		{
-			if(currentIntegrity >= maxIntegrity)
+			if (currentIntegrity >= maxIntegrity)
+			{
 				pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), true);
+				pRocketBars[i]->setTexture(res_manager->GetTexture("rocketFilledContent"));
+			}
 			else
 			{
 				float percent = currentIntegrity / (float)maxIntegrity;
 				pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f - percent, 0.0f), true);
+				pRocketBars[i]->setTexture(res_manager->GetTexture("rocketContent"));
 			}
 
 			currentIntegrity -= maxIntegrity;
@@ -190,6 +194,28 @@ void MainApp::setFullscreenMode(bool fullscreen)
 void MainApp::startGame()
 {
 	base_level->startLevel();
+}
+
+void MainApp::pauseGame()
+{
+	if (base_level)
+		base_level->pauseLevel();
+	if(pPauseButton)
+		pPauseButton->setVisible(false);
+	if (pResumeButton)
+		pResumeButton->setVisible(true);
+	currentPage = PageType::PauseGame;
+}
+
+void MainApp::resumeGame()
+{
+	if (base_level)
+		base_level->resumeLevel();
+	if (pPauseButton)
+		pPauseButton->setVisible(true);
+	if (pResumeButton)
+		pResumeButton->setVisible(false);
+	currentPage = PageType::Game;
 }
 
 void MainApp::clearBuffers()

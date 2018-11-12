@@ -10,7 +10,7 @@ void MainApp::loadShaders()
 
 	//textures.
 	// use this params for non-resized objects (not maximized mostly).
-	// this will clean all borders artefacts of textures.
+	// this will clean all borders artifacts of textures.
 	TextureParams gameObjectsParams;
 	gameObjectsParams.Filter_Min = GL_LINEAR_MIPMAP_NEAREST;
 	gameObjectsParams.Filter_Max = GL_NEAREST;
@@ -98,13 +98,22 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//Interface//checkBoxPressed.png", "checkBoxPressed", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//checkIcon.png", "checkIcon", false, &gameObjectsParams);
 
-	res_manager->LoadTexture("Images//Interface//healthBar.png", "healthBar", false);
-	res_manager->LoadTexture("Images//Interface//energyBar.png", "energyBar", false);
-	res_manager->LoadTexture("Images//Interface//rocketContent.png", "rocketContent", false);
-	res_manager->LoadTexture("Images//Interface//barFrame.png", "barFrame", false);
-	res_manager->LoadTexture("Images//Interface//rocketFrame.png", "rocketFrame", false);
+	res_manager->LoadTexture("Images//Interface//healthBar.png", "healthBar", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//energyBar.png", "energyBar", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//rocketContent.png", "rocketContent", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//rocketContentFilled.png", "rocketFilledContent", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//barFrame.png", "barFrame", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//rocketFrame.png", "rocketFrame", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//healthCaption.png", "healthCaption", false);
 	res_manager->LoadTexture("Images//Interface//energyCaption.png", "energyCaption", false);
+	res_manager->LoadTexture("Images//Interface//rocketFireCaption.png", "rocketFireCaption", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//rocketCreateCaption.png", "rocketCreateCaption", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//pauseButton.png", "pauseButton", false);
+	res_manager->LoadTexture("Images//Interface//pauseButtonHovered.png", "pauseButtonHovered", false);
+	res_manager->LoadTexture("Images//Interface//pauseButtonPressed.png", "pauseButtonPressed", false);
+	res_manager->LoadTexture("Images//Interface//resumeButton.png", "resumeButton", false);
+	res_manager->LoadTexture("Images//Interface//resumeButtonHovered.png", "resumeButtonHovered", false);
+	res_manager->LoadTexture("Images//Interface//resumeButtonPressed.png", "resumeButtonPressed", false);
 
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");

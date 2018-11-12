@@ -37,6 +37,7 @@ public:
 	void setMaximumWidth(int width);
 	void setMaximumHeight(int height);
 
+	void setTexture(Texture2D* tex);
 	void setRenderer(SpriteRenderer* renderer);
 	void setVisible(bool visible);
 	void setResizable(bool resizable);

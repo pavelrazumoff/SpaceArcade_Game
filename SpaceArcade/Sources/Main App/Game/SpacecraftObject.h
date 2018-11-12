@@ -49,6 +49,7 @@ public:
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 	void spawnLaserRay();
 	void spawnRocket();
+	void constructRocket();
 
 protected:
 	GameObject* laser_ray;

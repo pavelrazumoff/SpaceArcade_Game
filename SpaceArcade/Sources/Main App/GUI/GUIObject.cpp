@@ -212,6 +212,11 @@ void GUIObject::setMaximumHeight(int height)
 	maximumSize.y = height;
 }
 
+void GUIObject::setTexture(Texture2D* tex)
+{
+	Texture = tex;
+}
+
 void GUIObject::setRenderer(SpriteRenderer* renderer)
 {
 	this->renderer = renderer;

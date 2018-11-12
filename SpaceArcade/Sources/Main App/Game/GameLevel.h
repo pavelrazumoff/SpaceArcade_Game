@@ -21,6 +21,8 @@ public:
 	void									update(float delta);
 	void									updateInstances();
 	void									startLevel();			// calls once after all initializations and before updating.
+	void									pauseLevel();
+	void									resumeLevel();
 
 	void									handleInput(GLFWwindow *window, float delta);
 	void									processKey(int key, int action, bool* key_pressed);
@@ -81,4 +83,6 @@ private:
 	std::map<std::string, std::string>		soundNames;
 
 	bool									wasStarted = false;
+	bool									wasPaused = false;
+	double									levelTime = 0.0f;
 };

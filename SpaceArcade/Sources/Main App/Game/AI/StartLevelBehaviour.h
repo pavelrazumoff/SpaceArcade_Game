@@ -67,6 +67,9 @@ public:
 
 	void setMeteoritesZone(glm::vec2 zone);
 	void setEnergyBarriersZone(glm::vec2 zone);
+	void setHealthKitsZone(glm::vec2 zone);
+
+	void setHealthKitsSpawnFreq(float freq);
 
 	void addController(AIController* controller);
 
@@ -82,6 +85,9 @@ protected:
 	// kits data.
 	int maxNumOfHealthKits = 3;
 	int numOfCreatedHealthKits = 0;
+	float healthKitsFreq = 60.0f;
+	float currentHealthKitsTime = 0.0f;
+	glm::vec2 healthKitsZone = glm::vec2(-500, -1500);		// min, max.
 
 	// enemies data.
 	int maxNumOfBasicEnemies = 1;

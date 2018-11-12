@@ -501,10 +501,16 @@ void GameObject::setHealth(float hp)
 	else
 		health = hp;
 
-	if (health <= 0.0f && explosionSoundName.compare("") &&
-		!isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
-		pLevel->playSound(explosionSoundName, false);
-	
+	if (health <= 0.0f)
+	{
+		if (explosionSoundName.compare("") &&
+			!isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
+			pLevel->playSound(explosionSoundName, false);
+
+		for (int i = 0; i < attachedObjects.size(); ++i)
+			attachedObjects[i]->setVisible(false);
+	}
+
 	if (healthChanged)
 		healthChanged(this->health, this->maxHealth);
 }

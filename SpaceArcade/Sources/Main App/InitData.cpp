@@ -74,6 +74,7 @@ void MainApp::initGUI()
 	std::vector<GUIObject*> mainMenuObjects;
 	std::vector<GUIObject*> settingsObjects;
 	std::vector<GUIObject*> gameInterfaceObjects;
+	std::vector<GUIObject*> gamePauseInterfaceObjects;
 
 	// Main Menu.
 	GUILayout* mainMenuLayout = new GUILayout(&renderer);
@@ -267,11 +268,11 @@ void MainApp::initGUI()
 	gameLayout->setTypeLayout(GUILayout_Type::Vertical);
 	gameLayout->setAlignment(GUILayout_Alignment::Center);
 
-	GUILayout* screenLayouts[2];
-	int screenPercents[2] = { 8, 1 };
+	GUILayout* screenLayouts[3];
+	int screenPercents[3] = { 1, 7, 1 };
 
 	// Top Screen and bottom (health and energy bars).
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		screenLayouts[i] = new GUILayout(&renderer);
 		gameLayout->addChild(screenLayouts[i]);
@@ -285,6 +286,26 @@ void MainApp::initGUI()
 		//screenLayouts[i]->setColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.1f)); // debug color.
 	}
 
+	// Top Layout (Pause Menu).
+	GUILayout* screenTopLayout = new GUILayout(&renderer);
+	screenLayouts[0]->addChild(screenTopLayout);
+
+	screenTopLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	screenTopLayout->setIndents(glm::vec4(20, 0, 20, 0));
+	screenTopLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	screenTopLayout->setAlignment(GUILayout_Alignment::Left);
+
+	pPauseButton = new GUIButton(&renderer);
+	screenTopLayout->addChild(pPauseButton);
+
+	pPauseButton->init(res_manager->GetTexture("pauseButton"), glm::vec2(0.0f, 0.0f), glm::vec2(120.0f, 40.0f), true);
+	pPauseButton->setMaximumSize(glm::vec2(120.0f, 40.0f));
+	pPauseButton->setMinimumSize(glm::vec2(60.0f, 20.0f));
+	pPauseButton->setSizeRatio(3.0f, true);
+	pPauseButton->setHoveredTexture(res_manager->GetTexture("pauseButtonHovered"));
+	pPauseButton->setPressedTexture(res_manager->GetTexture("pauseButtonPressed"));
+	pPauseButton->setActionCallback(pauseScene);
+
 	GUILayout* screenBottomLayouts[3];
 	int bottomScreenPercents[3] = { 1, 5, 1 };
 
@@ -292,7 +313,7 @@ void MainApp::initGUI()
 	for (int i = 0; i < 3; ++i)
 	{
 		screenBottomLayouts[i] = new GUILayout(&renderer);
-		screenLayouts[1]->addChild(screenBottomLayouts[i]);
+		screenLayouts[2]->addChild(screenBottomLayouts[i]);
 
 		screenBottomLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
 		screenBottomLayouts[i]->setIndents(glm::vec4(20, 0, 20, 0));
@@ -326,7 +347,7 @@ void MainApp::initGUI()
 		barFrame->addChild(barLayouts[i]);
 
 		barLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
-		barLayouts[i]->setIndents(glm::vec4(3, 3, 3, 3));
+		barLayouts[i]->setIndents(glm::vec4(0, 0, 0, 0));
 		barLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
 		barLayouts[i]->setAlignment(GUILayout_Alignment::Left);
 		barLayouts[i]->setUseParentDimensions(true);
@@ -335,13 +356,13 @@ void MainApp::initGUI()
 	pHealthBar = new GUIObject(&renderer);
 	barLayouts[0]->addChild(pHealthBar);
 
-	pHealthBar->init(res_manager->GetTexture("healthBar"), glm::vec2(0.0f, 0.0f), glm::vec2(250.0f, 30.0f), true);
+	pHealthBar->init(res_manager->GetTexture("healthBar"), glm::vec2(0.0f, 0.0f), glm::vec2(260.0f, 40.0f), true);
 	pHealthBar->setMinimumHeight(5.0f);
 
 	pEnergyBar = new GUIObject(&renderer);
 	barLayouts[1]->addChild(pEnergyBar);
 
-	pEnergyBar->init(res_manager->GetTexture("energyBar"), glm::vec2(0.0f, 0.0f), glm::vec2(250.0f, 30.0f), true);
+	pEnergyBar->init(res_manager->GetTexture("energyBar"), glm::vec2(0.0f, 0.0f), glm::vec2(260.0f, 40.0f), true);
 	pEnergyBar->setMinimumHeight(5.0f);
 
 	// Create rocket stats.
@@ -364,6 +385,7 @@ void MainApp::initGUI()
 		rocketsLayout->addChild(rocketFrame);
 
 		rocketFrame->init(res_manager->GetTexture("rocketFrame"), glm::vec2(0.0f, 0.0f), glm::vec2(60.0f, 60.0f), true);
+		rocketFrame->setMaximumSize(glm::vec2(60.0f, 60.0f));
 		rocketFrame->setSizeRatio(1.0f, true);
 
 		GUILayout* rocketBarLayout = new GUILayout(&renderer);
@@ -382,13 +404,74 @@ void MainApp::initGUI()
 		pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), true);
 	}
 
+	std::string rocketTexes[] = { "rocketFireCaption", "rocketCreateCaption" };
+
+	for (int i = 0; i < 2; ++i)
+	{
+		GUIObject* rocketCaption = new GUIObject(&renderer);
+		rocketsLayout->addChild(rocketCaption);
+
+		rocketCaption->init(res_manager->GetTexture(rocketTexes[i]), glm::vec2(0.0f, 0.0f), glm::vec2(212.0f, 72.0f), true);
+		rocketCaption->setMaximumSize(glm::vec2(212.0f, 72.0f));
+		rocketCaption->setSizeRatio(2.94f, true);
+	}
+
+	// Game Pause Interface.
+	// Whole screen.
+	GUILayout* gamePauseLayout = new GUILayout(&renderer);
+	gamePauseInterfaceObjects.push_back(gamePauseLayout);
+
+	gamePauseLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	gamePauseLayout->setSpace(10);
+	gamePauseLayout->setTypeLayout(GUILayout_Type::Vertical);
+	gamePauseLayout->setAlignment(GUILayout_Alignment::Center);
+
+	GUILayout* screenPauseLayouts[2];
+	int screenPausePercents[2] = { 1, 8 };
+
+	// Top Screen and bottom (health and energy bars).
+	for (int i = 0; i < 2; ++i)
+	{
+		screenPauseLayouts[i] = new GUILayout(&renderer);
+		gamePauseLayout->addChild(screenPauseLayouts[i]);
+
+		screenPauseLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		screenPauseLayouts[i]->setSpace(10);
+		screenPauseLayouts[i]->setIndents(glm::vec4(10, 10, 10, 10));
+		screenPauseLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
+		screenPauseLayouts[i]->setAlignment(GUILayout_Alignment::Left);
+		screenPauseLayouts[i]->setLayoutFillPercent(screenPausePercents[i]);
+	}
+
+	// Top Layout (Resume Menu).
+	GUILayout* screenPauseTopLayout = new GUILayout(&renderer);
+	screenPauseLayouts[0]->addChild(screenPauseTopLayout);
+
+	screenPauseTopLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	screenPauseTopLayout->setIndents(glm::vec4(20, 0, 20, 0));
+	screenPauseTopLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	screenPauseTopLayout->setAlignment(GUILayout_Alignment::Left);
+
+	pResumeButton = new GUIButton(&renderer);
+	screenPauseTopLayout->addChild(pResumeButton);
+
+	pResumeButton->init(res_manager->GetTexture("resumeButton"), glm::vec2(0.0f, 0.0f), glm::vec2(120.0f, 40.0f), true);
+	pResumeButton->setMaximumSize(glm::vec2(120.0f, 40.0f));
+	pResumeButton->setMinimumSize(glm::vec2(60.0f, 20.0f));
+	pResumeButton->setSizeRatio(3.0f, true);
+	pResumeButton->setHoveredTexture(res_manager->GetTexture("resumeButtonHovered"));
+	pResumeButton->setPressedTexture(res_manager->GetTexture("resumeButtonPressed"));
+	pResumeButton->setActionCallback(resumeScene);
+
 	mainMenuLayout->resize();
 	settingsLayout->resize();
 	gameLayout->resize();
+	gamePauseLayout->resize();
 
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::MainMenu, mainMenuObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Settings, settingsObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Game, gameInterfaceObjects));
+	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::PauseGame, gamePauseInterfaceObjects));
 }
 
 void MainApp::initScene()
@@ -438,10 +521,13 @@ void MainApp::initScene()
 	pSpaceCraft->setRocketRelativePosition(glm::vec2(22, -5), 2);
 
 	basicBehaviour->setMaxNumberOfMeteorites(30);
-	basicBehaviour->setMaxNumberOfHealthKits(1);
+	basicBehaviour->setMaxNumberOfHealthKits(2);
 	basicBehaviour->setMaxNumberOfBarriers(3);
 	basicBehaviour->setMaxNumberOfTeamEnemies(2);
 
 	basicBehaviour->setMeteoritesZone(glm::vec2(0.0f, 1000.0f));
 	basicBehaviour->setEnergyBarriersZone(glm::vec2(0.0f, 500.0f));
+	basicBehaviour->setHealthKitsZone(glm::vec2(-1500.0f, -6000.0f));
+
+	basicBehaviour->setHealthKitsSpawnFreq(90.0f);
 }
