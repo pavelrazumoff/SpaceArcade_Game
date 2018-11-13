@@ -351,6 +351,36 @@ glm::vec4 GUIObject::getColor()
 	return color;
 }
 
+glm::vec2 GUIObject::getMaximumSize()
+{
+	return maximumSize;
+}
+
+glm::vec2 GUIObject::getMinimumSize()
+{
+	return minimumSize;
+}
+
+int GUIObject::getMaximumWidth()
+{
+	return maximumSize.x;
+}
+
+int GUIObject::getMaximumHeight()
+{
+	return maximumSize.y;
+}
+
+int GUIObject::getMinimumWidth()
+{
+	return minimumSize.x;
+}
+
+int GUIObject::getMinimumHeight()
+{
+	return minimumSize.y;
+}
+
 void GUIObject::clear()
 {
 	for (int i = 0; i < children.size(); ++i)

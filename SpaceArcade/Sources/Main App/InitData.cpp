@@ -222,7 +222,7 @@ void MainApp::initGUI()
 		textBox->setMaximumHeight(40.0f);
 		textBox->setText(textBoxData[i]);
 		textBox->setTextColor(glm::vec3(0.0, 0.68f, 1.0f));
-		textBox->setFont(res_manager->Fonts["SansNarrow"]);
+		textBox->setFont(res_manager->Fonts["TTLakes26"]);
 		textBox->setFontShader(&font_shader);
 		textBox->setFontBuffers(fontVAO, fontVBO);
 		textBox->setTextPos(glm::vec2(10.0f, 30.0f));
@@ -286,7 +286,7 @@ void MainApp::initGUI()
 		//screenLayouts[i]->setColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.1f)); // debug color.
 	}
 
-	// Top Layout (Pause Menu).
+	// Top Layout (Pause and Score Menu).
 	GUILayout* screenTopLayout = new GUILayout(&renderer);
 	screenLayouts[0]->addChild(screenTopLayout);
 
@@ -295,8 +295,21 @@ void MainApp::initGUI()
 	screenTopLayout->setTypeLayout(GUILayout_Type::Horizontal);
 	screenTopLayout->setAlignment(GUILayout_Alignment::Left);
 
+	GUILayout* topLayouts[2];
+	int topAlignments[] = { GUILayout_Alignment::Left, GUILayout_Alignment::Right };
+	for (int i = 0; i < 2; ++i)
+	{
+		topLayouts[i] = new GUILayout(&renderer);
+		screenTopLayout->addChild(topLayouts[i]);
+
+		topLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		topLayouts[i]->setIndents(glm::vec4(0, 0, 0, 0));
+		topLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
+		topLayouts[i]->setAlignment(topAlignments[i]);
+	}
+
 	pPauseButton = new GUIButton(&renderer);
-	screenTopLayout->addChild(pPauseButton);
+	topLayouts[0]->addChild(pPauseButton);
 
 	pPauseButton->init(res_manager->GetTexture("pauseButton"), glm::vec2(0.0f, 0.0f), glm::vec2(120.0f, 40.0f), true);
 	pPauseButton->setMaximumSize(glm::vec2(120.0f, 40.0f));
@@ -305,6 +318,21 @@ void MainApp::initGUI()
 	pPauseButton->setHoveredTexture(res_manager->GetTexture("pauseButtonHovered"));
 	pPauseButton->setPressedTexture(res_manager->GetTexture("pauseButtonPressed"));
 	pPauseButton->setActionCallback(pauseScene);
+
+	pScoreBox = new GUITextBox(&renderer);
+	topLayouts[1]->addChild(pScoreBox);
+
+	pScoreBox->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	pScoreBox->setMaximumWidth(140.0f);
+	pScoreBox->setMinimumHeight(40.0f);
+	pScoreBox->setMaximumHeight(40.0f);
+	pScoreBox->setText("Score: 0");
+	pScoreBox->setTextColor(glm::vec3(1.0, 0.68f, 0.0f));
+	pScoreBox->setFont(res_manager->Fonts["TTLakes30"]);
+	pScoreBox->setFontShader(&font_shader);
+	pScoreBox->setFontBuffers(fontVAO, fontVBO);
+	pScoreBox->setTextPos(glm::vec2(10.0f, 30.0f));
+	//pScoreBox->setColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 
 	GUILayout* screenBottomLayouts[3];
 	int bottomScreenPercents[3] = { 1, 5, 1 };
@@ -489,6 +517,7 @@ void MainApp::initScene()
 	base_level->addSound("ExplosionEffect2", res_manager->getSoundPath("ExplosionEffect2"));
 	base_level->addSound("ElectricExplosionEffect", res_manager->getSoundPath("ElectricExplosionEffect"));
 	base_level->addSound("GeneratorEffect", res_manager->getSoundPath("GeneratorEffect"));
+	base_level->setScoreChangedCallback(scoreChanged);
 
 	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(base_level, res_manager);
 	levelBehaviours.push_back(basicBehaviour);
@@ -522,11 +551,11 @@ void MainApp::initScene()
 
 	basicBehaviour->setMaxNumberOfMeteorites(30);
 	basicBehaviour->setMaxNumberOfHealthKits(2);
-	basicBehaviour->setMaxNumberOfBarriers(3);
+	basicBehaviour->setMaxNumberOfBarriers(16);
 	basicBehaviour->setMaxNumberOfTeamEnemies(2);
 
 	basicBehaviour->setMeteoritesZone(glm::vec2(0.0f, 1000.0f));
-	basicBehaviour->setEnergyBarriersZone(glm::vec2(0.0f, 500.0f));
+	basicBehaviour->setEnergyBarriersZone(glm::vec2(0.0f, 1000.0f));
 	basicBehaviour->setHealthKitsZone(glm::vec2(-1500.0f, -6000.0f));
 
 	basicBehaviour->setHealthKitsSpawnFreq(90.0f);

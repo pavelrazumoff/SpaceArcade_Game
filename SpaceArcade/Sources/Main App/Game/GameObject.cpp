@@ -55,6 +55,7 @@ void GameObject::cloneParams(GameObject* obj)
 	obj->setAnimationDuration(this->getAnimationDuration());
 	obj->setDamageAsAttachment(this->isDamageAsAttachment());
 	obj->setImpulseFactor(this->impulseFactor);
+	obj->setScoreContribution(this->scoreContribution);
 }
 
 void GameObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity, bool addToLevel)
@@ -142,6 +143,17 @@ void GameObject::update(float delta)
 	}
 }
 
+void GameObject::updatePaused(float delta)
+{
+	updateModelMatrix();
+
+	for (int i = 0; i < attachedObjects.size(); ++i)
+	{
+		attachedObjects[i]->Position = this->Position + attachedObjects[i]->RelativePosition;
+		attachedObjects[i]->updatePaused(delta);
+	}
+}
+
 void GameObject::updateModelMatrix()
 {
 	model = glm::mat4();
@@ -150,6 +162,9 @@ void GameObject::updateModelMatrix()
 	model = glm::translate(model, glm::vec3(0.5f * Size.x, 0.5f * Size.y, 0.0f)); // Move origin of rotation to center of quad
 	model = glm::rotate(model, glm::radians(this->InitialRotation), glm::vec3(0.0f, 0.0f, 1.0f)); // Then rotate
 	model = glm::translate(model, glm::vec3(-0.5f * Size.x, -0.5f * Size.y, 0.0f)); // Move origin back
+
+	if (health <= 0.0f)
+		explosionModel = glm::scale(model, glm::vec3(Size.x, Size.x, 1.0f));		// make it square.
 
 	model = glm::scale(model, glm::vec3(Size, 1.0f)); // Last scale
 }
@@ -208,13 +223,10 @@ void GameObject::draw(bool useInstanced, int amount)
 	if(visible && health > 0.0f)
 		pLevel->getRenderer()->DrawSprite(this->Sprite, this->model, glm::vec4(0.0f), currentAnimationFrame);
 	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
-		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->model, glm::vec4(0.0f), currentExplosionFrame);
+		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->explosionModel, glm::vec4(0.0f), currentExplosionFrame);
 
 	for (int i = 0; i < attachedOnTop.size(); ++i)
 		attachedOnTop[i]->draw(useInstanced, amount);
-
-	//for (int i = 0; i < attachedObjects.size(); ++i)
-	//	attachedObjects[i]->draw(useInstanced, amount);
 	
 	// drop renderer from drawing instances.
 	pLevel->getRenderer()->dropInstanced();
@@ -281,6 +293,13 @@ void GameObject::makeCollision(GameObject* obj)
 		return;
 
 	obj->setHealth(obj->getHealth() - this->damage);
+
+	GameObject* pPlayerObject = pLevel->getBehaviour()->getPlayerObject();
+	if (!pPlayerObject)
+		return;
+
+	if (obj->getHealth() <= 0.0f && (this == pPlayerObject || this->getParentObject() == pPlayerObject))
+		pLevel->addScore(obj->getScoreContribution());
 }
 
 void GameObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -612,6 +631,11 @@ void GameObject::applyImpulse(float impulse)
 	appliedImpulse = impulse;
 }
 
+void GameObject::setScoreContribution(int score)
+{
+	scoreContribution = score;
+}
+
 GameLevel* GameObject::getLevel()
 {
 	return pLevel;
@@ -720,6 +744,11 @@ float GameObject::getAnimationDuration()
 float GameObject::getImpulseFactor()
 {
 	return impulseFactor;
+}
+
+int GameObject::getScoreContribution()
+{
+	return scoreContribution;
 }
 
 void GameObject::clear()

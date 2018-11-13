@@ -95,6 +95,11 @@ void rocketIntegrityChanged(int integrity, int maxIntegrity)
 	app.updateRocketIntegrity(integrity, maxIntegrity);
 }
 
+void scoreChanged(int score)
+{
+	app.updateScore(score);
+}
+
 void showScene()
 {
 	app.currentPage = PageType::Game;

@@ -21,6 +21,8 @@ public:
 	virtual void update(float delta);
 	// this func calls only once in startLevel function after all level's initializations have been completed.
 	virtual void startBehaviour();
+	virtual void pauseBehaviour();
+	virtual void resumeBehaviour();
 
 	virtual void clear();
 
@@ -31,6 +33,7 @@ public:
 	virtual bool checkForCollisionAddiction(GameObject* obj1, GameObject* obj2) = 0;
 
 	GameLevel* getLevel();
+	GameObject* getPlayerObject();
 	bool isUserInputBlocked();
 
 	void addComplexAIController(AIController* controller);
@@ -38,6 +41,7 @@ public:
 protected:
 	// pointer to the controlling level.
 	GameLevel* pLevel = NULL;
+	GameObject* playerObject = NULL;
 	ResourceManager* pResourceManager = NULL;
 	std::vector<AIController*> complexControllers;
 

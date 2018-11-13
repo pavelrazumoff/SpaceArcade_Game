@@ -20,6 +20,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void healthBarChanged(float health, float initialHealth);
 void energyBarChanged(float usedEnergy, float maxEnergy);
 void rocketIntegrityChanged(int integrity, int maxIntegrity);
+void scoreChanged(int score);
 
 void showScene();
 void showSettings();
@@ -79,6 +80,7 @@ public:
 	void updateHealthBar(float health, float initialHealth);
 	void updateEnergyBar(float usedEnergy, float maxEnergy);
 	void updateRocketIntegrity(int integrity, int maxIntegrity);
+	void updateScore(int score);
 
 	// input.
 	void processInput(GLFWwindow *window);
@@ -153,6 +155,7 @@ private:
 	bool firstMouseUse = true;
 	bool lbutton_down = false;
 	bool key_pressed = false;
+	int prevScore = 0;
 
 	ResourceManager* res_manager = NULL;
 	SpriteRenderer renderer;
@@ -162,4 +165,5 @@ private:
 	GUIObject* pRocketBars[3];
 	GUIButton* pPauseButton = NULL;
 	GUIButton* pResumeButton = NULL;
+	GUITextBox* pScoreBox = NULL;
 };

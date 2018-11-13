@@ -42,12 +42,25 @@ void StartLevelBehaviour::startBehaviour()
 		// if this spacecraft is player controlled, save it and position it a little below the screen.
 		if (!spacecraft->isNonPlayerObject())
 		{
+			playerObject = spacecraft;
 			playerCraft = dynamic_cast<SpacecraftObject*>(spacecraft);
 			playerCraft->Position = glm::vec2(screenDimensions.x / 2 - playerCraft->Size.x / 2, screenDimensions.y + 50);
 		}
 	}
 
-	pLevel->playSound("BackgroundSound", true);
+	levelMusic = pLevel->playSound("BackgroundSound", true);
+}
+
+void StartLevelBehaviour::pauseBehaviour()
+{
+	if(levelMusic)
+		levelMusic->setIsPaused(true);
+}
+
+void StartLevelBehaviour::resumeBehaviour()
+{
+	if (levelMusic)
+		levelMusic->setIsPaused(false);
 }
 
 void StartLevelBehaviour::update(float delta)
@@ -228,11 +241,19 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 
 		if (spacecraft->getAIController())
 		{
+			// reset boss starting introduce position in case screen size was changed.
+			if (!introduceBegins)
+			{
+				spacecraft->Position.y = -spacecraft->Size.y - 10.0f;
+				introduceBegins = true;
+			}
+
 			if (spacecraft->Position.y < (screenDimensions.y / 3 - spacecraft->Size.y / 2))
 			{
 				spacecraft->Velocity.y = -50.0f * screenRatio.y;
 				spacecraft->setUsePhysics(false);
 				updateLevel = false;
+				spacecraft->hideFromLevel(false);
 			}
 			else
 			{
@@ -241,6 +262,7 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 				spacecraft->enableShield(true);
 				spacecraft->getAIController()->unblockAI();
 				unblockUserInput();
+				introduceBegins = false;
 			}
 		}
 	}
@@ -279,7 +301,10 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 		blockUserInput();
 	}
 	else
+	{
+		numOfBossEnemies = 0;
 		levelMode += 2;		// skip boss leaving mode.
+	}
 }
 
 void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
@@ -307,6 +332,7 @@ void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
 				spacecraft->Velocity.y = 0.0f;
 				unblockUserInput();
 				spacecraft->enableShield(false);
+				spacecraft->hideFromLevel(true);
 			}
 		}
 	}
@@ -421,6 +447,7 @@ void StartLevelBehaviour::spawnHealthKits(float delta)
 
 		box->InitialRotation = rand() % 360;
 		box->Rotation = 15.0f;
+		box->setScoreContribution(0);
 
 		ImprovementStruct healthKit;
 		healthKit.health = 30.0f;
@@ -465,6 +492,7 @@ void StartLevelBehaviour::spawnEnemies(float delta)
 	}
 
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = screenDimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 	float zoneWidth = screenDimensions.x / craftNum;
 
 	for (int i = 0; i < craftNum; ++i)
@@ -485,16 +513,17 @@ void StartLevelBehaviour::spawnEnemies(float delta)
 		enemySpaceCraft->setHealth(200.0f);
 		enemySpaceCraft->setLaserSoundName("LaserEnemySound");
 		enemySpaceCraft->setExplosionSoundName("ExplosionEffect");
+		enemySpaceCraft->setScoreContribution(50);
 
 		GameObject* pLaserRay = enemySpaceCraft->getLaserRay();
 		pLaserRay->setObjectType(ObjectTypes::LaserRay);
-		pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f), false);
+		pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f * screenRatio.y), false);
 
 		if (levelMode == StartLevelMode::TeamCraftEnemyIntroducing)
 			teamController->addController(spacecraftAI);
 
 		// resize it just before setting actual position.
-		enemySpaceCraft->resize();
+		//enemySpaceCraft->resize();
 
 		// show ai controlled spacecraft and position it a little above the screen.
 		enemySpaceCraft->Position = glm::vec2(zoneWidth / 2 + i * zoneWidth - 42, -100.0f);
@@ -512,6 +541,7 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 		return;
 
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = screenDimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 
 	BossShipAIController* bossAI = new BossShipAIController();
 	addController(bossAI);
@@ -530,10 +560,11 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	bossSpaceCraft->setMaxEnergy(200.0f);
 	bossSpaceCraft->setLaserSoundName("LaserEnemySound");
 	bossSpaceCraft->setExplosionSoundName("ExplosionEffect");
+	bossSpaceCraft->setScoreContribution(300);
 
 	GameObject* pLaserRay = bossSpaceCraft->getLaserRay();
 	pLaserRay->setObjectType(ObjectTypes::LaserRay);
-	pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f), false);
+	pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f * screenRatio.y), false);
 
 	glm::vec2 laserPoints[] = {
 		glm::vec2(50, 54),
@@ -555,11 +586,12 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	energyShield->setAnimationDuration(0.5f);
 	energyShield->setUseBackAndForthAnimation(true);
 	energyShield->setObjectType(ObjectTypes::EnergyShield);
+	energyShield->setScoreContribution(20);
 
 	bossSpaceCraft->setEnergyShield(energyShield);
 
 	// resize it just before setting actual position.
-	bossSpaceCraft->resize();
+	//bossSpaceCraft->resize();
 
 	// show ai controlled spacecraft and position it a little above the screen.
 	bossSpaceCraft->getAIController()->setTargetEnemy(playerCraft);
@@ -580,14 +612,74 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 	if (barriersDiff <= 0)
 		return;
 
+	glm::vec2 currentScreenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = (currentScreenDimensions / screenDimensions);
+
+	int denom = (7 * barriersDiff / 16);
+	if (denom == 0)
+		denom = 7;
+
+	float yShift = screenRatio.y * abs(barriersZone.y - barriersZone.x) / denom;
+
+	float currentShift = 0.0f;
+	int currentPosY = -1;
+	int posesDecrement = 0;
+	
+	glm::vec2 barrierSize = glm::vec2(131, 35);
+	glm::vec2 generatorSize = glm::vec2(33, 32);
+	glm::vec2 blastWaveSize = glm::vec2(128, 128);
+
+	float objRatio = barrierSize.x / barrierSize.y;
+	barrierSize.x *= screenRatio.x;
+	barrierSize.y = barrierSize.x / objRatio;
+
+	objRatio = generatorSize.x / generatorSize.y;
+	generatorSize.x *= screenRatio.x;
+	generatorSize.y = generatorSize.x / objRatio;
+
+	objRatio = blastWaveSize.x / blastWaveSize.y;
+	blastWaveSize.x *= screenRatio.x;
+	blastWaveSize.y = blastWaveSize.x / objRatio;
+
+	float barrierWidth = barrierSize.x + generatorSize.x;
+
+	glm::vec2 barrierPoses[] = {
+		glm::vec2(generatorSize.x, 0),
+		glm::vec2(currentScreenDimensions.x - barrierWidth, 0),
+		glm::vec2(currentScreenDimensions.x / 2 - barrierWidth / 2, 1),
+		glm::vec2(currentScreenDimensions.x / 4 - barrierWidth / 2, 2),
+		glm::vec2(3 * currentScreenDimensions.x / 4 - barrierWidth / 2, 2),
+		glm::vec2(currentScreenDimensions.x / 6 - barrierWidth / 2, 3),
+		glm::vec2(currentScreenDimensions.x / 2 - barrierWidth / 2, 3),
+		glm::vec2(5 * currentScreenDimensions.x / 6 - barrierWidth / 2, 3),
+		glm::vec2(2 * currentScreenDimensions.x / 5 - barrierWidth / 2, 4),
+		glm::vec2(3 * currentScreenDimensions.x / 5 - barrierWidth / 2, 4),
+		glm::vec2(currentScreenDimensions.x / 5 - barrierWidth / 2, 5),
+		glm::vec2(3 * currentScreenDimensions.x / 4 - barrierWidth / 2, 5),
+		glm::vec2(generatorSize.x, 6),
+		glm::vec2(2 * currentScreenDimensions.x / 5 - barrierWidth / 2, 6),
+		glm::vec2(3 * currentScreenDimensions.x / 5 - barrierWidth / 2, 6),
+		glm::vec2(currentScreenDimensions.x - barrierWidth, 6),
+	};
+
 	for (int i = 0; i < barriersDiff; ++i)
 	{
+		if (i > 0 && i / 16 > 0 && i % 16 == 0)
+			posesDecrement += 16;
+
+		if (currentPosY != barrierPoses[i - posesDecrement].y)
+		{
+			currentShift += -(rand() % (int)(yShift - yShift / 1.5f + 1) + yShift / 1.5f);
+			currentPosY = barrierPoses[i - posesDecrement].y;
+		}
+
 		EnergyBarrierObject* barrier = new EnergyBarrierObject();
-		barrier->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 170 + 1) + 10,
-			rand() % (int)(barriersZone.x + barriersZone.y + 1) - barriersZone.y), glm::vec2(131, 35),
-			pResourceManager->GetTexture("energyBarrier"), glm::vec2(0.0f, 60.0f));
+
+		barrier->init(pLevel, glm::vec2(barrierPoses[i - posesDecrement].x, currentShift), barrierSize,
+			pResourceManager->GetTexture("energyBarrier"), glm::vec2(0.0f, 120.0f));
 		barrier->setAnimationDuration(0.5f);
 		barrier->setGeneratorSoundName("GeneratorEffect");
+		barrier->setScoreContribution(0);
 
 		GameObject* generators[2];
 		std::string texes[] = { "leftGenerator", "rightGenerator" };
@@ -602,8 +694,9 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 			generators[j]->setUsePhysics(true);
 			generators[j]->setObjectType(ObjectTypes::Basic);
 			generators[j]->setExplosionSoundName("ExplosionEffect2");
+			generators[j]->setScoreContribution(15);
 
-			generators[j]->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(33, 32), pResourceManager->GetTexture(texes[j]), glm::vec2(0.0f, 0.0f));
+			generators[j]->init(pLevel, glm::vec2(0.0f, 0.0f), generatorSize, pResourceManager->GetTexture(texes[j]), glm::vec2(0.0f, 0.0f));
 		}
 
 		barrier->setGenerators(generators[0], generators[1]);
@@ -623,14 +716,12 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 		barrier->setElectricShock(electricShock);
 
 		BlastWaveObject* blastWave = new BlastWaveObject();
-		blastWave->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(128, 128), pResourceManager->GetTexture("blastWave"), glm::vec2(0.0f, 0.0f));
+		blastWave->init(pLevel, glm::vec2(0.0f, 0.0f), blastWaveSize, pResourceManager->GetTexture("blastWave"), glm::vec2(0.0f, 0.0f));
 		blastWave->setAnimationDuration(0.5f);
 		blastWave->setSelfDestroyTime(0.5f);
 		blastWave->setExplosionSoundName("ElectricExplosionEffect");
 
 		barrier->setBlastWave(blastWave);
-		blastWave->resize();
-		barrier->resize();
 	}
 
 	numOfCreatedBarriers = maxNumOfBarriers;
@@ -651,8 +742,8 @@ void StartLevelBehaviour::iterateLevel()
 
 	// energy barriers.
 	numOfCreatedBarriers = 0;
-	maxNumOfBarriers += 2;
-	barriersZone.y *= 1.2f;
+	maxNumOfBarriers += 4;
+	barriersZone.y *= 1.1f;
 
 	// basic enemies.
 	numOfBasicEnemies = 0;

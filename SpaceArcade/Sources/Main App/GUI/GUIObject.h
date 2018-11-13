@@ -58,6 +58,13 @@ public:
 	glm::vec4 getClipSpace();
 	glm::vec4 getColor();
 
+	glm::vec2 getMaximumSize();
+	glm::vec2 getMinimumSize();
+	int getMaximumWidth();
+	int getMaximumHeight();
+	int getMinimumWidth();
+	int getMinimumHeight();
+
 	bool isVisible();
 	bool getResizable();
 	bool isUseFixedPosition();

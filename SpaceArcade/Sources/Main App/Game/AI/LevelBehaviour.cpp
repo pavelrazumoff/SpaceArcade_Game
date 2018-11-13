@@ -27,6 +27,16 @@ void LevelBehaviour::startBehaviour()
 	
 }
 
+void LevelBehaviour::pauseBehaviour()
+{
+	
+}
+
+void LevelBehaviour::resumeBehaviour()
+{
+	
+}
+
 void LevelBehaviour::update(float delta)
 {
 	
@@ -50,6 +60,11 @@ void LevelBehaviour::unblockUserInput()
 GameLevel* LevelBehaviour::getLevel()
 {
 	return pLevel;
+}
+
+GameObject* LevelBehaviour::getPlayerObject()
+{
+	return playerObject;
 }
 
 bool LevelBehaviour::isUserInputBlocked()

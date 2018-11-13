@@ -19,6 +19,7 @@ public:
 
 	void									draw();
 	void									update(float delta);
+	void									updatePaused(float delta);
 	void									updateInstances();
 	void									startLevel();			// calls once after all initializations and before updating.
 	void									pauseLevel();
@@ -35,13 +36,17 @@ public:
 	void									addSound(std::string soundName, std::string soundPath);
 	ISound*									playSound(std::string soundName, bool loop);
 
+	void									setScoreChangedCallback(void(*actionCallback)(int));
+
 	void									setBehaviour(LevelBehaviour* behaviour);
 	void									setScreenIndents(glm::vec4 indents);
 	void									setPlayerRestrictionHeight(float height);
 	void									setUseInstancing(int object_type, bool use);
 	void									setInstancesTransforms(int object_type, glm::mat4* transforms, int size);
 	void									setSoundEnginePointer(ISoundEngine* soundEngine);
+	void									addScore(int score);
 
+	int										getScore();
 	LevelBehaviour*							getBehaviour();
 
 	int										getObjectsSize();
@@ -85,4 +90,7 @@ private:
 	bool									wasStarted = false;
 	bool									wasPaused = false;
 	double									levelTime = 0.0f;
+	int										score = 0;
+
+	void(*scoreChanged)(int) = NULL;
 };

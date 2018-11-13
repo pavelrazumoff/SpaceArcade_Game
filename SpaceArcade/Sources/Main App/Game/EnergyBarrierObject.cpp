@@ -103,16 +103,27 @@ void EnergyBarrierObject::resize()
 	GameObject::resize();
 
 	glm::vec2 screenRatio = pLevel->getRenderer()->getScreenRatio();
+	float barrierRatio = Size.x / Size.y;
 
-	Size = glm::vec2(Size.x * screenRatio.x, Size.y * screenRatio.y);
+	Size.x = Size.x * screenRatio.x;
+	Size.y = Size.x / barrierRatio;
 	for (int i = 0; i < 2; ++i)
 		if (generators[i])
 		{
-			generators[i]->Size = glm::vec2(generators[i]->Size.x * screenRatio.x, generators[i]->Size.y * screenRatio.y);
+			float genRatio = generators[i]->Size.x / generators[i]->Size.y;
+			generators[i]->Size.x = generators[i]->Size.x * screenRatio.x;
+			generators[i]->Size.y = generators[i]->Size.x / genRatio;
 			generators[i]->Position = glm::vec2(this->Position.x + i * this->Size.x, this->Position.y);
 			if (i == 0)
 				generators[i]->Position.x -= generators[i]->Size.x;
 		}
+
+	if (blastWave)
+	{
+		float waveRatio = blastWave->Size.x / blastWave->Size.y;
+		blastWave->Size.x = blastWave->Size.x * screenRatio.x;
+		blastWave->Size.y = blastWave->Size.x / waveRatio;
+	}
 }
 
 void EnergyBarrierObject::makeCollision(GameObject* obj)
@@ -213,6 +224,7 @@ void EnergyBarrierObject::setBlastWave(BlastWaveObject* wave)
 {
 	blastWave = wave;
 	blastWave->hideFromLevel(true);
+	blastWave->setParentObject(this);
 }
 
 void EnergyBarrierObject::setGeneratorSoundName(std::string name)
@@ -239,6 +251,7 @@ void EnergyBarrierObject::attachElectricShockToObject(GameObject* obj)
 void EnergyBarrierObject::spawnBlastWave(int generatorIndex)
 {
 	generators[generatorIndex]->setVisible(false);
+	blastWave->setParentObject(NULL);
 	blastWave->startSelfDestroying(true);
 	blastWave->setSender(this);
 	blastWave->hideFromLevel(false);
@@ -266,6 +279,7 @@ void EnergyBarrierObject::clear()
 
 	if (blastWave)
 	{
+		blastWave->setParentObject(NULL);
 		blastWave->setSender(NULL);
 		blastWave = NULL;
 	}

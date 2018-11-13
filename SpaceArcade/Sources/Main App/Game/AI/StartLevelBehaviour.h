@@ -33,6 +33,8 @@ public:
 	virtual void init();
 	virtual void update(float delta);
 	virtual void startBehaviour();
+	virtual void pauseBehaviour();
+	virtual void resumeBehaviour();
 
 	virtual void clear();
 
@@ -76,6 +78,7 @@ public:
 protected:
 	SpacecraftObject* playerCraft = NULL;
 	std::vector<AIController*> aiControllers;
+	ISound* levelMusic = NULL;
 
 	// meteorites data.
 	int maxNumOfMeteorites = 0;
@@ -100,6 +103,7 @@ protected:
 	int numOfBossEnemies = 0;
 	float bossHealthThreshold;
 	float bossHealthThresholdStep;
+	bool introduceBegins = false;
 
 	// energy barriers data.
 	int maxNumOfBarriers = 0;

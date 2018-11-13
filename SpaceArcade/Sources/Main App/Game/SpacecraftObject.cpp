@@ -166,6 +166,9 @@ void SpacecraftObject::resize()
 		rockets[i]->Position = glm::vec2(rockets[i]->Position.x * screenRatio.x, rockets[i]->Position.y * screenRatio.y);
 
 	laser_ray->resize();
+
+	for (int i = 0; i < attachedObjects.size(); ++i)
+		attachedObjects[i]->resize();
 }
 
 void SpacecraftObject::handleInput(GLFWwindow *window, float delta)

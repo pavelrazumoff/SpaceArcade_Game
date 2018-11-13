@@ -79,7 +79,8 @@ void MainApp::init()
 
 void MainApp::loadFonts()
 {
-	res_manager->loadFont("Fonts/PT Sans Narrow.ttf", "SansNarrow", 26);
+	res_manager->loadFont("Fonts/TTLakesCondensed-Bold.otf", "TTLakes26", 26);
+	res_manager->loadFont("Fonts/TTLakesCondensed-Bold.otf", "TTLakes30", 30);
 }
 
 void MainApp::update()
@@ -89,8 +90,17 @@ void MainApp::update()
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 
-	if(currentPage == PageType::Game)
+	switch (currentPage)
+	{
+	case PageType::Game:
 		base_level->update(deltaTime);
+		break;
+	case PageType::PauseGame:
+		base_level->updatePaused(deltaTime);
+		break;
+	default:
+		break;
+	}
 }
 
 void MainApp::updateHealthBar(float health, float initialHealth)
@@ -135,8 +145,31 @@ void MainApp::updateRocketIntegrity(int integrity, int maxIntegrity)
 	}
 }
 
+void MainApp::updateScore(int score)
+{
+	std::string textScore = std::to_string(score);
+	std::string text = "Score: " + textScore;
+	if (pScoreBox)
+	{
+		pScoreBox->setText(text);
+		
+		if (score >= 100 && textScore.size() > std::to_string(prevScore).size())
+		{
+			pScoreBox->setMaximumWidth(pScoreBox->getMaximumWidth() + 15);
+			renderer.resize(screenWidth, screenHeight);
+			for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+				gui_objects[currentPage][i]->resize();
+		}
+	}
+
+	prevScore = score;
+}
+
 void MainApp::resize(int width, int height)
 {
+	if (width == 0 || height == 0)
+		return;
+
 	// Calls when window is resizing.
 	screenWidth = width;
 	screenHeight = height;

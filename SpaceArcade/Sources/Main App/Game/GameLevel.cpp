@@ -40,11 +40,15 @@ void GameLevel::startLevel()
 void GameLevel::pauseLevel()
 {
 	wasPaused = true;
+	if(behaviour)
+		behaviour->pauseBehaviour();
 }
 
 void GameLevel::resumeLevel()
 {
 	wasPaused = false;
+	if (behaviour)
+		behaviour->resumeBehaviour();
 }
 
 void GameLevel::update(float delta)
@@ -66,6 +70,13 @@ void GameLevel::update(float delta)
 	// here we sort all of our visible objects on the arrays of instances (one object look, that'll be draw many times),
 	// same type of instanced but have different look (explosions) and basic non-instanced objects.
 	updateInstances();
+}
+
+void GameLevel::updatePaused(float delta)
+{
+	for (int i = 0; i < objects.size(); ++i)
+		if (!objects[i]->getParentObject() && !objects[i]->isHiddenFromLevel())
+			objects[i]->updatePaused(delta);
 }
 
 void GameLevel::updateInstances()
@@ -347,6 +358,11 @@ ISound* GameLevel::playSound(std::string soundName, bool loop)
 	return NULL;
 }
 
+void GameLevel::setScoreChangedCallback(void(*actionCallback)(int))
+{
+	scoreChanged = actionCallback;
+}
+
 void GameLevel::setBehaviour(LevelBehaviour* behaviour)
 {
 	this->behaviour = behaviour;
@@ -417,6 +433,19 @@ void GameLevel::setInstancesTransforms(int object_type, glm::mat4* transforms, i
 void GameLevel::setSoundEnginePointer(ISoundEngine* soundEngine)
 {
 	pSoundEngine = soundEngine;
+}
+
+void GameLevel::addScore(int score)
+{
+	this->score += score;
+
+	if (scoreChanged)
+		scoreChanged(this->score);
+}
+
+int GameLevel::getScore()
+{
+	return score;
 }
 
 LevelBehaviour* GameLevel::getBehaviour()

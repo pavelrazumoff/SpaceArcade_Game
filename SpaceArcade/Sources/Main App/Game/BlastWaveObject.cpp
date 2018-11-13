@@ -51,6 +51,7 @@ void BlastWaveObject::update(float delta)
 		if (pSender)
 		{
 			pSender->notify(this, NotifyCode::BlastFinished);
+			setParentObject(NULL);
 			pSender = NULL;
 		}
 	}

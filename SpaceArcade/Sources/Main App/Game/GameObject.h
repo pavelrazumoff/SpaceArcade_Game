@@ -45,6 +45,7 @@ public:
 	// Draw sprite
 	virtual void draw(bool useInstanced = false, int amount = 0);
 	virtual void update(float delta);
+	virtual void updatePaused(float delta);
 	virtual void updateModelMatrix();
 	virtual void updateAnimation(float delta);
 
@@ -85,6 +86,7 @@ public:
 	void setAnimationDuration(float duration);
 	void setImpulseFactor(float impulse);
 	void applyImpulse(float impulse);
+	void setScoreContribution(int score);
 
 	GameLevel* getLevel();
 	glm::mat4 getModel();
@@ -107,6 +109,7 @@ public:
 	bool getAnimationOrder();
 	float getAnimationDuration();
 	float getImpulseFactor();
+	int getScoreContribution();
 
 	bool isOffTheScreen(glm::vec2 screenDimensions);
 	bool getReadyForDeath();
@@ -133,6 +136,7 @@ public:
 	glm::vec2	RelativePosition;
 	glm::vec2	VelocityScale;
 	GLfloat     InitialRotation, Rotation;
+
 	// Render state
 	Texture2D*  Sprite = NULL;
 	Texture2D*	ExplosionSprite = NULL;
@@ -148,6 +152,7 @@ protected:
 	std::vector<GameObject*> postDeathObjects;		// spawned after death of this object (when readyForDeath = true).
 
 	glm::mat4 model;
+	glm::mat4 explosionModel;
 
 	int objectType = ObjectTypes::None;
 	bool visible = true;
@@ -176,10 +181,13 @@ protected:
 	int currentExplosionFrame = 0;
 	float explosionTimeStep = 0.0f;
 	bool readyForDeath = false;
+	bool useExplosionSize = false;
 	std::string explosionSoundName;
 
 	float impulseFactor = 200;
 	float appliedImpulse = 0;
+
+	int scoreContribution = 10;
 
 	void(*healthChanged)(float, float) = NULL;
 };
