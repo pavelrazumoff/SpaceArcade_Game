@@ -28,6 +28,7 @@ void MainApp::render()
 		break;
 	case PageType::Game:
 	case PageType::PauseGame:
+	case PageType::GameOver:
 		drawScene();
 		break;
 	default:
@@ -120,6 +121,9 @@ void MainApp::render()
 	case PageType::PauseGame:
 		drawScenePausedInterface();
 		break;
+	case PageType::GameOver:
+		drawGameOverInterface();
+		break;
 	case PageType::MainMenu:
 		drawStartPage();
 		break;
@@ -174,6 +178,12 @@ void MainApp::drawScenePausedInterface()
 {
 	for (int i = 0; i < gui_objects[PageType::PauseGame].size(); ++i)
 		gui_objects[PageType::PauseGame][i]->draw();
+}
+
+void MainApp::drawGameOverInterface()
+{
+	for (int i = 0; i < gui_objects[PageType::GameOver].size(); ++i)
+		gui_objects[PageType::GameOver][i]->draw();
 }
 
 void MainApp::drawStartPage()

@@ -23,6 +23,8 @@ public:
 	virtual void startBehaviour();
 	virtual void pauseBehaviour();
 	virtual void resumeBehaviour();
+	virtual void finishBehaviour();
+	virtual void resetBehaviour();
 
 	virtual void clear();
 

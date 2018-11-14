@@ -37,6 +37,20 @@ void LevelBehaviour::resumeBehaviour()
 	
 }
 
+void LevelBehaviour::finishBehaviour()
+{
+	
+}
+
+void LevelBehaviour::resetBehaviour()
+{
+	playerObject = NULL;
+	complexControllers.clear();
+	userInput = true;
+	levelMode = -1;
+	levelIteration = 0;
+}
+
 void LevelBehaviour::update(float delta)
 {
 	

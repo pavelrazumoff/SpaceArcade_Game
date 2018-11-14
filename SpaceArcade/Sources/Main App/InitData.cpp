@@ -75,6 +75,7 @@ void MainApp::initGUI()
 	std::vector<GUIObject*> settingsObjects;
 	std::vector<GUIObject*> gameInterfaceObjects;
 	std::vector<GUIObject*> gamePauseInterfaceObjects;
+	std::vector<GUIObject*> gameOverInterfaceObjects;
 
 	// Main Menu.
 	GUILayout* mainMenuLayout = new GUILayout(&renderer);
@@ -453,6 +454,7 @@ void MainApp::initGUI()
 	gamePauseLayout->setSpace(10);
 	gamePauseLayout->setTypeLayout(GUILayout_Type::Vertical);
 	gamePauseLayout->setAlignment(GUILayout_Alignment::Center);
+	gamePauseLayout->setColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
 
 	GUILayout* screenPauseLayouts[2];
 	int screenPausePercents[2] = { 1, 8 };
@@ -491,15 +493,58 @@ void MainApp::initGUI()
 	pResumeButton->setPressedTexture(res_manager->GetTexture("resumeButtonPressed"));
 	pResumeButton->setActionCallback(resumeScene);
 
+	// Game Over Interface.
+	GUILayout* gameOverLayout = new GUILayout(&renderer);
+	gameOverInterfaceObjects.push_back(gameOverLayout);
+
+	gameOverLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	gameOverLayout->setSpace(50);
+	gameOverLayout->setTypeLayout(GUILayout_Type::Vertical);
+	gameOverLayout->setAlignment(GUILayout_Alignment::Center);
+	gameOverLayout->setIndents(glm::vec4(50.0f, 50.0f, 50.0f, 50.0f));
+
+	GUIObject* gameOverCaption = new GUIObject(&renderer);
+	gameOverLayout->addChild(gameOverCaption);
+
+	gameOverCaption->init(res_manager->GetTexture("gameOverCaption"), glm::vec2(0.0f, 0.0f), glm::vec2(350.0f, 200.0f), true);
+	gameOverCaption->setMaximumSize(glm::vec2(350.0f, 200.0f));
+	gameOverCaption->setSizeRatio(1.75f, true);
+
+	pFinalScore = new GUITextBox(&renderer);
+	gameOverLayout->addChild(pFinalScore);
+
+	pFinalScore->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	pFinalScore->setMaximumWidth(105.0f);
+	pFinalScore->setMinimumHeight(40.0f);
+	pFinalScore->setMaximumHeight(40.0f);
+	pFinalScore->setText("Score: 0");
+	pFinalScore->setTextColor(glm::vec3(1.0, 0.68f, 0.0f));
+	pFinalScore->setFont(res_manager->Fonts["TTLakes30"]);
+	pFinalScore->setFontShader(&font_shader);
+	pFinalScore->setFontBuffers(fontVAO, fontVBO);
+	pFinalScore->setTextPos(glm::vec2(10.0f, 30.0f));
+
+	GUIButton* playAgainButton = new GUIButton(&renderer);
+	gameOverLayout->addChild(playAgainButton);
+
+	playAgainButton->init(res_manager->GetTexture("playAgainButton"), glm::vec2(0.0f, 0.0f), glm::vec2(300.0f, 100.0f), true);
+	playAgainButton->setMaximumSize(glm::vec2(300.0f, 100.0f));
+	playAgainButton->setSizeRatio(3.0f, true);
+	playAgainButton->setHoveredTexture(res_manager->GetTexture("playAgainButtonHovered"));
+	playAgainButton->setPressedTexture(res_manager->GetTexture("playAgainButtonPressed"));
+	playAgainButton->setActionCallback(restartScene);
+
 	mainMenuLayout->resize();
 	settingsLayout->resize();
 	gameLayout->resize();
 	gamePauseLayout->resize();
+	gameOverLayout->resize();
 
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::MainMenu, mainMenuObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Settings, settingsObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Game, gameInterfaceObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::PauseGame, gamePauseInterfaceObjects));
+	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::GameOver, gameOverInterfaceObjects));
 }
 
 void MainApp::initScene()
@@ -521,33 +566,7 @@ void MainApp::initScene()
 
 	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(base_level, res_manager);
 	levelBehaviours.push_back(basicBehaviour);
-
-	SpacecraftObject* pSpaceCraft = new SpacecraftObject();
-	GameObject* pLaserRay = pSpaceCraft->getLaserRay();
-
-	pSpaceCraft->setObjectType(ObjectTypes::SpaceCraft);
-	pSpaceCraft->init(base_level, glm::vec2(screenWidth / 2 - 31, screenHeight - 200), glm::vec2(62, 57), res_manager->GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
-	pSpaceCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
-	pSpaceCraft->setExplosionSprite(res_manager->GetTexture("explosion"));
-	pSpaceCraft->setHealthChangedCallback(healthBarChanged);
-	pSpaceCraft->setEnergyChangedCallback(energyBarChanged);
-	pSpaceCraft->setRocketIntegrityChangedCallback(rocketIntegrityChanged);
-	pSpaceCraft->setNonPlayerObject(false);
-	pSpaceCraft->setLaserSoundName("LaserSound");
-	pSpaceCraft->setRocketSoundName("RocketSound");
-	pSpaceCraft->setExplosionSoundName("ExplosionEffect");
-	pSpaceCraft->setRocketStartVelocity(glm::vec2(0.0f, -450.0f));
-
-	pLaserRay->init(base_level, glm::vec2(0, 0), glm::vec2(13, 55), res_manager->GetTexture("laserRayBlue"), glm::vec2(0.0f, -400.0f), false);
-	
-	GameObject* pRocket = pSpaceCraft->getRocket();
-	pRocket->init(base_level, glm::vec2(0, 0), glm::vec2(16, 40), res_manager->GetTexture("rocket"), glm::vec2(0.0f, 0.0f), false);
-	pRocket->setExplosionTime(1.0f);
-	pRocket->setExplosionSprite(res_manager->GetTexture("explosion"));
-
-	pSpaceCraft->setRocketRelativePosition(glm::vec2(42, 12), 0);
-	pSpaceCraft->setRocketRelativePosition(glm::vec2(4, 12), 1);
-	pSpaceCraft->setRocketRelativePosition(glm::vec2(22, -5), 2);
+	basicBehaviour->setFinishLevelCallback(finishScene);
 
 	basicBehaviour->setMaxNumberOfMeteorites(30);
 	basicBehaviour->setMaxNumberOfHealthKits(2);

@@ -93,6 +93,7 @@ void MainApp::update()
 	switch (currentPage)
 	{
 	case PageType::Game:
+	case PageType::GameOver:
 		base_level->update(deltaTime);
 		break;
 	case PageType::PauseGame:
@@ -190,7 +191,7 @@ void MainApp::resize(int width, int height)
 		for (int i = 0; i < it->second.size(); ++i)
 			it->second[i]->resize();
 
-	if(base_level->isStarted())
+	if(base_level->getLevelStatus() != LevelStatus::NotStarted)
 		base_level->resize();
 }
 
@@ -249,6 +250,41 @@ void MainApp::resumeGame()
 	if (pResumeButton)
 		pResumeButton->setVisible(false);
 	currentPage = PageType::Game;
+}
+
+void MainApp::finishGame()
+{
+	currentPage = PageType::GameOver;
+	base_level->finishLevel();
+
+	int score = base_level->getScore();
+	std::string textScore = std::to_string(score);
+	std::string text = "Score: " + textScore;
+	if (pFinalScore)
+	{
+		pFinalScore->setText(text);
+
+		pFinalScore->setMaximumWidth(pFinalScore->getMaximumWidth() + 15 * textScore.size());
+		renderer.resize(screenWidth, screenHeight);
+		for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+			gui_objects[currentPage][i]->resize();
+	}
+}
+
+void MainApp::restartGame()
+{
+	currentPage = PageType::Game;
+	if (pScoreBox)
+		pScoreBox->setMaximumWidth(140.0f);
+
+	renderer.resize(screenWidth, screenHeight);
+	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+		gui_objects[currentPage][i]->resize();
+
+	base_level->resetLevel();
+	base_level->startLevel();
+
+	prevScore = 0;
 }
 
 void MainApp::clearBuffers()

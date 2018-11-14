@@ -23,6 +23,7 @@ void GameLevel::init(Texture2D* cubemap, Shader cubemapShader, SpriteRenderer* r
 
 void GameLevel::startLevel()
 {
+	levelStatus = LevelStatus::Playing;
 	setUseInstancing(ObjectTypes::Meteorite, true);
 	setUseInstancing(ObjectTypes::LaserRay, false);
 	setUseInstancing(ObjectTypes::SpaceCraft, false);
@@ -33,32 +34,68 @@ void GameLevel::startLevel()
 
 	if (behaviour)
 		behaviour->startBehaviour();
-
-	wasStarted = true;
 }
 
 void GameLevel::pauseLevel()
 {
-	wasPaused = true;
+	levelStatus = LevelStatus::Paused;
 	if(behaviour)
 		behaviour->pauseBehaviour();
 }
 
 void GameLevel::resumeLevel()
 {
-	wasPaused = false;
+	levelStatus = LevelStatus::Playing;
 	if (behaviour)
 		behaviour->resumeBehaviour();
 }
 
+void GameLevel::finishLevel()
+{
+	levelStatus = LevelStatus::Overed;
+}
+
+void GameLevel::resetLevel()
+{
+	levelStatus = LevelStatus::NotStarted;
+
+	for (int i = 0; i < objects.size(); ++i)
+		if (!objects[i]->getParentObject())
+			delete objects[i];
+	objects.clear();
+
+	levelTime = 0.0f;
+	score = 0;
+
+	for (auto it = typeObjects.begin(); it != typeObjects.end(); ++it)
+		if (useInstancing[it->first])
+		{
+			if (objectsMatrices[it->first])
+			{
+				delete objectsMatrices[it->first];
+				objectsMatrices[it->first] = NULL;
+			}
+		}
+
+	typeObjects.clear();
+	instancedObjects.clear();
+	normalObjects.clear();
+	objectsMatrices.clear();
+	useInstancing.clear();
+
+	addScore(0);
+	if (behaviour)
+		behaviour->resetBehaviour();
+}
+
 void GameLevel::update(float delta)
 {
-	if (wasPaused)
+	if (levelStatus == LevelStatus::Paused)
 		return;
 
 	levelTime += delta;
 
-	if (behaviour)
+	if (behaviour && levelStatus != LevelStatus::Overed)
 		behaviour->update(delta);
 
 	for (int i = 0; i < objects.size(); ++i)
@@ -144,12 +181,6 @@ void GameLevel::draw()
 	glDisable(GL_DEPTH_TEST);
 
 	glm::vec2 screenDimensions = renderer->getCurrentScreenDimensions();
-
-	// draw only those objects, whose parents are NULL.
-	// other objects will be drawn inside those draw calls (such as laser rays of spacecraft).
-	//for (int i = 0; i < objects.size(); ++i)
-	//	if (!objects[i]->getParentObject() && !objects[i]->isHiddenFromLevel() && !objects[i]->isOffTheScreen(screenDimensions))
-	//		objects[i]->Draw();
 	
 	// first we have to draw all instanced objects (one draw call for every type).
 	for (auto it = instancedObjects.begin(); it != instancedObjects.end(); ++it)
@@ -194,7 +225,7 @@ void GameLevel::resize()
 
 void GameLevel::handleInput(GLFWwindow *window, float delta)
 {
-	if (wasPaused)
+	if (levelStatus == LevelStatus::Paused)
 		return;
 
 	if (behaviour && behaviour->isUserInputBlocked())
@@ -207,7 +238,7 @@ void GameLevel::handleInput(GLFWwindow *window, float delta)
 
 void GameLevel::processKey(int key, int action, bool* key_pressed)
 {
-	if (wasPaused)
+	if (levelStatus == LevelStatus::Paused)
 		return;
 
 	if (behaviour && behaviour->isUserInputBlocked())
@@ -536,9 +567,9 @@ SpriteRenderer* GameLevel::getRenderer()
 	return renderer;
 }
 
-bool GameLevel::isStarted()
+int GameLevel::getLevelStatus()
 {
-	return wasStarted;
+	return levelStatus;
 }
 
 void GameLevel::clear()

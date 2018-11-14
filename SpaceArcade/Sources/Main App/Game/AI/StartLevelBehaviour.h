@@ -35,6 +35,8 @@ public:
 	virtual void startBehaviour();
 	virtual void pauseBehaviour();
 	virtual void resumeBehaviour();
+	virtual void finishBehaviour();
+	virtual void resetBehaviour();
 
 	virtual void clear();
 
@@ -75,6 +77,8 @@ public:
 
 	void addController(AIController* controller);
 
+	void setFinishLevelCallback(void(*actionCallback)(void));
+
 protected:
 	SpacecraftObject* playerCraft = NULL;
 	std::vector<AIController*> aiControllers;
@@ -109,4 +113,6 @@ protected:
 	int maxNumOfBarriers = 0;
 	int numOfCreatedBarriers = 0;
 	glm::vec2 barriersZone = glm::vec2(0, 300);		// min, max.
+
+	void(*finishLevelCallback)(void) = NULL;
 };

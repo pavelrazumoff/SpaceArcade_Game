@@ -101,7 +101,7 @@ void BasicShipAIController::followTargetEnemy(float delta)
 	}
 
 	// if difference between this ship and target is small, stop it.
-	if (abs(controlledPawn->Position.x + controlledPawn->Size.x / 2 - (targetEnemy->Position.x + targetEnemy->Size.x / 2)) < 5.0f)
+	if (abs(controlledPawn->Position.x + controlledPawn->Size.x / 2 - (targetEnemy->Position.x + targetEnemy->Size.x / 2)) < 2.0f)
 		controlledPawn->Velocity.x = 0.0f;
 }
 
@@ -116,11 +116,12 @@ void BasicShipAIController::returnToSourcePosition(float delta)
 	glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 
 	glm::vec2 shift = glm::vec2(delta * controlledPawn->VelocityScale.x * initialScreenRatio.x, delta * controlledPawn->VelocityScale.y * initialScreenRatio.y);
+	float currentPos = controlledPawn->Position.x + controlledPawn->Size.x / 2;
 
-	if (abs(controlledPawn->Position.x - returnPosition.x) > 5.0f)
+	if (abs(currentPos - returnPosition.x) > 5.0f)
 	{
 		// move this ship to the source position.
-		if (controlledPawn->Position.x < returnPosition.x)
+		if (currentPos < returnPosition.x)
 			controlledPawn->Position.x += shift.x;
 		else
 			controlledPawn->Position.x -= shift.x;

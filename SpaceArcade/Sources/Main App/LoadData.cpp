@@ -98,6 +98,11 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//Interface//checkBoxPressed.png", "checkBoxPressed", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//checkIcon.png", "checkIcon", false, &gameObjectsParams);
 
+	res_manager->LoadTexture("Images//Interface//gameOverCaption.png", "gameOverCaption", false);
+	res_manager->LoadTexture("Images//Interface//playAgainButton.png", "playAgainButton", false);
+	res_manager->LoadTexture("Images//Interface//playAgainButtonHovered.png", "playAgainButtonHovered", false);
+	res_manager->LoadTexture("Images//Interface//playAgainButtonPressed.png", "playAgainButtonPressed", false);
+
 	res_manager->LoadTexture("Images//Interface//healthBar.png", "healthBar", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//energyBar.png", "energyBar", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//rocketContent.png", "rocketContent", false, &gameObjectsParams);

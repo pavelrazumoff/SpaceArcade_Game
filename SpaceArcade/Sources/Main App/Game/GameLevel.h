@@ -6,6 +6,14 @@
 
 class LevelBehaviour;
 
+enum LevelStatus
+{
+	NotStarted = 0,
+	Playing,
+	Paused,
+	Overed
+};
+
 class GameLevel
 {
 public:
@@ -24,6 +32,8 @@ public:
 	void									startLevel();			// calls once after all initializations and before updating.
 	void									pauseLevel();
 	void									resumeLevel();
+	void									finishLevel();			// calls when game was overed.
+	void									resetLevel();
 
 	void									handleInput(GLFWwindow *window, float delta);
 	void									processKey(int key, int action, bool* key_pressed);
@@ -62,7 +72,7 @@ public:
 
 	SpriteRenderer*							getRenderer();
 
-	bool									isStarted();
+	int										getLevelStatus();
 
 private:
 	std::vector<GameObject*>				objects;
@@ -87,10 +97,9 @@ private:
 	ISoundEngine*							pSoundEngine = NULL;
 	std::map<std::string, std::string>		soundNames;
 
-	bool									wasStarted = false;
-	bool									wasPaused = false;
 	double									levelTime = 0.0f;
 	int										score = 0;
+	int										levelStatus = LevelStatus::NotStarted;
 
 	void(*scoreChanged)(int) = NULL;
 };

@@ -29,24 +29,40 @@ void StartLevelBehaviour::init()
 
 void StartLevelBehaviour::startBehaviour()
 {
-	// get all ai controlled spacecrafts and hide them.
-	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::SpaceCraft); ++i)
-	{
-		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::SpaceCraft, i);
-		glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = screenDimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 
-		// hide all ai controlled objects to start level with basic obstacles.
-		if (spacecraft->getAIController())
-			spacecraft->hideFromLevel(true);
+	playerCraft = new SpacecraftObject();
+	GameObject* pLaserRay = playerCraft->getLaserRay();
 
-		// if this spacecraft is player controlled, save it and position it a little below the screen.
-		if (!spacecraft->isNonPlayerObject())
-		{
-			playerObject = spacecraft;
-			playerCraft = dynamic_cast<SpacecraftObject*>(spacecraft);
-			playerCraft->Position = glm::vec2(screenDimensions.x / 2 - playerCraft->Size.x / 2, screenDimensions.y + 50);
-		}
-	}
+	playerCraft->setObjectType(ObjectTypes::SpaceCraft);
+	playerCraft->init(pLevel, glm::vec2(screenDimensions.x / 2 - 31, screenDimensions.y - 200), glm::vec2(62, 57), pResourceManager->GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
+	playerCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
+	playerCraft->setExplosionSprite(pResourceManager->GetTexture("explosion"));
+	playerCraft->setHealthChangedCallback(healthBarChanged);
+	playerCraft->setEnergyChangedCallback(energyBarChanged);
+	playerCraft->setRocketIntegrityChangedCallback(rocketIntegrityChanged);
+	playerCraft->setNonPlayerObject(false);
+	playerCraft->setLaserSoundName("LaserSound");
+	playerCraft->setRocketSoundName("RocketSound");
+	playerCraft->setExplosionSoundName("ExplosionEffect");
+	playerCraft->setRocketStartVelocity(glm::vec2(0.0f, -450.0f));
+
+	pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayBlue"), glm::vec2(0.0f, -400.0f * screenRatio.y), false);
+
+	GameObject* pRocket = playerCraft->getRocket();
+	pRocket->init(pLevel, glm::vec2(0, 0), glm::vec2(16, 40), pResourceManager->GetTexture("rocket"), glm::vec2(0.0f, 0.0f), false);
+	pRocket->setExplosionTime(1.0f);
+	pRocket->setExplosionSprite(pResourceManager->GetTexture("explosion"));
+
+	playerCraft->setRocketRelativePosition(glm::vec2(42, 12), 0);
+	playerCraft->setRocketRelativePosition(glm::vec2(4, 12), 1);
+	playerCraft->setRocketRelativePosition(glm::vec2(22, -5), 2);
+
+	playerObject = playerCraft;
+	playerCraft->Position = glm::vec2(screenDimensions.x / 2 - playerCraft->Size.x / 2, screenDimensions.y + 50);
+	playerCraft->setHealth(playerCraft->getHealth());
+	playerCraft->setRocketDetail(0);
 
 	levelMusic = pLevel->playSound("BackgroundSound", true);
 }
@@ -61,6 +77,43 @@ void StartLevelBehaviour::resumeBehaviour()
 {
 	if (levelMusic)
 		levelMusic->setIsPaused(false);
+}
+
+void StartLevelBehaviour::finishBehaviour()
+{
+	if (finishLevelCallback)
+		finishLevelCallback();
+}
+
+void StartLevelBehaviour::resetBehaviour()
+{
+	LevelBehaviour::resetBehaviour();
+	playerCraft = NULL;
+
+	for (int i = 0; i < aiControllers.size(); ++i)
+		delete aiControllers[i];
+	aiControllers.clear();
+
+	if (levelMusic)
+	{
+		levelMusic->stop();
+		levelMusic->drop();
+		levelMusic = NULL;
+	}
+
+	numOfCreatedMeteorites = 0;
+	numOfCreatedHealthKits = 0;
+	currentHealthKitsTime = 0.0f;
+
+	numOfBasicEnemies = 0;
+	numOfTeamEnemies = 0;
+	numOfBossEnemies = 0;
+	introduceBegins = false;
+	numOfCreatedBarriers = 0;
+
+	levelMode = StartLevelMode::Introducing;
+	// block user input from beginning of the level.
+	blockUserInput();
 }
 
 void StartLevelBehaviour::update(float delta)
@@ -347,6 +400,10 @@ void StartLevelBehaviour::updateParallelEvents(float delta)
 	// it updates all events that are parallel to the current mode.
 	spawnMeteorites(delta);
 	spawnHealthKits(delta);
+
+	// here we have to check if player craft is still alive.
+	if (playerCraft && playerCraft->getHealth() <= 0.0f)
+		finishBehaviour();
 }
 
 void StartLevelBehaviour::spawnMeteorites(float delta)
@@ -881,6 +938,11 @@ void StartLevelBehaviour::setHealthKitsSpawnFreq(float freq)
 void StartLevelBehaviour::addController(AIController* controller)
 {
 	aiControllers.push_back(controller);
+}
+
+void StartLevelBehaviour::setFinishLevelCallback(void(*actionCallback)(void))
+{
+	finishLevelCallback = actionCallback;
 }
 
 void StartLevelBehaviour::clear()

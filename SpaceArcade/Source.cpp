@@ -131,6 +131,16 @@ void resumeScene()
 	app.resumeGame();
 }
 
+void finishScene()
+{
+	app.finishGame();
+}
+
+void restartScene()
+{
+	app.restartGame();
+}
+
 void enableMultisampling(bool enable)
 {
 	app.useMultisampling = enable;

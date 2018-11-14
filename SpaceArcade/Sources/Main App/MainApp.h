@@ -17,9 +17,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_click_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-void healthBarChanged(float health, float initialHealth);
-void energyBarChanged(float usedEnergy, float maxEnergy);
-void rocketIntegrityChanged(int integrity, int maxIntegrity);
 void scoreChanged(int score);
 
 void showScene();
@@ -28,6 +25,8 @@ void quitGame();
 void backToMainMenu();
 void pauseScene();
 void resumeScene();
+void finishScene();
+void restartScene();
 
 void enableMultisampling(bool enable);
 void enableGammaCorrection(bool enable);
@@ -40,7 +39,8 @@ enum PageType
 	MainMenu = 0,
 	Settings,
 	Game,
-	PauseGame
+	PauseGame,
+	GameOver
 };
 
 class MainApp
@@ -71,6 +71,7 @@ public:
 	void drawScene();
 	void drawSceneInterface();
 	void drawScenePausedInterface();
+	void drawGameOverInterface();
 	void drawMenuBackground();
 	void drawStartPage();
 	void drawSettingsPage();
@@ -105,6 +106,8 @@ public:
 	void startGame();
 	void pauseGame();
 	void resumeGame();
+	void finishGame();
+	void restartGame();
 
 	GLFWwindow* getWindow();
 
@@ -166,4 +169,5 @@ private:
 	GUIButton* pPauseButton = NULL;
 	GUIButton* pResumeButton = NULL;
 	GUITextBox* pScoreBox = NULL;
+	GUITextBox* pFinalScore = NULL;
 };
