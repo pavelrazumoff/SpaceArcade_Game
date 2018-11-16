@@ -21,7 +21,7 @@ void main()
 	}
 
 	if (useImage)
-		color = texture(image, TexCoords);
+		color = texture(image, TexCoords) * background_color;
 	else
 		color = background_color;
 }

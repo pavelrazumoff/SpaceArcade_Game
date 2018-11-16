@@ -36,8 +36,12 @@ public:
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
 
 	void setImprovement(ImprovementStruct improv);
+	void setSmokeObject(GameObject* smoke);
+
 	ImprovementStruct getImprovement();
+	GameObject* getSmokeObject();
 
 protected:
 	ImprovementStruct improvement;
+	GameObject* smokeObject = NULL;
 };

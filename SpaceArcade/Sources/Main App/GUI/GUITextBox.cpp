@@ -2,12 +2,12 @@
 
 GUITextBox::GUITextBox()
 {
-
+	color = glm::vec4(0.0f);
 }
 
 GUITextBox::GUITextBox(SpriteRenderer* renderer, ISoundEngine* soundEngine) : GUIObject(renderer, soundEngine)
 {
-
+	color = glm::vec4(0.0f);
 }
 
 GUITextBox::~GUITextBox()

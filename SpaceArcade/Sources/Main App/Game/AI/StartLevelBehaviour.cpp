@@ -37,7 +37,7 @@ void StartLevelBehaviour::startBehaviour()
 
 	playerCraft->setObjectType(ObjectTypes::SpaceCraft);
 	playerCraft->init(pLevel, glm::vec2(screenDimensions.x / 2 - 31, screenDimensions.y - 200), glm::vec2(62, 57), pResourceManager->GetTexture("spacecraft"), glm::vec2(0.0f, 0.0f));
-	playerCraft->VelocityScale = glm::vec2(400.0f, 200.0f);
+	playerCraft->VelocityScale = levelData.playerSpeed;
 	playerCraft->setExplosionSprite(pResourceManager->GetTexture("explosion"));
 	playerCraft->setHealthChangedCallback(healthBarChanged);
 	playerCraft->setEnergyChangedCallback(energyBarChanged);
@@ -46,7 +46,7 @@ void StartLevelBehaviour::startBehaviour()
 	playerCraft->setLaserSoundName("LaserSound");
 	playerCraft->setRocketSoundName("RocketSound");
 	playerCraft->setExplosionSoundName("ExplosionEffect");
-	playerCraft->setRocketStartVelocity(glm::vec2(0.0f, -450.0f));
+	playerCraft->setRocketStartVelocity(glm::vec2(0.0f, -450.0f * screenRatio.y));
 
 	pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayBlue"), glm::vec2(0.0f, -400.0f * screenRatio.y), false);
 
@@ -101,19 +101,29 @@ void StartLevelBehaviour::resetBehaviour()
 		levelMusic = NULL;
 	}
 
-	numOfCreatedMeteorites = 0;
-	numOfCreatedHealthKits = 0;
-	currentHealthKitsTime = 0.0f;
+	levelData.playerSpeed = glm::vec2(200.0f, 100.0f);
+	levelData.basicEnemySpeed = 100.0f;
+	levelData.bossEnemySpeed = 100.0f;
+	levelData.barriersSpeed = 100.0f;
 
-	numOfBasicEnemies = 0;
-	numOfTeamEnemies = 0;
-	numOfBossEnemies = 0;
-	introduceBegins = false;
-	numOfCreatedBarriers = 0;
+	levelData.numOfCreatedMeteorites = 0;
+	levelData.numOfCreatedHealthKits = 0;
+	levelData.currentHealthKitsTime = 0.0f;
+
+	levelData.numOfBasicEnemies = 0;
+	levelData.numOfTeamEnemies = 0;
+	levelData.numOfBossEnemies = 0;
+	levelData.introduceBegins = false;
+	levelData.numOfCreatedBarriers = 0;
+
+	levelData.timeWithoutShield = 0.0f;
 
 	levelMode = StartLevelMode::Introducing;
 	// block user input from beginning of the level.
 	blockUserInput();
+
+	if (updateLevelIterationCallback)
+		updateLevelIterationCallback();
 }
 
 void StartLevelBehaviour::update(float delta)
@@ -295,10 +305,10 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 		if (spacecraft->getAIController())
 		{
 			// reset boss starting introduce position in case screen size was changed.
-			if (!introduceBegins)
+			if (!levelData.introduceBegins)
 			{
 				spacecraft->Position.y = -spacecraft->Size.y - 10.0f;
-				introduceBegins = true;
+				levelData.introduceBegins = true;
 			}
 
 			if (spacecraft->Position.y < (screenDimensions.y / 3 - spacecraft->Size.y / 2))
@@ -315,7 +325,7 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 				spacecraft->enableShield(true);
 				spacecraft->getAIController()->unblockAI();
 				unblockUserInput();
-				introduceBegins = false;
+				levelData.introduceBegins = false;
 			}
 		}
 	}
@@ -330,19 +340,31 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 	bool isBossAlive = false;
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::BossSpaceCraft); ++i)
 	{
-		GameObject* spacecraft = pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
+		BossSpacecraftObject* spacecraft = (BossSpacecraftObject*)pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
 		if (spacecraft->getAIController())
 		{
-			if (spacecraft->getHealth() > bossHealthThreshold)
+			if (spacecraft->getHealth() > levelData.bossHealthThreshold)
+			{
+				if (!spacecraft->isShieldEnabled())
+				{
+					if (levelData.timeWithoutShield >= levelData.maxTimeWithoutShield)
+					{
+						spacecraft->enableShield(true);
+						levelData.timeWithoutShield = 0.0f;
+					}
+					else
+						levelData.timeWithoutShield += delta;
+				}
 				return;
+			}
 			else
 			{
 				if (spacecraft->getHealth() > 0.0f)
 					isBossAlive = true;
 
-				bossHealthThreshold -= bossHealthThresholdStep;
-				if (bossHealthThreshold < 0.0f)
-					bossHealthThreshold = 0.0f;
+				levelData.bossHealthThreshold -= levelData.bossHealthThresholdStep;
+				if (levelData.bossHealthThreshold < 0.0f)
+					levelData.bossHealthThreshold = 0.0f;
 				spacecraft->getAIController()->BlockAI();
 			}
 		}
@@ -355,7 +377,7 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 	}
 	else
 	{
-		numOfBossEnemies = 0;
+		levelData.numOfBossEnemies = 0;
 		levelMode += 2;		// skip boss leaving mode.
 	}
 }
@@ -384,8 +406,10 @@ void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
 			{
 				spacecraft->Velocity.y = 0.0f;
 				unblockUserInput();
-				spacecraft->enableShield(false);
+				if(!spacecraft->isShieldEnabled())
+					spacecraft->enableShield(true);
 				spacecraft->hideFromLevel(true);
+				levelData.timeWithoutShield = 0.0f;
 			}
 		}
 	}
@@ -411,14 +435,14 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 	// create some meteorites by groups.
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
 
-	int meteoriteDiff = maxNumOfMeteorites - numOfCreatedMeteorites;
+	int meteoriteDiff = levelData.maxNumOfMeteorites - levelData.numOfCreatedMeteorites;
 	if (meteoriteDiff <= 0)
 		return;
 	
 	int randomIndices[10];
 
 	for (int i = 0; i < 10; ++i)
-		randomIndices[i] = rand() % (30);
+		randomIndices[i] = rand() % (levelData.meteorRandomSeed);
 
 	glm::vec2 detailSizes[] = {
 		glm::vec2(15, 37),
@@ -448,7 +472,7 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 		//asteroid->hideFromLevel(true);
 
 		asteroid->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 100 + 1) + 50,
-			rand() % (int)(meteoritesZone.x + meteoritesZone.y + 1) - meteoritesZone.y), glm::vec2(46, 47),
+			rand() % (int)(levelData.meteoritesZone.x + levelData.meteoritesZone.y + 1) - levelData.meteoritesZone.y), glm::vec2(46, 47),
 			pResourceManager->GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (150 - 50 + 1) + 50));
 
 		asteroid->InitialRotation = rand() % 360;
@@ -468,28 +492,40 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 				rocketDetail->Rotation = 15.0f;
 				rocketDetail->setImprovement(rocketKit);
 
+				GameObject* smoke = new GameObject();
+				smoke->setUsePhysics(false);
+				smoke->setObjectType(ObjectTypes::Basic);
+				smoke->setSelfDestroyTime(1.5f);
+				smoke->setUseAnimation(true);
+				smoke->setCollisionCheck(false);
+				smoke->setAnimationDuration(1.5f);
+
+				smoke->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(64, 64), pResourceManager->GetTexture("smoke"), glm::vec2(0.0f, 0.0f));
+
+				rocketDetail->setSmokeObject(smoke);
+
 				rocketDetail->resize();
 				asteroid->addPostDeathObject(rocketDetail);
 				break;
 			}
 	}
 
-	numOfCreatedMeteorites += numOfMeteorites;
+	levelData.numOfCreatedMeteorites += numOfMeteorites;
 }
 
 void StartLevelBehaviour::spawnHealthKits(float delta)
 {
 	// Spawn Health Kits every healthKitsFreq time.
-	currentHealthKitsTime += delta;
+	levelData.currentHealthKitsTime += delta;
 
-	if (currentHealthKitsTime >= healthKitsFreq)
+	if (levelData.currentHealthKitsTime >= levelData.healthKitsFreq)
 	{
-		numOfCreatedHealthKits = 0;
-		currentHealthKitsTime = 0.0f;
+		levelData.numOfCreatedHealthKits = 0;
+		levelData.currentHealthKitsTime = 0.0f;
 	}
 
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
-	int kitsDiff = maxNumOfHealthKits - numOfCreatedHealthKits;
+	int kitsDiff = levelData.maxNumOfHealthKits - levelData.numOfCreatedHealthKits;
 
 	if (kitsDiff <= 0)
 		return;
@@ -498,7 +534,7 @@ void StartLevelBehaviour::spawnHealthKits(float delta)
 	{
 		ImprovementBoxObject* box = new ImprovementBoxObject();
 
-		float posY = healthKitsZone.x - i * (rand() % (int)(abs(healthKitsZone.y - healthKitsZone.x) / kitsDiff) + 500);
+		float posY = levelData.healthKitsZone.x - i * (rand() % (int)(abs(levelData.healthKitsZone.y - levelData.healthKitsZone.x) / kitsDiff) + 500);
 		box->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 300 + 1) + 100, posY),
 			glm::vec2(45, 45), pResourceManager->GetTexture("healthKit"), glm::vec2(0.0f, 70.0f));
 
@@ -512,10 +548,22 @@ void StartLevelBehaviour::spawnHealthKits(float delta)
 
 		box->setImprovement(healthKit);
 
+		GameObject* smoke = new GameObject();
+		smoke->setUsePhysics(false);
+		smoke->setObjectType(ObjectTypes::Basic);
+		smoke->setSelfDestroyTime(1.5f);
+		smoke->setUseAnimation(true);
+		smoke->setCollisionCheck(false);
+		smoke->setAnimationDuration(1.5f);
+		smoke->color = glm::vec4(0.0f, 1.0f, 0.0f, 0.8f);
+
+		smoke->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(128, 128), pResourceManager->GetTexture("smoke"), glm::vec2(0.0f, 0.0f));
+
+		box->setSmokeObject(smoke);
 		box->resize();
 	}
 
-	numOfCreatedHealthKits = maxNumOfHealthKits;
+	levelData.numOfCreatedHealthKits = levelData.maxNumOfHealthKits;
 }
 
 void StartLevelBehaviour::spawnEnemies(float delta)
@@ -526,12 +574,12 @@ void StartLevelBehaviour::spawnEnemies(float delta)
 	switch (levelMode)
 	{
 	case StartLevelMode::SpaceCraftEnemyIntroducing:
-		craftNum = maxNumOfBasicEnemies - numOfBasicEnemies;
-		numOfBasicEnemies = maxNumOfBasicEnemies;
+		craftNum = levelData.maxNumOfBasicEnemies - levelData.numOfBasicEnemies;
+		levelData.numOfBasicEnemies = levelData.maxNumOfBasicEnemies;
 		break;
 	case StartLevelMode::TeamCraftEnemyIntroducing:
-		craftNum = maxNumOfTeamEnemies - numOfTeamEnemies;
-		numOfTeamEnemies = maxNumOfTeamEnemies;
+		craftNum = levelData.maxNumOfTeamEnemies - levelData.numOfTeamEnemies;
+		levelData.numOfTeamEnemies = levelData.maxNumOfTeamEnemies;
 		break;
 	default:
 		break;
@@ -562,7 +610,7 @@ void StartLevelBehaviour::spawnEnemies(float delta)
 		SpacecraftObject* enemySpaceCraft = new SpacecraftObject();
 		enemySpaceCraft->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(85, 92), pResourceManager->GetTexture("spacecraftEnemy"), glm::vec2(0.0f, 0.0f));
 		enemySpaceCraft->InitialRotation = 180.0f;
-		enemySpaceCraft->VelocityScale = glm::vec2(200.0f, 100.0f);
+		enemySpaceCraft->VelocityScale = glm::vec2(levelData.basicEnemySpeed, 100.0f);
 		enemySpaceCraft->setExplosionSprite(pResourceManager->GetTexture("explosion"));
 		enemySpaceCraft->setAIController(spacecraftAI);
 		enemySpaceCraft->setControlVelocityByRotation(true);
@@ -594,7 +642,7 @@ void StartLevelBehaviour::spawnEnemies(float delta)
 
 void StartLevelBehaviour::spawnEnemyBoss(float delta)
 {
-	if (numOfBossEnemies > 0)
+	if (levelData.numOfBossEnemies > 0)
 		return;
 
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
@@ -608,7 +656,7 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	BossSpacecraftObject* bossSpaceCraft = new BossSpacecraftObject();
 	bossSpaceCraft->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(218, 134), pResourceManager->GetTexture("spacecraftBoss"), glm::vec2(0.0f, 0.0f));
 	bossSpaceCraft->InitialRotation = 180.0f;
-	bossSpaceCraft->VelocityScale = glm::vec2(100.0f, 100.0f);
+	bossSpaceCraft->VelocityScale = glm::vec2(levelData.bossEnemySpeed, 100.0f);
 	bossSpaceCraft->setExplosionSprite(pResourceManager->GetTexture("explosion"));
 	bossSpaceCraft->setAIController(bossAI);
 	bossSpaceCraft->setControlVelocityByRotation(true);
@@ -656,27 +704,27 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	// also block its ai for a little time to be able to properly introduce this object on scene.
 	bossSpaceCraft->getAIController()->BlockAI();
 
-	bossHealthThreshold = (2.0f * bossSpaceCraft->getHealth()) / 3.0f;
-	bossHealthThresholdStep = bossSpaceCraft->getHealth() / 3.0f;
-	numOfBossEnemies++;
+	levelData.bossHealthThreshold = (2.0f * bossSpaceCraft->getHealth()) / 3.0f;
+	levelData.bossHealthThresholdStep = bossSpaceCraft->getHealth() / 3.0f;
+	levelData.numOfBossEnemies++;
 }
 
 void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 {
-	glm::vec2 screenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
-	int barriersDiff = maxNumOfBarriers - numOfCreatedBarriers;
+	glm::vec2 initialScreenDimensions = pLevel->getRenderer()->getInitialScreenDimensions();
+	int barriersDiff = levelData.maxNumOfBarriers - levelData.numOfCreatedBarriers;
 
 	if (barriersDiff <= 0)
 		return;
 
 	glm::vec2 currentScreenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
-	glm::vec2 screenRatio = (currentScreenDimensions / screenDimensions);
+	glm::vec2 screenRatio = (currentScreenDimensions / initialScreenDimensions);
 
 	int denom = (7 * barriersDiff / 16);
 	if (denom == 0)
 		denom = 7;
 
-	float yShift = screenRatio.y * abs(barriersZone.y - barriersZone.x) / denom;
+	float yShift = screenRatio.y * abs(levelData.barriersZone.y - levelData.barriersZone.x) / denom;
 
 	float currentShift = 0.0f;
 	int currentPosY = -1;
@@ -733,7 +781,7 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 		EnergyBarrierObject* barrier = new EnergyBarrierObject();
 
 		barrier->init(pLevel, glm::vec2(barrierPoses[i - posesDecrement].x, currentShift), barrierSize,
-			pResourceManager->GetTexture("energyBarrier"), glm::vec2(0.0f, 120.0f));
+			pResourceManager->GetTexture("energyBarrier"), glm::vec2(0.0f, levelData.barriersSpeed * screenRatio.y));
 		barrier->setAnimationDuration(0.5f);
 		barrier->setGeneratorSoundName("GeneratorEffect");
 		barrier->setScoreContribution(0);
@@ -743,8 +791,8 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 		for (int j = 0; j < 2; ++j)
 		{
 			generators[j] = new GameObject();
-			generators[j]->setMaxHealth(40.0f);
-			generators[j]->setHealth(40.0f);
+			generators[j]->setMaxHealth(80.0f);
+			generators[j]->setHealth(80.0f);
 			generators[j]->setDamage(10.0f);
 			generators[j]->setExplosionTime(1.0f);
 			generators[j]->setExplosionSprite(pResourceManager->GetTexture("explosion"));
@@ -781,34 +829,53 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 		barrier->setBlastWave(blastWave);
 	}
 
-	numOfCreatedBarriers = maxNumOfBarriers;
+	levelData.numOfCreatedBarriers = levelData.maxNumOfBarriers;
 }
 
 void StartLevelBehaviour::iterateLevel()
 {
 	levelIteration++;
 
+	// player.
+	if (levelIteration % 4 == 0)
+		levelData.playerSpeed += glm::vec2(20.0f, 10.0f);
+
 	// meteorites.
-	numOfCreatedMeteorites = 0;
-	maxNumOfMeteorites += 10;
-	meteoritesZone.y *= 1.2f;
+	levelData.numOfCreatedMeteorites = 0;
+	levelData.maxNumOfMeteorites += 10;
+	levelData.meteoritesZone.y *= 1.2f;
+
+	if (levelIteration < 10)
+		levelData.meteorRandomSeed -= 3;
 
 	// health kits.
 	if (levelIteration % 4 == 0)
-		maxNumOfHealthKits++;
+		levelData.maxNumOfHealthKits++;
 
 	// energy barriers.
-	numOfCreatedBarriers = 0;
-	maxNumOfBarriers += 4;
-	barriersZone.y *= 1.1f;
+	levelData.numOfCreatedBarriers = 0;
+	levelData.maxNumOfBarriers += 4;
+	levelData.barriersZone.y *= 1.1f;
+	levelData.barriersSpeed += 10.0f;
 
 	// basic enemies.
-	numOfBasicEnemies = 0;
+	levelData.numOfBasicEnemies = 0;
+	if(levelData.basicEnemySpeed < 350.0f)
+		levelData.basicEnemySpeed += 10.0f;
 
 	// team enemies.
-	numOfTeamEnemies = 0;
-	if (levelIteration % 2 == 0)
-		maxNumOfTeamEnemies++;
+	levelData.numOfTeamEnemies = 0;
+	if (levelIteration <= 6 && levelIteration % 2 == 0)
+		levelData.maxNumOfTeamEnemies++;
+
+	// boss enemy.
+	if (levelData.bossEnemySpeed < 350.0f)
+		levelData.bossEnemySpeed += 10.0f;
+	if (levelIteration <= 14 && levelIteration % 2 == 0 && levelData.maxTimeWithoutShield > 3)
+		levelData.maxTimeWithoutShield -= 1.0f;
+
+	if (updateLevelIterationCallback)
+		updateLevelIterationCallback();
 }
 
 bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObject* obj2)
@@ -895,44 +962,14 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	return false;
 }
 
-void StartLevelBehaviour::setMaxNumberOfMeteorites(int number)
+void StartLevelBehaviour::setLevelData(LevelData data)
 {
-	maxNumOfMeteorites = number;
+	levelData = data;
 }
 
-void StartLevelBehaviour::setMaxNumberOfHealthKits(int number)
+LevelData StartLevelBehaviour::getLevelData()
 {
-	maxNumOfHealthKits = number;
-}
-
-void StartLevelBehaviour::setMaxNumberOfBarriers(int number)
-{
-	maxNumOfBarriers = number;
-}
-
-void StartLevelBehaviour::setMaxNumberOfTeamEnemies(int number)
-{
-	maxNumOfTeamEnemies = number;
-}
-
-void StartLevelBehaviour::setMeteoritesZone(glm::vec2 zone)
-{
-	meteoritesZone = zone;
-}
-
-void StartLevelBehaviour::setEnergyBarriersZone(glm::vec2 zone)
-{
-	barriersZone = zone;
-}
-
-void StartLevelBehaviour::setHealthKitsZone(glm::vec2 zone)
-{
-	healthKitsZone = zone;
-}
-
-void StartLevelBehaviour::setHealthKitsSpawnFreq(float freq)
-{
-	healthKitsFreq = freq;
+	return levelData;
 }
 
 void StartLevelBehaviour::addController(AIController* controller)
@@ -943,6 +980,11 @@ void StartLevelBehaviour::addController(AIController* controller)
 void StartLevelBehaviour::setFinishLevelCallback(void(*actionCallback)(void))
 {
 	finishLevelCallback = actionCallback;
+}
+
+void StartLevelBehaviour::setIterateLevelCallback(void(*actionCallback)(void))
+{
+	updateLevelIterationCallback = actionCallback;
 }
 
 void StartLevelBehaviour::clear()

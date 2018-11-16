@@ -141,11 +141,21 @@ void BossSpacecraftObject::enableShield(bool enable)
 	}
 }
 
+bool BossSpacecraftObject::isShieldEnabled()
+{
+	if (energyShield)
+		return energyShield->isHiddenFromLevel();
+	return false;
+}
+
 void BossSpacecraftObject::setEnergyShield(GameObject* shield)
 {
 	pEnergyShieldTemplate = shield;
-	pEnergyShieldTemplate->setParentObject(this);
-	pEnergyShieldTemplate->hideFromLevel(true);
+	if (pEnergyShieldTemplate)
+	{
+		pEnergyShieldTemplate->setParentObject(this);
+		pEnergyShieldTemplate->hideFromLevel(true);
+	}
 }
 
 GameObject* BossSpacecraftObject::getEnergyShield()
@@ -167,12 +177,15 @@ void BossSpacecraftObject::clear()
 {
 	if (energyShield)
 	{
-		energyShield->setParentObject(NULL);
+		//energyShield->setParentObject(NULL);
+		pLevel->removeObject(energyShield);
+		delete energyShield;
 		energyShield = NULL;
 	}
 
 	if (pEnergyShieldTemplate)
 	{
+		pLevel->removeObject(pEnergyShieldTemplate);
 		delete pEnergyShieldTemplate;
 		pEnergyShieldTemplate = NULL;
 	}

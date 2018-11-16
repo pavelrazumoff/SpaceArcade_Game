@@ -140,6 +140,8 @@ public:
 	// Render state
 	Texture2D*  Sprite = NULL;
 	Texture2D*	ExplosionSprite = NULL;
+	glm::vec4	color = glm::vec4(1.0f);
+	glm::vec4	explosionColor = glm::vec4(1.0f);
 
 protected:
 	GameLevel* pLevel = NULL;

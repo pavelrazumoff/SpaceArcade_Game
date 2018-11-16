@@ -5,7 +5,7 @@
 
 BlastWaveObject::BlastWaveObject()
 {
-	damage = 1.0f;
+	damage = 2.0f;
 	impulseFactor = 300;
 	usePhysics = true;
 	useAnimation = true;

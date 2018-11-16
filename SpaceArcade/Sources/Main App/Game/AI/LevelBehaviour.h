@@ -37,6 +37,7 @@ public:
 	GameLevel* getLevel();
 	GameObject* getPlayerObject();
 	bool isUserInputBlocked();
+	int getLevelIteration();
 
 	void addComplexAIController(AIController* controller);
 

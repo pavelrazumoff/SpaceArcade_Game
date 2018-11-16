@@ -315,7 +315,8 @@ void GameLevel::doCollisions()
 				// check if two objects can do damage (exclude cases when damaging object collides with stars for example)
 				// and also check collision for two objects.
 				if (objects[currentIndex]->isDamagingObject() && objects[currentIndex]->getHealth() > 0.0f &&
-					!objects[currentIndex]->isHiddenFromLevel() && !objects[currentIndex]->isOffTheScreen(screenDimensions))
+					!objects[currentIndex]->isHiddenFromLevel() && !objects[currentIndex]->isOffTheScreen(screenDimensions) &&
+					objects[currentIndex]->isCheckingCollision())
 				{
 					collidedList[objects[i]].push_back(objects[currentIndex]);
 

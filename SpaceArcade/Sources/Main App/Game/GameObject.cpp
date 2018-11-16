@@ -221,9 +221,9 @@ void GameObject::draw(bool useInstanced, int amount)
 		attachedOnBottom[i]->draw(useInstanced, amount);
 
 	if(visible && health > 0.0f)
-		pLevel->getRenderer()->DrawSprite(this->Sprite, this->model, glm::vec4(0.0f), currentAnimationFrame);
+		pLevel->getRenderer()->DrawSprite(this->Sprite, this->model, color, currentAnimationFrame);
 	if(health <= 0.0f && explosionTime > 0.0f && ExplosionSprite->ID >= 0)
-		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->explosionModel, glm::vec4(0.0f), currentExplosionFrame);
+		pLevel->getRenderer()->DrawSprite(this->ExplosionSprite, this->explosionModel, explosionColor, currentExplosionFrame);
 
 	for (int i = 0; i < attachedOnTop.size(); ++i)
 		attachedOnTop[i]->draw(useInstanced, amount);

@@ -2,12 +2,12 @@
 
 GUILayout::GUILayout()
 {
-
+	color = glm::vec4(0.0f);
 }
 
 GUILayout::GUILayout(SpriteRenderer* renderer) : GUIObject(renderer)
 {
-
+	color = glm::vec4(0.0f);
 }
 
 GUILayout::~GUILayout()

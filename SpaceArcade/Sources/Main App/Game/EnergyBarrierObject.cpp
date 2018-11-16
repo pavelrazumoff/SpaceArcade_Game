@@ -279,8 +279,16 @@ void EnergyBarrierObject::clear()
 
 	if (blastWave)
 	{
-		blastWave->setParentObject(NULL);
-		blastWave->setSender(NULL);
+		if (blastWave->getParentObject())
+		{
+			pLevel->removeObject(blastWave);
+			delete blastWave;
+		}
+		else
+		{
+			blastWave->setParentObject(NULL);
+			blastWave->setSender(NULL);
+		}
 		blastWave = NULL;
 	}
 

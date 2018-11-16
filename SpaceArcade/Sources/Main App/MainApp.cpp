@@ -276,15 +276,43 @@ void MainApp::restartGame()
 	currentPage = PageType::Game;
 	if (pScoreBox)
 		pScoreBox->setMaximumWidth(140.0f);
+	if (pLevelBox)
+		pLevelBox->setMaximumWidth(140.0f);
 
 	renderer.resize(screenWidth, screenHeight);
 	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
 		gui_objects[currentPage][i]->resize();
 
 	base_level->resetLevel();
+	resetInitialSceneData();
 	base_level->startLevel();
 
 	prevScore = 0;
+	prevLevel = 0;
+}
+
+void MainApp::iterateLevel()
+{
+	if (levelBehaviours.size() == 0)
+		return;
+
+	int currentLevel = levelBehaviours[0]->getLevelIteration();
+	std::string textLevel = std::to_string(currentLevel);
+	std::string text = "Level: " + textLevel;
+	if (pLevelBox)
+	{
+		pLevelBox->setText(text);
+
+		if (currentLevel >= 100 && textLevel.size() > std::to_string(prevLevel).size())
+		{
+			pLevelBox->setMaximumWidth(pLevelBox->getMaximumWidth() + 15);
+			renderer.resize(screenWidth, screenHeight);
+			for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+				gui_objects[currentPage][i]->resize();
+		}
+	}
+
+	prevLevel = currentLevel;
 }
 
 void MainApp::clearBuffers()

@@ -13,8 +13,8 @@ SpacecraftObject::SpacecraftObject()
 	laser_ray = new GameObject();
 	laser_ray->setIsDamagingObject(true);
 	laser_ray->setDamage(20.0f);
-	laser_ray->setHealth(1.0f); // destroys momentally.
 	laser_ray->setMaxHealth(1.0f);
+	laser_ray->setHealth(1.0f); // destroys momentally.
 	laser_ray->setUsePhysics(false);
 	laser_ray->setParentObject(this);
 	laser_ray->setObjectType(ObjectTypes::LaserRay);
@@ -22,8 +22,8 @@ SpacecraftObject::SpacecraftObject()
 	pRocket = new GameObject();
 	pRocket->setIsDamagingObject(true);
 	pRocket->setDamage(200.0f);
-	pRocket->setHealth(1.0f); // destroys momentally.
 	pRocket->setMaxHealth(1.0f);
+	pRocket->setHealth(1.0f); // destroys momentally.
 	pRocket->setUsePhysics(false);
 	pRocket->setParentObject(this);
 	pRocket->setObjectType(ObjectTypes::Rocket);

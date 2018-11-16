@@ -141,6 +141,11 @@ void restartScene()
 	app.restartGame();
 }
 
+void iterateScene()
+{
+	app.iterateLevel();
+}
+
 void enableMultisampling(bool enable)
 {
 	app.useMultisampling = enable;

@@ -27,6 +27,7 @@ void pauseScene();
 void resumeScene();
 void finishScene();
 void restartScene();
+void iterateScene();
 
 void enableMultisampling(bool enable);
 void enableGammaCorrection(bool enable);
@@ -55,6 +56,7 @@ public:
 	void init();
 	void initGUI();
 	void initScene();
+	void resetInitialSceneData();
 	void initBuffers();
 
 	void loadShaders();
@@ -108,6 +110,7 @@ public:
 	void resumeGame();
 	void finishGame();
 	void restartGame();
+	void iterateLevel();
 
 	GLFWwindow* getWindow();
 
@@ -159,6 +162,7 @@ private:
 	bool lbutton_down = false;
 	bool key_pressed = false;
 	int prevScore = 0;
+	int prevLevel = 0;
 
 	ResourceManager* res_manager = NULL;
 	SpriteRenderer renderer;
@@ -170,4 +174,5 @@ private:
 	GUIButton* pResumeButton = NULL;
 	GUITextBox* pScoreBox = NULL;
 	GUITextBox* pFinalScore = NULL;
+	GUITextBox* pLevelBox = NULL;
 };

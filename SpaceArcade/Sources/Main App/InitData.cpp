@@ -92,6 +92,7 @@ void MainApp::initGUI()
 		fillObjects[i] = new GUIObject(&renderer);
 		fillObjects[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
 		fillObjects[i]->setLayoutFillPercent(3);
+		fillObjects[i]->setColor(glm::vec4(0.0f));
 	}
 
 	mainMenuLayout->addChild(fillObjects[0]);
@@ -319,6 +320,20 @@ void MainApp::initGUI()
 	pPauseButton->setHoveredTexture(res_manager->GetTexture("pauseButtonHovered"));
 	pPauseButton->setPressedTexture(res_manager->GetTexture("pauseButtonPressed"));
 	pPauseButton->setActionCallback(pauseScene);
+
+	pLevelBox = new GUITextBox(&renderer);
+	topLayouts[1]->addChild(pLevelBox);
+
+	pLevelBox->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	pLevelBox->setMaximumWidth(140.0f);
+	pLevelBox->setMinimumHeight(40.0f);
+	pLevelBox->setMaximumHeight(40.0f);
+	pLevelBox->setText("Level: 0");
+	pLevelBox->setTextColor(glm::vec3(1.0, 0.47f, 0.0f));
+	pLevelBox->setFont(res_manager->Fonts["TTLakes30"]);
+	pLevelBox->setFontShader(&font_shader);
+	pLevelBox->setFontBuffers(fontVAO, fontVBO);
+	pLevelBox->setTextPos(glm::vec2(10.0f, 30.0f));
 
 	pScoreBox = new GUITextBox(&renderer);
 	topLayouts[1]->addChild(pScoreBox);
@@ -566,16 +581,35 @@ void MainApp::initScene()
 
 	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(base_level, res_manager);
 	levelBehaviours.push_back(basicBehaviour);
-	basicBehaviour->setFinishLevelCallback(finishScene);
+	
+	resetInitialSceneData();
+}
 
-	basicBehaviour->setMaxNumberOfMeteorites(30);
-	basicBehaviour->setMaxNumberOfHealthKits(2);
-	basicBehaviour->setMaxNumberOfBarriers(16);
-	basicBehaviour->setMaxNumberOfTeamEnemies(2);
+void MainApp::resetInitialSceneData()
+{
+	if (levelBehaviours.size() == 0)
+		return;
 
-	basicBehaviour->setMeteoritesZone(glm::vec2(0.0f, 1000.0f));
-	basicBehaviour->setEnergyBarriersZone(glm::vec2(0.0f, 1000.0f));
-	basicBehaviour->setHealthKitsZone(glm::vec2(-1500.0f, -6000.0f));
+	StartLevelBehaviour* behavior = (StartLevelBehaviour*)levelBehaviours[0];
+	behavior->setFinishLevelCallback(finishScene);
+	behavior->setIterateLevelCallback(iterateScene);
 
-	basicBehaviour->setHealthKitsSpawnFreq(90.0f);
+	LevelData levelData = behavior->getLevelData();
+	levelData.maxNumOfMeteorites = 30;
+	levelData.maxNumOfHealthKits = 2;
+	levelData.maxNumOfBarriers = 16;
+	levelData.maxNumOfTeamEnemies = 2;
+
+	levelData.meteoritesZone = glm::vec2(0.0f, 1000.0f);
+	levelData.barriersZone = glm::vec2(0.0f, 1000.0f);
+	levelData.healthKitsZone = glm::vec2(-1500.0f, -6000.0f);
+
+	levelData.healthKitsFreq = 90.0f;
+	levelData.playerSpeed = glm::vec2(400.0f, 200.0f);
+	levelData.barriersSpeed = 90.0f;
+	levelData.basicEnemySpeed = 200.0f;
+	levelData.bossEnemySpeed = 100.0f;
+	levelData.maxTimeWithoutShield = 12.0f;
+
+	behavior->setLevelData(levelData);
 }

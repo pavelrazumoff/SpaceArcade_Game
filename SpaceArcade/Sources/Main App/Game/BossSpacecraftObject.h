@@ -25,6 +25,7 @@ public:
 
 	void spawnLaserRays();
 	void enableShield(bool enable);
+	bool isShieldEnabled();
 
 	void setEnergyShield(GameObject* shield);
 	GameObject* getEnergyShield();

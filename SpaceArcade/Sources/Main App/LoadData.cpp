@@ -30,6 +30,7 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//health_kit.png", "healthKit", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//energy_shield.png", "energyShield", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//rocket.png", "rocket", useGammaCorrection, &gameObjectsParams);
+	res_manager->LoadTexture("Images//smoke.png", "smoke", useGammaCorrection, &gameObjectsParams);
 
 	for (int i = 0; i < 3; ++i)
 	{
@@ -58,11 +59,15 @@ void MainApp::loadShaders()
 	tex->numOfRows = 2;
 	tex->numOfFrames = 11;
 
-	
 	tex = res_manager->GetTexture("energyShield");
 	tex->numOfColumns = 1;
 	tex->numOfRows = 5;
 	tex->numOfFrames = 5;
+
+	tex = res_manager->GetTexture("smoke");
+	tex->numOfColumns = 8;
+	tex->numOfRows = 8;
+	tex->numOfFrames = 64;
 
 	// sounds.
 	res_manager->addSound("Sounds//sound1_0.mp3", "BackgroundSound");

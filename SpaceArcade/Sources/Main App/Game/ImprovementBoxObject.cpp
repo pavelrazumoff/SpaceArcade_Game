@@ -70,6 +70,15 @@ void ImprovementBoxObject::makeReaction(glm::vec2 difference, GameObject* otherO
 
 	improvement.improve(spacecraft);
 
+	if (smokeObject)
+	{
+		smokeObject->Position = this->Position - glm::vec2(smokeObject->Size.x / 2, smokeObject->Size.y / 2);
+		smokeObject->Velocity = glm::vec2(this->Velocity.x / 1.5f, this->Velocity.y / 1.5f);
+		smokeObject->hideFromLevel(false);
+		smokeObject->startSelfDestroying(true);
+		smokeObject = NULL;
+	}
+
 	readyForDeath = true;
 }
 
@@ -78,13 +87,31 @@ void ImprovementBoxObject::setImprovement(ImprovementStruct improv)
 	improvement = improv;
 }
 
+void ImprovementBoxObject::setSmokeObject(GameObject* smoke)
+{
+	smokeObject = smoke;
+	if(smokeObject)
+		smokeObject->hideFromLevel(true);
+}
+
 ImprovementStruct ImprovementBoxObject::getImprovement()
 {
 	return improvement;
 }
 
+GameObject* ImprovementBoxObject::getSmokeObject()
+{
+	return smokeObject;
+}
+
 void ImprovementBoxObject::clear()
 {
+	if (smokeObject)
+	{
+		pLevel->removeObject(smokeObject);
+		delete smokeObject;
+		smokeObject = NULL;
+	}
 }
 
 void ImprovementStruct::improve(SpacecraftObject* spacecraft)

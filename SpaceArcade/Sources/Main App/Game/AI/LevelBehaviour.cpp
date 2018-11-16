@@ -86,6 +86,11 @@ bool LevelBehaviour::isUserInputBlocked()
 	return !userInput;
 }
 
+int LevelBehaviour::getLevelIteration()
+{
+	return levelIteration;
+}
+
 void LevelBehaviour::addComplexAIController(AIController* controller)
 {
 	complexControllers.push_back(controller);

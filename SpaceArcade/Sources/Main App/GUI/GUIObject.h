@@ -80,7 +80,7 @@ protected:
 	glm::vec2 SourceSize, Size;
 	glm::vec2 minimumSize, maximumSize;
 	glm::vec4 clipSpace;				// used in percentage displacement from (left, top, right, bottom).
-	glm::vec4 color = glm::vec4(0.0f);
+	glm::vec4 color = glm::vec4(1.0f);
 
 	bool visible = true;
 	bool resizable = false;
