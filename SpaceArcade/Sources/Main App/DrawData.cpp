@@ -24,6 +24,7 @@ void MainApp::render()
 	{
 	case PageType::MainMenu:
 	case PageType::Settings:
+	case PageType::Credits:
 		drawMenuBackground();
 		break;
 	case PageType::Game:
@@ -113,26 +114,7 @@ void MainApp::render()
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	switch (currentPage)
-	{
-	case PageType::Game:
-		drawSceneInterface();
-		break;
-	case PageType::PauseGame:
-		drawScenePausedInterface();
-		break;
-	case PageType::GameOver:
-		drawGameOverInterface();
-		break;
-	case PageType::MainMenu:
-		drawStartPage();
-		break;
-	case PageType::Settings:
-		drawSettingsPage();
-		break;
-	default:
-		break;
-	}
+	drawPage(currentPage);
 
 	// Draw text.
 	//drawTextData();
@@ -168,34 +150,10 @@ void MainApp::drawMenuBackground()
 	glDepthFunc(GL_LESS); // set depth function back to default.
 }
 
-void MainApp::drawSceneInterface()
+void MainApp::drawPage(int type)
 {
-	for (int i = 0; i < gui_objects[PageType::Game].size(); ++i)
-		gui_objects[PageType::Game][i]->draw();
-}
-
-void MainApp::drawScenePausedInterface()
-{
-	for (int i = 0; i < gui_objects[PageType::PauseGame].size(); ++i)
-		gui_objects[PageType::PauseGame][i]->draw();
-}
-
-void MainApp::drawGameOverInterface()
-{
-	for (int i = 0; i < gui_objects[PageType::GameOver].size(); ++i)
-		gui_objects[PageType::GameOver][i]->draw();
-}
-
-void MainApp::drawStartPage()
-{
-	for (int i = 0; i < gui_objects[PageType::MainMenu].size(); ++i)
-		gui_objects[PageType::MainMenu][i]->draw();
-}
-
-void MainApp::drawSettingsPage()
-{
-	for (int i = 0; i < gui_objects[PageType::Settings].size(); ++i)
-		gui_objects[PageType::Settings][i]->draw();
+	for (int i = 0; i < gui_objects[type].size(); ++i)
+		gui_objects[type][i]->draw();
 }
 
 void MainApp::RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
@@ -212,7 +170,7 @@ void MainApp::RenderText(std::string fontType, std::string text, GLfloat x, GLfl
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); c++)
 	{
-		Character ch = res_manager->Fonts[fontType][*c];
+		Character ch = res_manager->Fonts[fontType].characters[*c];
 		GLfloat xpos = x + ch.Bearing.x * scale;
 		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 		GLfloat w = ch.Size.x * scale;

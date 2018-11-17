@@ -31,7 +31,8 @@ struct LevelData
 	// meteorites data.
 	int maxNumOfMeteorites = 0;
 	int numOfCreatedMeteorites = 0;
-	int meteorRandomSeed = 50;
+	int meteorRandomSeed = 8;
+	glm::vec2 meteoritesSpeed = glm::vec2(50, 150);		// min, max.
 	glm::vec2 meteoritesZone = glm::vec2(0, 300);		// min, max.
 
 	// kits data.
@@ -54,6 +55,8 @@ struct LevelData
 	int numOfBossEnemies = 0;
 	float bossHealthThreshold;
 	float bossHealthThresholdStep;
+	float bossHealth = 1000.0f;
+	float bossEnergy = 200.0f;
 	float bossEnemySpeed = 100.0f;
 	bool introduceBegins = false;
 	float timeWithoutShield = 0.0f;

@@ -27,7 +27,7 @@ void GUITextBox::draw()
 
 	GUIObject::draw();
 
-	renderText(this->text, this->Position.x + textRelativePos.x, this->Position.y + textRelativePos.y, 1.0f, textColor);
+	renderText(this->text, 1.0f, textColor);
 }
 
 void GUITextBox::resize(bool useParentResize)
@@ -35,7 +35,7 @@ void GUITextBox::resize(bool useParentResize)
 	GUIObject::resize(useParentResize);
 }
 
-void GUITextBox::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
+void GUITextBox::renderText(std::string text, GLfloat scale, glm::vec3 color)
 {
 	if (!fontShader || fontVAO < 0 || fontVBO < 0)
 		return;
@@ -53,19 +53,53 @@ void GUITextBox::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scal
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(screenDimensions.x), static_cast<GLfloat>(screenDimensions.y), 0.0f, -1.0f, 1.0f);
 
 	fontShader->setMat4("projection", projection);
-	fontShader->setBool("useClipSpace", true);
+	fontShader->setBool("useClipSpace", useClipSpace);
 	fontShader->setVec4("clipSpace", glm::vec4(Position.x, Position.y, Position.x + Size.x, Position.y + Size.y));
 
 	glUniform3f(glGetUniformLocation(fontShader->getShaderProgram(), "textColor"), color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(fontVAO);
-	// Iterate through all characters
+
+	// first we have to determine text width.
+	float textWidth = 0;
 	std::string::const_iterator c;
+	float x = 0, y = 0;
+
 	for (c = text.begin(); c != text.end(); c++)
 	{
-		Character ch = font[*c];
-		GLfloat xpos = x + ch.Bearing.x * scale;
-		GLfloat ypos = y + (ch.Size.y - ch.Bearing.y) * scale;
+		Character ch = font.characters[*c];
+		x += (ch.Advance >> 6) * scale;
+	}
+
+	textWidth = x;
+
+	// second we have to set text position with appropriate alignment.
+	glm::vec2 textPos;
+
+	switch (textAlignment)
+	{
+	case TextAlignment::TextAlignNone:
+	case TextAlignment::TextAlignLeft:
+		textPos = glm::vec2(this->Position.x, this->Position.y);
+		break;
+	case TextAlignment::TextAlignCenter:
+		textPos = glm::vec2(this->Position.x + this->Size.x / 2 - textWidth / 2, this->Position.y);
+		break;
+	case TextAlignment::TextAlignRight:
+		textPos = glm::vec2(this->Position.x + this->Size.x - textWidth, this->Position.y);
+		break;
+	default:
+		break;
+	}
+
+	textPos += textRelativePos;
+
+	// Iterate through all characters
+	for (c = text.begin(); c != text.end(); c++)
+	{
+		Character ch = font.characters[*c];
+		GLfloat xpos = textPos.x + ch.Bearing.x * scale;
+		GLfloat ypos = textPos.y + font.fontSize + (ch.Size.y - ch.Bearing.y) * scale;
 		GLfloat w = ch.Size.x * scale;
 		GLfloat h = ch.Size.y * scale;
 		// Update VBO for each character
@@ -86,7 +120,7 @@ void GUITextBox::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scal
 		// Render quad
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+		textPos.x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -100,7 +134,7 @@ void GUITextBox::setText(std::string text)
 	this->text = text;
 }
 
-void GUITextBox::setFont(std::map<GLchar, Character> font)
+void GUITextBox::setFont(Font font)
 {
 	this->font = font;
 }
@@ -113,6 +147,16 @@ void GUITextBox::setTextPos(glm::vec2 pos)
 void GUITextBox::setTextColor(glm::vec3 color)
 {
 	textColor = color;
+}
+
+void GUITextBox::setTextAlignment(int alignment)
+{
+	textAlignment = alignment;
+}
+
+void GUITextBox::setUseClipSpace(bool clipSpace)
+{
+	useClipSpace = clipSpace;
 }
 
 void GUITextBox::setFontShader(Shader* shader)
@@ -131,7 +175,7 @@ std::string GUITextBox::getText()
 	return text;
 }
 
-std::map<GLchar, Character> GUITextBox::getFont()
+Font GUITextBox::getFont()
 {
 	return font;
 }

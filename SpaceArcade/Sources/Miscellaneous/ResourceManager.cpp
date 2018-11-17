@@ -13,6 +13,7 @@ void ResourceManager::init()
 
 	// Initialize irrKlang Sound library.
 	SoundEngine = createIrrKlangDevice();
+	//SoundEngine->setSoundVolume(0.0f);
 }
 
 Shader ResourceManager::LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, std::string name)
@@ -90,7 +91,8 @@ void ResourceManager::loadFont(std::string fontPath, std::string fontType, int f
 		Characters.insert(std::pair<GLchar, Character>(c, character));
 	}
 
-	Fonts[fontType] = Characters;
+	Fonts[fontType].characters = Characters;
+	Fonts[fontType].fontSize = fontSize;
 
 	FT_Done_Face(face);
 }

@@ -30,8 +30,6 @@ void GameLevel::startLevel()
 	setUseInstancing(ObjectTypes::Basic, false);
 	setUseInstancing(ObjectTypes::EnergyBarrier, false);
 
-	resize();
-
 	if (behaviour)
 		behaviour->startBehaviour();
 }

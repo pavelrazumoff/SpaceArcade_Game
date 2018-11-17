@@ -1,6 +1,14 @@
 #pragma once
 #include "GUIObject.h"
 
+enum TextAlignment
+{
+	TextAlignNone = 0,
+	TextAlignCenter,
+	TextAlignLeft,
+	TextAlignRight
+};
+
 class GUITextBox : public GUIObject
 {
 public:
@@ -15,25 +23,30 @@ public:
 
 	virtual void clear();
 
-	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+	void renderText(std::string text, GLfloat scale, glm::vec3 color);
 
 	void setText(std::string text);
-	void setFont(std::map<GLchar, Character> font);
+	void setFont(Font font);
 	void setTextPos(glm::vec2 pos);
 	void setTextColor(glm::vec3 color);
+	void setTextAlignment(int alignment);
+	void setUseClipSpace(bool clipSpace);
+
 	void setFontShader(Shader* shader);
 	void setFontBuffers(int vao, int vbo);
 
 	std::string getText();
-	std::map<GLchar, Character> getFont();
+	Font getFont();
 	glm::vec2 getTextPos();
 	glm::vec3 getTextColor();
 
 protected:
 	std::string text;
-	std::map<GLchar, Character> font;
+	Font font;
 	glm::vec2 textRelativePos;
 	glm::vec3 textColor;
+	int textAlignment = TextAlignment::TextAlignNone;
+	bool useClipSpace = true;
 
 	Shader* fontShader = NULL;
 	int fontVAO = -1, fontVBO = -1;

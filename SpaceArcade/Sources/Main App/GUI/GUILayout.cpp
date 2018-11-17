@@ -124,7 +124,8 @@ void GUILayout::resize(bool useParentResize)
 			else if (alignment == GUILayout_Alignment::Center)
 				children[i]->setPosition(glm::vec2(layout_center.x - content_size.x / 2 + shift, layout_center.y - children[i]->getSize().y / 2));
 			else if (alignment == GUILayout_Alignment::Right)
-				children[i]->setPosition(glm::vec2(this->Position.x + this->Size.x - content_size.x + shift, layout_center.y - children[i]->getSize().y / 2));
+				children[i]->setPosition(glm::vec2(this->Position.x + this->Size.x - content_size.x + shift - currentIndents.z,
+					layout_center.y - children[i]->getSize().y / 2));
 			
 			shift += children[i]->getSize().x + currentSpace;
 		}

@@ -81,6 +81,8 @@ void MainApp::loadShaders()
 	res_manager->addSound("Sounds//click_effect.wav", "ClickEffect");
 
 	// gui.
+	res_manager->LoadTexture("Images//Interface//gameCaption.png", "gameCaption", false);
+
 	res_manager->LoadTexture("Images//Interface//playGameButton.png", "playGameButton", false);
 	res_manager->LoadTexture("Images//Interface//playGameButtonHovered.png", "playGameButtonHovered", false);
 	res_manager->LoadTexture("Images//Interface//playGameButtonPressed.png", "playGameButtonPressed", false);
@@ -124,6 +126,9 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//Interface//resumeButton.png", "resumeButton", false);
 	res_manager->LoadTexture("Images//Interface//resumeButtonHovered.png", "resumeButtonHovered", false);
 	res_manager->LoadTexture("Images//Interface//resumeButtonPressed.png", "resumeButtonPressed", false);
+	res_manager->LoadTexture("Images//Interface//creditsButton.png", "creditsButton", false);
+	res_manager->LoadTexture("Images//Interface//creditsButtonHovered.png", "creditsButtonHovered", false);
+	res_manager->LoadTexture("Images//Interface//creditsButtonPressed.png", "creditsButtonPressed", false);
 
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");

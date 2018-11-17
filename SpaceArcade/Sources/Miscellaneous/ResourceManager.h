@@ -41,7 +41,7 @@ public:
 	std::map<std::string, Shader>    Shaders;
 	std::map<std::string, Texture2D*> Textures;
 	std::map<std::string, Texture2D*> Cubemaps;
-	std::map<std::string, std::map<GLchar, Character>> Fonts;
+	std::map<std::string, Font> Fonts;
 	std::map<std::string, std::string> sounds;
 
 private:

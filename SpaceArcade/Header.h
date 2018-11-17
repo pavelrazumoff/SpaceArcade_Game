@@ -48,6 +48,12 @@ struct Character {
 	GLuint Advance; // Offset to advance to next glyph
 };
 
+struct Font
+{
+	std::map<GLchar, Character> characters;
+	int fontSize;
+};
+
 float lerp(float a, float b, float f);
 
 void healthBarChanged(float health, float initialHealth);

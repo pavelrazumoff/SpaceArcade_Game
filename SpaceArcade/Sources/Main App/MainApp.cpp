@@ -191,7 +191,7 @@ void MainApp::resize(int width, int height)
 		for (int i = 0; i < it->second.size(); ++i)
 			it->second[i]->resize();
 
-	if(base_level->getLevelStatus() != LevelStatus::NotStarted)
+	if(base_level)
 		base_level->resize();
 }
 

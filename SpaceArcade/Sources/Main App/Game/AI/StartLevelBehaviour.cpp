@@ -102,6 +102,7 @@ void StartLevelBehaviour::resetBehaviour()
 	}
 
 	levelData.playerSpeed = glm::vec2(200.0f, 100.0f);
+	levelData.meteoritesSpeed = glm::vec2(50, 150);
 	levelData.basicEnemySpeed = 100.0f;
 	levelData.bossEnemySpeed = 100.0f;
 	levelData.barriersSpeed = 100.0f;
@@ -117,6 +118,9 @@ void StartLevelBehaviour::resetBehaviour()
 	levelData.numOfCreatedBarriers = 0;
 
 	levelData.timeWithoutShield = 0.0f;
+
+	levelData.bossHealth = 1000.0f;
+	levelData.bossEnergy = 200.0f;
 
 	levelMode = StartLevelMode::Introducing;
 	// block user input from beginning of the level.
@@ -438,11 +442,6 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 	int meteoriteDiff = levelData.maxNumOfMeteorites - levelData.numOfCreatedMeteorites;
 	if (meteoriteDiff <= 0)
 		return;
-	
-	int randomIndices[10];
-
-	for (int i = 0; i < 10; ++i)
-		randomIndices[i] = rand() % (levelData.meteorRandomSeed);
 
 	glm::vec2 detailSizes[] = {
 		glm::vec2(15, 37),
@@ -472,42 +471,41 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 		//asteroid->hideFromLevel(true);
 
 		asteroid->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 100 + 1) + 50,
-			rand() % (int)(levelData.meteoritesZone.x + levelData.meteoritesZone.y + 1) - levelData.meteoritesZone.y), glm::vec2(46, 47),
-			pResourceManager->GetTexture("asteroid"), glm::vec2(rand() % 15, rand() % (150 - 50 + 1) + 50));
+			rand() % (int)(levelData.meteoritesZone.x + levelData.meteoritesZone.y + 1) - levelData.meteoritesZone.y), glm::vec2(50, 50),
+			pResourceManager->GetTexture("asteroid"), glm::vec2(rand() % 15,
+				rand() % (int)(levelData.meteoritesSpeed.y - levelData.meteoritesSpeed.x + 1) + levelData.meteoritesSpeed.x));
 
 		asteroid->InitialRotation = rand() % 360;
 		asteroid->Rotation = 10.0f;
 
 		asteroid->resize();
 
-		for (int j = 0; j < 10; ++j)
-			if (i == randomIndices[j])
-			{
-				ImprovementBoxObject* rocketDetail = new ImprovementBoxObject();
+		if (rand() % levelData.meteorRandomSeed == 1)
+		{
+			ImprovementBoxObject* rocketDetail = new ImprovementBoxObject();
 
-				rocketDetail->init(pLevel, glm::vec2(0.0f, 0.0f), detailSizes[i % 3], pResourceManager->GetTexture("rocketDetail1_" + std::to_string(i % 3)),
-					glm::vec2(rand() % (20 + 1) - 20, rand() % (170 - 60 + 1) + 60));
+			rocketDetail->init(pLevel, glm::vec2(0.0f, 0.0f), detailSizes[i % 3], pResourceManager->GetTexture("rocketDetail1_" + std::to_string(i % 3)),
+				glm::vec2(rand() % (20 + 1) - 20, rand() % (170 - 60 + 1) + 60));
 
-				rocketDetail->InitialRotation = rand() % 360;
-				rocketDetail->Rotation = 15.0f;
-				rocketDetail->setImprovement(rocketKit);
+			rocketDetail->InitialRotation = rand() % 360;
+			rocketDetail->Rotation = 15.0f;
+			rocketDetail->setImprovement(rocketKit);
 
-				GameObject* smoke = new GameObject();
-				smoke->setUsePhysics(false);
-				smoke->setObjectType(ObjectTypes::Basic);
-				smoke->setSelfDestroyTime(1.5f);
-				smoke->setUseAnimation(true);
-				smoke->setCollisionCheck(false);
-				smoke->setAnimationDuration(1.5f);
+			GameObject* smoke = new GameObject();
+			smoke->setUsePhysics(false);
+			smoke->setObjectType(ObjectTypes::Basic);
+			smoke->setSelfDestroyTime(1.5f);
+			smoke->setUseAnimation(true);
+			smoke->setCollisionCheck(false);
+			smoke->setAnimationDuration(1.5f);
 
-				smoke->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(64, 64), pResourceManager->GetTexture("smoke"), glm::vec2(0.0f, 0.0f));
+			smoke->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(64, 64), pResourceManager->GetTexture("smoke"), glm::vec2(0.0f, 0.0f));
 
-				rocketDetail->setSmokeObject(smoke);
+			rocketDetail->setSmokeObject(smoke);
 
-				rocketDetail->resize();
-				asteroid->addPostDeathObject(rocketDetail);
-				break;
-			}
+			rocketDetail->resize();
+			asteroid->addPostDeathObject(rocketDetail);
+		}
 	}
 
 	levelData.numOfCreatedMeteorites += numOfMeteorites;
@@ -645,6 +643,9 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	if (levelData.numOfBossEnemies > 0)
 		return;
 
+	levelData.bossHealth += 50.0f;
+	levelData.bossEnergy += 20.0f;
+
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = screenDimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 
@@ -660,9 +661,9 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	bossSpaceCraft->setExplosionSprite(pResourceManager->GetTexture("explosion"));
 	bossSpaceCraft->setAIController(bossAI);
 	bossSpaceCraft->setControlVelocityByRotation(true);
-	bossSpaceCraft->setMaxHealth(1000.0f);
-	bossSpaceCraft->setHealth(1000.0f);
-	bossSpaceCraft->setMaxEnergy(200.0f);
+	bossSpaceCraft->setMaxHealth(levelData.bossHealth);
+	bossSpaceCraft->setHealth(levelData.bossHealth);
+	bossSpaceCraft->setMaxEnergy(levelData.bossEnergy);
 	bossSpaceCraft->setLaserSoundName("LaserEnemySound");
 	bossSpaceCraft->setExplosionSoundName("ExplosionEffect");
 	bossSpaceCraft->setScoreContribution(300);
@@ -844,6 +845,8 @@ void StartLevelBehaviour::iterateLevel()
 	levelData.numOfCreatedMeteorites = 0;
 	levelData.maxNumOfMeteorites += 10;
 	levelData.meteoritesZone.y *= 1.2f;
+	levelData.meteoritesSpeed.x += 10.0f;
+	levelData.meteoritesSpeed.y += 15.0f;
 
 	if (levelIteration < 10)
 		levelData.meteorRandomSeed -= 3;

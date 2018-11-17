@@ -111,6 +111,11 @@ void showSettings()
 	app.currentPage = PageType::Settings;
 }
 
+void showCredits()
+{
+	app.currentPage = PageType::Credits;
+}
+
 void quitGame()
 {
 	glfwSetWindowShouldClose(app.getWindow(), true);

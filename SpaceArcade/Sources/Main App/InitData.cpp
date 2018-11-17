@@ -73,6 +73,7 @@ void MainApp::initGUI()
 {
 	std::vector<GUIObject*> mainMenuObjects;
 	std::vector<GUIObject*> settingsObjects;
+	std::vector<GUIObject*> creditsObjects;
 	std::vector<GUIObject*> gameInterfaceObjects;
 	std::vector<GUIObject*> gamePauseInterfaceObjects;
 	std::vector<GUIObject*> gameOverInterfaceObjects;
@@ -83,8 +84,54 @@ void MainApp::initGUI()
 
 	mainMenuLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
 	mainMenuLayout->setSpace(0);
-	mainMenuLayout->setTypeLayout(GUILayout_Type::Horizontal);
-	mainMenuLayout->setAlignment(GUILayout_Alignment::Center);
+	mainMenuLayout->setTypeLayout(GUILayout_Type::Vertical);
+	mainMenuLayout->setAlignment(GUILayout_Alignment::Top);
+
+	GUILayout* topMenuLayout = new GUILayout(&renderer);
+	mainMenuLayout->addChild(topMenuLayout);
+
+	topMenuLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	topMenuLayout->setSpace(0);
+	topMenuLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	topMenuLayout->setAlignment(GUILayout_Alignment::Right);
+	topMenuLayout->setIndents(glm::vec4(20.0f, 5.0f, 20.0f, 0.0f));
+	topMenuLayout->setLayoutFillPercent(1);
+
+	GUIButton* creaditsButton = new GUIButton(&renderer);
+	topMenuLayout->addChild(creaditsButton);
+
+	creaditsButton->init(res_manager->GetTexture("creditsButton"), glm::vec2(0.0f, 0.0f), glm::vec2(120.0f, 40.0f), true);
+	creaditsButton->setMaximumSize(glm::vec2(120.0f, 40.0f));
+	creaditsButton->setMinimumSize(glm::vec2(60.0f, 20.0f));
+	creaditsButton->setSizeRatio(3.0f, true);
+	creaditsButton->setHoveredTexture(res_manager->GetTexture("creditsButtonHovered"));
+	creaditsButton->setPressedTexture(res_manager->GetTexture("creditsButtonPressed"));
+	creaditsButton->setActionCallback(showCredits);
+
+	GUILayout* middleMenuLayout = new GUILayout(&renderer);
+	mainMenuLayout->addChild(middleMenuLayout);
+
+	middleMenuLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	middleMenuLayout->setSpace(0);
+	middleMenuLayout->setTypeLayout(GUILayout_Type::Vertical);
+	middleMenuLayout->setAlignment(GUILayout_Alignment::Center);
+	middleMenuLayout->setLayoutFillPercent(4);
+
+	GUIObject* gameCaption = new GUIObject(&renderer);
+	middleMenuLayout->addChild(gameCaption);
+
+	gameCaption->init(res_manager->GetTexture("gameCaption"), glm::vec2(0.0f, 0.0f), glm::vec2(600.0f, 150.0f), true);
+	gameCaption->setMaximumSize(glm::vec2(600.0f, 150.0f));
+	gameCaption->setSizeRatio(4.0f, true);
+
+	GUILayout* bottomMenuLayout = new GUILayout(&renderer);
+	mainMenuLayout->addChild(bottomMenuLayout);
+
+	bottomMenuLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	bottomMenuLayout->setSpace(0);
+	bottomMenuLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	bottomMenuLayout->setAlignment(GUILayout_Alignment::Center);
+	bottomMenuLayout->setLayoutFillPercent(8);
 
 	GUIObject* fillObjects[2];
 	for (int i = 0; i < 2; ++i)
@@ -95,19 +142,19 @@ void MainApp::initGUI()
 		fillObjects[i]->setColor(glm::vec4(0.0f));
 	}
 
-	mainMenuLayout->addChild(fillObjects[0]);
+	bottomMenuLayout->addChild(fillObjects[0]);
 
 	GUILayout* menuLayout = new GUILayout(&renderer);
-	mainMenuLayout->addChild(menuLayout);
+	bottomMenuLayout->addChild(menuLayout);
 
 	glm::vec2 layoutSize = glm::vec2(270, 342);
 	menuLayout->init(NULL, glm::vec2(screenWidth / 2 - layoutSize.x / 2, screenHeight / 2 - layoutSize.y / 2), layoutSize, true);
 	menuLayout->setLayoutFillPercent(2);
 	menuLayout->setSpace(30);
 	menuLayout->setTypeLayout(GUILayout_Type::Vertical);
-	menuLayout->setAlignment(GUILayout_Alignment::Center);
+	menuLayout->setAlignment(GUILayout_Alignment::Top);
 
-	mainMenuLayout->addChild(fillObjects[1]);
+	bottomMenuLayout->addChild(fillObjects[1]);
 
 	std::string textureNames[] = { "playGameButton", "settingsButton", "quitButton" };
 	std::string textureNames_0[] = { "playGameButtonHovered", "settingsButtonHovered", "quitButtonHovered" };
@@ -170,10 +217,10 @@ void MainApp::initGUI()
 	paramsLayout->setTypeLayout(GUILayout_Type::Vertical);
 	paramsLayout->setAlignment(GUILayout_Alignment::Top);
 
-	GUILayout* lineObject[10];
+	GUILayout* lineObject[8];
 	int linePercent[] = { 1, 3 };
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		GUILayout* paramLineLayout = new GUILayout(&renderer);
 		paramsLayout->addChild(paramLineLayout);
@@ -198,7 +245,6 @@ void MainApp::initGUI()
 	}
 
 	std::string textBoxData[] ={
-		"MULTISAMPLING",
 		"GAMMA CORRECTION",
 		"HDR",
 		"BLOOM",
@@ -206,15 +252,14 @@ void MainApp::initGUI()
 	};
 
 	bool params[] = {
-		useMultisampling,
 		useGammaCorrection,
 		useHDR,
 		useBloom,
 		fullscreenMode
 	};
 
-	GUICheckBox* checkBoxes[5];
-	for (int i = 0; i < 5; ++i)
+	GUICheckBox* checkBoxes[4];
+	for (int i = 0; i < 4; ++i)
 	{
 		GUITextBox* textBox = new GUITextBox(&renderer);
 		lineObject[i * 2]->addChild(textBox);
@@ -227,7 +272,7 @@ void MainApp::initGUI()
 		textBox->setFont(res_manager->Fonts["TTLakes26"]);
 		textBox->setFontShader(&font_shader);
 		textBox->setFontBuffers(fontVAO, fontVBO);
-		textBox->setTextPos(glm::vec2(10.0f, 30.0f));
+		textBox->setTextAlignment(TextAlignment::TextAlignLeft);
 
 		checkBoxes[i] = new GUICheckBox(&renderer);
 		lineObject[i * 2 + 1]->addChild(checkBoxes[i]);
@@ -245,11 +290,10 @@ void MainApp::initGUI()
 		checkBoxes[i]->setChecked(params[i]);
 	}
 
-	checkBoxes[0]->setCheckCallback(enableMultisampling);
-	checkBoxes[1]->setCheckCallback(enableGammaCorrection);
-	checkBoxes[2]->setCheckCallback(enableHDR);
-	checkBoxes[3]->setCheckCallback(enableBloom);
-	checkBoxes[4]->setCheckCallback(setFullscreen);
+	checkBoxes[0]->setCheckCallback(enableGammaCorrection);
+	checkBoxes[1]->setCheckCallback(enableHDR);
+	checkBoxes[2]->setCheckCallback(enableBloom);
+	checkBoxes[3]->setCheckCallback(setFullscreen);
 
 	GUIButton* backMenuButton = new GUIButton(&renderer);
 	topLayout->addChild(backMenuButton);
@@ -259,6 +303,91 @@ void MainApp::initGUI()
 	backMenuButton->setHoveredTexture(res_manager->GetTexture("backButtonHovered"));
 	backMenuButton->setPressedTexture(res_manager->GetTexture("backButtonPressed"));
 	backMenuButton->setActionCallback(backToMainMenu);
+
+	// Credits page.
+	GUILayout* creditsLayout = new GUILayout(&renderer);
+	creditsObjects.push_back(creditsLayout);
+
+	creditsLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	creditsLayout->setSpace(10);
+	creditsLayout->setIndents(glm::vec4(50, 10, 50, 10));
+	creditsLayout->setTypeLayout(GUILayout_Type::Vertical);
+	creditsLayout->setAlignment(GUILayout_Alignment::Center);
+
+	GUILayout* topCreditsLayout = new GUILayout(&renderer);
+	creditsLayout->addChild(topCreditsLayout);
+
+	topCreditsLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	topCreditsLayout->setMinimumHeight(50.0f);
+	topCreditsLayout->setMaximumHeight(50.0f);
+	topCreditsLayout->setLayoutFillPercent(1);
+	topCreditsLayout->setSpace(0);
+	topCreditsLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	topCreditsLayout->setAlignment(GUILayout_Alignment::Left);
+
+	backMenuButton = new GUIButton(&renderer);
+	topCreditsLayout->addChild(backMenuButton);
+
+	backMenuButton->init(res_manager->GetTexture("backButton"), glm::vec2(10.0f, 10.0f), glm::vec2(40.0f, 40.0f), false);
+	backMenuButton->setSizeRatio(1.0f, true);
+	backMenuButton->setHoveredTexture(res_manager->GetTexture("backButtonHovered"));
+	backMenuButton->setPressedTexture(res_manager->GetTexture("backButtonPressed"));
+	backMenuButton->setActionCallback(backToMainMenu);
+
+	GUILayout* creditsBottomLayout = new GUILayout(&renderer);
+	creditsLayout->addChild(creditsBottomLayout);
+
+	creditsBottomLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	creditsBottomLayout->setSpace(20);
+	creditsBottomLayout->setIndents(glm::vec4(20, 20, 20, 20));
+	creditsBottomLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	creditsBottomLayout->setAlignment(GUILayout_Alignment::Center);
+	creditsBottomLayout->setLayoutFillPercent(10);
+
+	GUILayout* creditsFillLayouts[3];
+	int creditsFillPercents[] = { 1, 2, 1 };
+
+	for (int i = 0; i < 3; ++i)
+	{
+		creditsFillLayouts[i] = new GUILayout(&renderer);
+		creditsBottomLayout->addChild(creditsFillLayouts[i]);
+
+		creditsFillLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		creditsFillLayouts[i]->setSpace(10);
+		creditsFillLayouts[i]->setIndents(glm::vec4(20, 20, 20, 20));
+		creditsFillLayouts[i]->setTypeLayout(GUILayout_Type::Vertical);
+		creditsFillLayouts[i]->setAlignment(GUILayout_Alignment::Center);
+		creditsFillLayouts[i]->setLayoutFillPercent(creditsFillPercents[i]);
+	}
+
+	std::string credits[] = {
+		"CREDITS",
+		"Created by Paul Razumov",
+		"Programming: Paul Razumov",
+		"Game Sprites were taken from the Web",
+		"GUI: Paul Razumov",
+		"Main Music Theme by Paul Razumov"
+	};
+
+	for (int i = 0; i < 6; ++i)
+	{
+		GUITextBox* creditsBox = new GUITextBox(&renderer);
+		creditsFillLayouts[1]->addChild(creditsBox);
+
+		creditsBox->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		creditsBox->setMinimumHeight(40.0f);
+		creditsBox->setMaximumHeight(40.0f);
+		creditsBox->setText(credits[i]);
+		creditsBox->setTextColor(glm::vec3(0.0, 0.68f, 1.0f));
+		if(i == 0)
+			creditsBox->setFont(res_manager->Fonts["TTLakes30"]);
+		else
+			creditsBox->setFont(res_manager->Fonts["TTLakes26"]);
+		creditsBox->setFontShader(&font_shader);
+		creditsBox->setFontBuffers(fontVAO, fontVBO);
+		creditsBox->setTextAlignment(TextAlignment::TextAlignCenter);
+		creditsBox->setUseClipSpace(false);
+	}
 
 	// Game Interface.
 	// Whole screen.
@@ -333,7 +462,6 @@ void MainApp::initGUI()
 	pLevelBox->setFont(res_manager->Fonts["TTLakes30"]);
 	pLevelBox->setFontShader(&font_shader);
 	pLevelBox->setFontBuffers(fontVAO, fontVBO);
-	pLevelBox->setTextPos(glm::vec2(10.0f, 30.0f));
 
 	pScoreBox = new GUITextBox(&renderer);
 	topLayouts[1]->addChild(pScoreBox);
@@ -347,7 +475,6 @@ void MainApp::initGUI()
 	pScoreBox->setFont(res_manager->Fonts["TTLakes30"]);
 	pScoreBox->setFontShader(&font_shader);
 	pScoreBox->setFontBuffers(fontVAO, fontVBO);
-	pScoreBox->setTextPos(glm::vec2(10.0f, 30.0f));
 	//pScoreBox->setColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 
 	GUILayout* screenBottomLayouts[3];
@@ -537,7 +664,6 @@ void MainApp::initGUI()
 	pFinalScore->setFont(res_manager->Fonts["TTLakes30"]);
 	pFinalScore->setFontShader(&font_shader);
 	pFinalScore->setFontBuffers(fontVAO, fontVBO);
-	pFinalScore->setTextPos(glm::vec2(10.0f, 30.0f));
 
 	GUIButton* playAgainButton = new GUIButton(&renderer);
 	gameOverLayout->addChild(playAgainButton);
@@ -551,12 +677,14 @@ void MainApp::initGUI()
 
 	mainMenuLayout->resize();
 	settingsLayout->resize();
+	creditsLayout->resize();
 	gameLayout->resize();
 	gamePauseLayout->resize();
 	gameOverLayout->resize();
 
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::MainMenu, mainMenuObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Settings, settingsObjects));
+	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Credits, creditsObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Game, gameInterfaceObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::PauseGame, gamePauseInterfaceObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::GameOver, gameOverInterfaceObjects));

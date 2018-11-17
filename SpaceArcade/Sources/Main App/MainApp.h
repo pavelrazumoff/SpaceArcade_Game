@@ -21,6 +21,7 @@ void scoreChanged(int score);
 
 void showScene();
 void showSettings();
+void showCredits();
 void quitGame();
 void backToMainMenu();
 void pauseScene();
@@ -39,6 +40,7 @@ enum PageType
 {
 	MainMenu = 0,
 	Settings,
+	Credits,
 	Game,
 	PauseGame,
 	GameOver
@@ -71,12 +73,8 @@ public:
 
 	void render();
 	void drawScene();
-	void drawSceneInterface();
-	void drawScenePausedInterface();
-	void drawGameOverInterface();
 	void drawMenuBackground();
-	void drawStartPage();
-	void drawSettingsPage();
+	void drawPage(int type);
 
 	void RenderText(std::string fontType, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 
@@ -128,7 +126,7 @@ public:
 
 	int screenWidth, screenHeight;
 
-	bool useMultisampling = true;
+	bool useMultisampling = false;
 	bool useGammaCorrection = true;
 	bool useHDR = true;
 	bool useBloom = true;
