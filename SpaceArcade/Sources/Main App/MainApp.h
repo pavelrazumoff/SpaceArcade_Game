@@ -5,6 +5,7 @@
 #include "Game/GameLevel.h"
 #include "Game/AI/TeamShipAIController.h"
 #include "Game/AI/StartLevelBehaviour.h"
+#include "Game/AI/SecretLevelBehaviour.h"
 #include "GUI/GUICheckBox.h"
 #include "GUI/GUILayout.h"
 #include "GUI/GUITextBox.h"
@@ -19,16 +20,21 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 void scoreChanged(int score);
 
-void showScene();
-void showSettings();
-void showCredits();
-void quitGame();
-void backToMainMenu();
-void pauseScene();
-void resumeScene();
+void showScene(int actionId);
+void showSettings(int actionId);
+void showCredits(int actionId);
+void quitGame(int actionId);
+void backToMainMenu(int actionId);
+void pauseScene(int actionId);
+void resumeScene(int actionId);
 void finishScene();
-void restartScene();
+void restartScene(int actionId);
 void iterateScene();
+
+void handleDialogue(int actionId);
+void handleMerch(int actionId);
+
+void teleportObject(GameObject* obj, LevelBehaviour* behaviour);
 
 void enableMultisampling(bool enable);
 void enableGammaCorrection(bool enable);
@@ -43,7 +49,20 @@ enum PageType
 	Credits,
 	Game,
 	PauseGame,
-	GameOver
+	GameOver,
+	StationDialogue
+};
+
+enum DialoguePhrase
+{
+	ShowGoods = 0,
+	Bye
+};
+
+enum MerchType
+{
+	IonWeapon = 0,
+	HealthFill
 };
 
 class MainApp
@@ -110,6 +129,11 @@ public:
 	void restartGame();
 	void iterateLevel();
 
+	void handleDialogueButton(int buttonId);
+	void handleMerchButton(int merchId);
+
+	void teleportPlayer(GameObject* obj, LevelBehaviour* behaviour);
+
 	GLFWwindow* getWindow();
 
 	Shader font_shader;
@@ -120,6 +144,8 @@ public:
 
 	// Game Data.
 	GameLevel* base_level = NULL;
+	GameLevel* secret_level = NULL;
+	GameLevel* pCurrentLevel = NULL;
 	std::vector<LevelBehaviour*> levelBehaviours;
 
 	int currentPage = PageType::MainMenu;
@@ -159,8 +185,10 @@ private:
 	bool firstMouseUse = true;
 	bool lbutton_down = false;
 	bool key_pressed = false;
+
 	int prevScore = 0;
 	int prevLevel = 0;
+	int merchPrices[2];
 
 	ResourceManager* res_manager = NULL;
 	SpriteRenderer renderer;
@@ -173,4 +201,6 @@ private:
 	GUITextBox* pScoreBox = NULL;
 	GUITextBox* pFinalScore = NULL;
 	GUITextBox* pLevelBox = NULL;
+
+	std::vector<GUILayout*> dialogueTextLayouts;
 };

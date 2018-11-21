@@ -25,7 +25,10 @@ enum ObjectTypes
 	EnergyShield,
 	BlastWave,
 	ImprovementBox,
-	Rocket
+	Rocket,
+	Debris,
+	BlackHole,
+	SpaceStation
 };
 
 class GameObject
@@ -85,7 +88,7 @@ public:
 	void setAnimationOrder(bool order);
 	void setAnimationDuration(float duration);
 	void setImpulseFactor(float impulse);
-	void applyImpulse(float impulse);
+	void applyImpulse(float impulse, bool free = false);
 	void setScoreContribution(int score);
 
 	GameLevel* getLevel();
@@ -188,6 +191,7 @@ protected:
 
 	float impulseFactor = 200;
 	float appliedImpulse = 0;
+	bool freeImpulse = false;
 
 	int scoreContribution = 10;
 

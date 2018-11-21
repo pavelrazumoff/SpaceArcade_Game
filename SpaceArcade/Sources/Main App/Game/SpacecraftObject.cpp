@@ -125,6 +125,9 @@ void SpacecraftObject::update(float delta)
 			i--;
 		}
 	}
+
+	if (pBlackHole)
+		pBlackHole->update(delta);
 }
 
 void SpacecraftObject::draw(bool useInstanced, int amount)
@@ -133,6 +136,10 @@ void SpacecraftObject::draw(bool useInstanced, int amount)
 		laser_rays[i]->draw(useInstanced, amount);
 	for (int i = 0; i < rockets.size(); ++i)
 		rockets[i]->draw(useInstanced, amount);
+
+	if (pBlackHole && !pBlackHole->isHiddenFromLevel())
+		pBlackHole->draw(useInstanced, amount);
+
 	GameObject::draw(useInstanced, amount);
 }
 
@@ -145,6 +152,7 @@ void SpacecraftObject::resize()
 
 	Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
 	Velocity = glm::vec2(Velocity.x * screenRatio.x, Velocity.y * screenRatio.y);
+	appliedImpulse = appliedImpulse * screenRatio.x;
 	rocketStartVelocity = glm::vec2(rocketStartVelocity.x * screenRatio.x, rocketStartVelocity.y * screenRatio.y);
 
 	if (!pLevel->getBehaviour()->isUserInputBlocked())
@@ -165,6 +173,9 @@ void SpacecraftObject::resize()
 	for (int i = 0; i < rockets.size(); ++i)
 		rockets[i]->Position = glm::vec2(rockets[i]->Position.x * screenRatio.x, rockets[i]->Position.y * screenRatio.y);
 
+	if (pBlackHole && !isNonPlayerObject())
+		pBlackHole->resize();
+
 	laser_ray->resize();
 
 	for (int i = 0; i < attachedObjects.size(); ++i)
@@ -173,14 +184,14 @@ void SpacecraftObject::resize()
 
 void SpacecraftObject::handleInput(GLFWwindow *window, float delta)
 {
-	if (health <= 0.0f || abs(Velocity.x) > (appliedImpulse / 2) || abs(Velocity.y) > (appliedImpulse / 2))
+	if (health <= 0.0f || (!freeImpulse && (abs(Velocity.x) > (appliedImpulse / 2) || abs(Velocity.y) > (appliedImpulse / 2))))
 		return;
 
 	glm::vec4 indents = pLevel->getScreenIndents();
 	glm::vec2 dimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
-	glm::vec2 initialScreenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
+	glm::vec2 screenRatio = dimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 
-	glm::vec2 shift = glm::vec2(delta * VelocityScale.x * initialScreenRatio.x, delta * VelocityScale.y * initialScreenRatio.y);
+	glm::vec2 shift = glm::vec2(delta * VelocityScale.x * screenRatio.x, delta * VelocityScale.y * screenRatio.y);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
@@ -221,6 +232,12 @@ void SpacecraftObject::processKey(int key, int action, bool* key_pressed)
 	if (key == GLFW_KEY_Q && action == GLFW_PRESS && *key_pressed == false)
 	{
 		constructRocket();
+		*key_pressed = true;
+	}
+
+	if (key == GLFW_KEY_X && action == GLFW_PRESS && *key_pressed == false)
+	{
+		spawnBlackHole();
 		*key_pressed = true;
 	}
 }
@@ -269,6 +286,32 @@ void SpacecraftObject::setLaserRay(GameObject* laser)
 	laser_ray = laser;
 }
 
+void SpacecraftObject::setBlackHole(BlackHoleObject* blackHole)
+{
+	if (pBlackHole)
+		delete pBlackHole;
+	pBlackHole = blackHole;
+
+	if (pBlackHole)
+	{
+		pBlackHole->setParentObject(this);
+		pBlackHole->hideFromLevel(true);
+	}
+}
+
+void SpacecraftObject::setIonWeapon(GameObject* weapon)
+{
+	if (pIonWeapon)
+		delete pIonWeapon;
+	pIonWeapon = weapon;
+
+	if (pIonWeapon)
+	{
+		pIonWeapon->setParentObject(this);
+		pIonWeapon->hideFromLevel(true);
+	}
+}
+
 GameObject* SpacecraftObject::getLaserRay()
 {
 	return laser_ray;
@@ -277,6 +320,16 @@ GameObject* SpacecraftObject::getLaserRay()
 GameObject* SpacecraftObject::getRocket()
 {
 	return pRocket;
+}
+
+BlackHoleObject* SpacecraftObject::getBlackHole()
+{
+	return pBlackHole;
+}
+
+GameObject* SpacecraftObject::getIonWeapon()
+{
+	return pIonWeapon;
 }
 
 void SpacecraftObject::setEnergyChangedCallback(void(*actionCallback)(float, float))
@@ -328,6 +381,16 @@ void SpacecraftObject::setRocketDetail(int detail)
 
 	if (rocketIntegrityChanged)
 		rocketIntegrityChanged(rocketIntegrity, 100);
+}
+
+void SpacecraftObject::setBlackHolePortal(bool blackHole)
+{
+	blackHolePortal = blackHole;
+}
+
+void SpacecraftObject::setCoins(int coins)
+{
+	this->coins = coins;
 }
 
 void SpacecraftObject::setRocketStartVelocity(glm::vec2 vel)
@@ -389,6 +452,34 @@ int SpacecraftObject::getRocketFreeIndex()
 	}
 
 	return -1;
+}
+
+int SpacecraftObject::getCoins()
+{
+	return coins;
+}
+
+void SpacecraftObject::makeCollision(GameObject* obj)
+{
+	if (obj->getObjectType() != ObjectTypes::BlackHole)
+		GameObject::makeCollision(obj);
+	else 
+	{
+		BlackHoleObject* blackHole = (BlackHoleObject*)obj;
+		if (blackHole->getBlackHoleType() != BlackHoleType::Teleportation)
+			return;
+
+		glm::vec2 diff;
+		this->checkCollision(obj, diff);
+
+		if (glm::length(diff) < 20.0f)
+		{
+			// here we have to put this craft into another level.
+			GameLevel* level = blackHole->getLevel();
+			if (level->getBehaviour())
+				level->getBehaviour()->teleport(this);
+		}
+	}
 }
 
 void SpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker)
@@ -456,6 +547,31 @@ void SpacecraftObject::spawnRocket()
 		}
 }
 
+void SpacecraftObject::spawnBlackHole()
+{
+	if (!pBlackHole || !blackHolePortal)
+		return;
+	pBlackHole->hideFromLevel(false);
+	pBlackHole->setParentObject(NULL);
+	pBlackHole->Position = glm::vec2(this->Position.x + this->Size.x / 2 - pBlackHole->Size.x / 2,
+		this->Position.y - pBlackHole->Size.y - 50.0f);
+	pBlackHole->startSelfDestroying(true);
+	pBlackHole = NULL;
+	blackHolePortal = false;
+}
+
+void SpacecraftObject::spawnIonWeapon()
+{
+	if (!pIonWeapon)
+		return;
+
+	pIonWeapon->setCollisionCheck(false);
+	pIonWeapon->hideFromLevel(false);
+	pIonWeapon->RelativePosition = glm::vec2(this->Size.x / 2 - pIonWeapon->Size.x / 2, 5.0f);
+	attachNewObject(pIonWeapon);
+	pIonWeapon = NULL;
+}
+
 void SpacecraftObject::constructRocket()
 {
 	int rocketIndex = getRocketFreeIndex();
@@ -502,5 +618,19 @@ void SpacecraftObject::clear()
 	{
 		delete pRocket;
 		pRocket = NULL;
+	}
+
+	if (pBlackHole)
+	{
+		pLevel->removeObject(pBlackHole);
+		delete pBlackHole;
+		pBlackHole = NULL;
+	}
+
+	if (pIonWeapon)
+	{
+		pLevel->removeObject(pIonWeapon);
+		delete pIonWeapon;
+		pIonWeapon = NULL;
 	}
 }

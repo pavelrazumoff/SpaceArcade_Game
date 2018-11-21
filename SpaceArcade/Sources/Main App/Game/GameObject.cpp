@@ -114,19 +114,20 @@ void GameObject::update(float delta)
 		if (InitialRotation >= 360.0f || InitialRotation <= -360.0f)
 			InitialRotation = 0.0f;
 
-		if (!nonPlayerObject)
+		if (!nonPlayerObject && !this->getParentObject())
 		{
 			float restrZone = pLevel->getRenderer()->getCurrentScreenDimensions().y - pLevel->getPlayerRestrictionHeight();
 			if (Position.y < restrZone)
 				Position.y = restrZone;
 		}
 		else
-		{
-			// when object goes out of screen bounds when it already overstepped top side of the screen, destroy it.
-			glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
-			if (Position.y > 0.0f && (Position.x + Size.x < 0.0f || Position.x > screenDimensions.x || Position.y > screenDimensions.y))
-				setHealth(0.0f);
-		}
+			if(!this->getParentObject())
+			{
+				// when object goes out of screen bounds when it already overstepped top side of the screen, destroy it.
+				glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+				if (Position.y > 0.0f && (Position.x + Size.x < 0.0f || Position.x > screenDimensions.x || Position.y > screenDimensions.y))
+					setHealth(0.0f);
+			}
 	}
 
 	// Update AI after all.
@@ -238,6 +239,7 @@ void GameObject::resize()
 
 	Position = glm::vec2(Position.x * screenRatio.x, Position.y * screenRatio.y);
 	Velocity = glm::vec2(Velocity.x * screenRatio.x, Velocity.y * screenRatio.y);
+	appliedImpulse = appliedImpulse * screenRatio.x;
 
 	for (int i = 0; i < attachedObjects.size(); ++i)
 		attachedObjects[i]->resize();
@@ -626,9 +628,12 @@ void GameObject::setImpulseFactor(float impulse)
 	impulseFactor = impulse;
 }
 
-void GameObject::applyImpulse(float impulse)
+void GameObject::applyImpulse(float impulse, bool free)
 {
-	appliedImpulse = impulse;
+	glm::vec2 screenRatio = pLevel->getRenderer()->getScreenRatio();
+
+	appliedImpulse = impulse * screenRatio.x;
+	freeImpulse = free;
 }
 
 void GameObject::setScoreContribution(int score)

@@ -73,6 +73,9 @@ void MainApp::init()
 
 	renderer.init(res_manager->GetShader("Sprite"), screenWidth, screenHeight);
 
+	merchPrices[MerchType::IonWeapon] = 3000;
+	merchPrices[MerchType::HealthFill] = 200;
+
 	initGUI();
 	initScene();
 }
@@ -81,6 +84,8 @@ void MainApp::loadFonts()
 {
 	res_manager->loadFont("Fonts/TTLakesCondensed-Bold.otf", "TTLakes26", 26);
 	res_manager->loadFont("Fonts/TTLakesCondensed-Bold.otf", "TTLakes30", 30);
+	res_manager->loadFont("Fonts/unispace.ttf", "Unispace18", 18);
+	res_manager->loadFont("Fonts/unispace.ttf", "Unispace14", 14);
 }
 
 void MainApp::update()
@@ -94,10 +99,11 @@ void MainApp::update()
 	{
 	case PageType::Game:
 	case PageType::GameOver:
-		base_level->update(deltaTime);
+	case PageType::StationDialogue:
+		pCurrentLevel->update(deltaTime);
 		break;
 	case PageType::PauseGame:
-		base_level->updatePaused(deltaTime);
+		pCurrentLevel->updatePaused(deltaTime);
 		break;
 	default:
 		break;
@@ -193,6 +199,9 @@ void MainApp::resize(int width, int height)
 
 	if(base_level)
 		base_level->resize();
+
+	if (secret_level)
+		secret_level->resize();
 }
 
 void MainApp::setFullscreenMode(bool fullscreen)
@@ -227,13 +236,13 @@ void MainApp::setFullscreenMode(bool fullscreen)
 
 void MainApp::startGame()
 {
-	base_level->startLevel();
+	pCurrentLevel->startLevel();
 }
 
 void MainApp::pauseGame()
 {
-	if (base_level)
-		base_level->pauseLevel();
+	if (pCurrentLevel)
+		pCurrentLevel->pauseLevel();
 	if(pPauseButton)
 		pPauseButton->setVisible(false);
 	if (pResumeButton)
@@ -243,8 +252,8 @@ void MainApp::pauseGame()
 
 void MainApp::resumeGame()
 {
-	if (base_level)
-		base_level->resumeLevel();
+	if (pCurrentLevel)
+		pCurrentLevel->resumeLevel();
 	if (pPauseButton)
 		pPauseButton->setVisible(true);
 	if (pResumeButton)
@@ -255,9 +264,9 @@ void MainApp::resumeGame()
 void MainApp::finishGame()
 {
 	currentPage = PageType::GameOver;
-	base_level->finishLevel();
+	pCurrentLevel->finishLevel();
 
-	int score = base_level->getScore();
+	int score = pCurrentLevel->getScore();
 	std::string textScore = std::to_string(score);
 	std::string text = "Score: " + textScore;
 	if (pFinalScore)
@@ -283,9 +292,10 @@ void MainApp::restartGame()
 	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
 		gui_objects[currentPage][i]->resize();
 
-	base_level->resetLevel();
+	pCurrentLevel = base_level;
+	pCurrentLevel->resetLevel();
 	resetInitialSceneData();
-	base_level->startLevel();
+	pCurrentLevel->startLevel();
 
 	prevScore = 0;
 	prevLevel = 0;
@@ -315,6 +325,94 @@ void MainApp::iterateLevel()
 	prevLevel = currentLevel;
 }
 
+void MainApp::handleDialogueButton(int buttonId)
+{
+	if (dialogueTextLayouts.size() < 2)
+		return;
+
+	SecretLevelBehaviour* behaviour = dynamic_cast<SecretLevelBehaviour*>(pCurrentLevel->getBehaviour());
+
+	switch (buttonId)
+	{
+	case DialoguePhrase::ShowGoods:
+		dialogueTextLayouts[0]->setVisible(false);
+		dialogueTextLayouts[1]->setVisible(true);
+		dialogueTextLayouts[1]->getParent()->resize();
+		break;
+	case DialoguePhrase::Bye:
+		currentPage = PageType::Game;
+		if(behaviour)
+			behaviour->finishStationDialogue();
+		break;
+	default:
+		break;
+	}
+}
+
+void MainApp::handleMerchButton(int merchId)
+{
+	if (dialogueTextLayouts.size() < 2)
+		return;
+
+	SpacecraftObject* pPlayerCraft = dynamic_cast<SpacecraftObject*>(pCurrentLevel->getBehaviour()->getPlayerObject());
+	if (!pPlayerCraft)
+		return;
+
+	int coinsDiff = pPlayerCraft->getCoins() - merchPrices[merchId];
+	if (coinsDiff < 0)
+		return;
+
+	pPlayerCraft->setCoins(coinsDiff);
+
+	switch (merchId)
+	{
+	case MerchType::IonWeapon:
+		pPlayerCraft->spawnIonWeapon();
+		break;
+	case MerchType::HealthFill:
+		pPlayerCraft->setHealth(pPlayerCraft->getMaxHealth());
+		break;
+	default:
+		break;
+	}
+
+	// go back to the prev layout.
+	dialogueTextLayouts[1]->setVisible(false);
+	dialogueTextLayouts[0]->setVisible(true);
+	dialogueTextLayouts[0]->getParent()->resize();
+}
+
+void MainApp::teleportPlayer(GameObject* obj, LevelBehaviour* behaviour)
+{
+	GameLevel* pLevel = behaviour->getLevel();
+	if (!pLevel)
+		return;
+
+	pCurrentLevel = pLevel;
+
+	if (pCurrentLevel == secret_level)
+	{
+		pCurrentLevel->resetLevel();
+		pCurrentLevel->addScore(base_level->getScore());
+
+		behaviour->setPlayerObject(obj);
+		pCurrentLevel->addExternalObject(obj);
+
+		pCurrentLevel->startLevel();
+	}else
+		if (pCurrentLevel == base_level)
+		{
+			SpacecraftObject* playerCraft = dynamic_cast<SpacecraftObject*>(pCurrentLevel->getBehaviour()->getPlayerObject());
+			if (!playerCraft)
+				return;
+
+			glm::vec2 screenDimensions = pCurrentLevel->getRenderer()->getCurrentScreenDimensions();
+			playerCraft->Position = glm::vec2(screenDimensions.x / 2 - playerCraft->Size.x / 2, screenDimensions.y - 50);
+			playerCraft->Velocity = glm::vec2(0.0f, 0.0f);
+			playerCraft->applyImpulse(0.0f);
+		}
+}
+
 void MainApp::clearBuffers()
 {
 	for (auto it = gui_objects.begin(); it != gui_objects.end(); ++it)
@@ -322,6 +420,9 @@ void MainApp::clearBuffers()
 			delete it->second[i];
 
 	gui_objects.clear();
+
+	delete secret_level;
+	secret_level = NULL;
 
 	delete base_level;
 	base_level = NULL;

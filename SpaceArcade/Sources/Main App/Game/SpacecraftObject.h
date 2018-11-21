@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "BlackHoleObject.h"
 
 class SpacecraftObject : public GameObject
 {
@@ -25,9 +26,13 @@ public:
 	virtual bool notify(GameObject* notifiedObject, NotifyCode code);
 
 	void setLaserRay(GameObject* laser);
+	void setBlackHole(BlackHoleObject* blackHole);
+	void setIonWeapon(GameObject* weapon);
 
 	GameObject* getLaserRay();
 	GameObject* getRocket();
+	BlackHoleObject* getBlackHole();
+	GameObject* getIonWeapon();
 
 	void setEnergyChangedCallback(void(*actionCallback)(float, float));
 	void setRocketIntegrityChangedCallback(void(*actionCallback)(int, int));
@@ -36,6 +41,8 @@ public:
 	void setMaxEnergy(float energy);
 	void setUsedEnergy(float energy);
 	void setRocketDetail(int detail);
+	void setBlackHolePortal(bool blackHole);
+	void setCoins(int coins);
 	void setRocketStartVelocity(glm::vec2 vel);
 	void setRocketRelativePosition(glm::vec2 pos, int rocket_index);
 	void setLaserSoundName(std::string name);
@@ -45,15 +52,23 @@ public:
 	float getUsedEnergy();
 	int getRocketIntegrity();
 	int getRocketFreeIndex();
+	int getCoins();
 
+	virtual void makeCollision(GameObject* obj);
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
+
 	void spawnLaserRay();
 	void spawnRocket();
+	void spawnBlackHole();
+	void spawnIonWeapon();
+
 	void constructRocket();
 
 protected:
 	GameObject* laser_ray;
 	GameObject* pRocket;
+	BlackHoleObject* pBlackHole = NULL;
+	GameObject* pIonWeapon = NULL;
 	std::vector<GameObject*> laser_rays;
 	std::vector<GameObject*> rockets;
 	std::string laserSoundName;
@@ -68,4 +83,7 @@ protected:
 	glm::vec2 rocketStartVelocity;
 	glm::vec2 rocketRelativePoses[3];
 	void(*rocketIntegrityChanged)(int, int) = NULL;
+
+	bool blackHolePortal = true;
+	int coins = 0;
 };

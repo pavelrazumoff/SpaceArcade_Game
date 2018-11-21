@@ -15,8 +15,8 @@ public:
 
 	virtual void clear();
 
-	virtual void processMouseMove(GLFWwindow* window, float xpos, float ypos);
-	virtual void processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos);
+	virtual bool processMouseMove(GLFWwindow* window, float xpos, float ypos);
+	virtual bool processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos);
 
 	void setChecked(bool checked);
 

@@ -20,10 +20,11 @@ enum StartLevelMode
 	BossSpaceCraftIntroducing,
 	BossSpaceCraftFighting,
 	BossSpaceCraftLeaving,
+	DebrisFighting,
 	End
 };
 
-struct LevelData
+struct StartLevelData
 {
 	// player's data.
 	glm::vec2 playerSpeed = glm::vec2(200.0f, 100.0f);
@@ -34,6 +35,14 @@ struct LevelData
 	int meteorRandomSeed = 8;
 	glm::vec2 meteoritesSpeed = glm::vec2(50, 150);		// min, max.
 	glm::vec2 meteoritesZone = glm::vec2(0, 300);		// min, max.
+
+	// debris data.
+	int maxNumOfDebris = 0;
+	int numOfCreatedDebris = 0;
+	int debrisRandomSeed = 8;
+	glm::vec2 debrisSpeed = glm::vec2(50, 150);		// min, max.
+	glm::vec2 debrisZone = glm::vec2(0, 300);		// min, max.
+	bool secretWreckCreated = false;
 
 	// kits data.
 	int maxNumOfHealthKits = 3;
@@ -97,6 +106,7 @@ public:
 	void updateBossSpaceCraftIntroduceMode(float delta);
 	void updateBossSpaceCraftFightMode(float delta);
 	void updateBossSpaceCraftLeaveMode(float delta);
+	void updateDebrisMode(float delta);
 
 	void updateParallelEvents(float delta);
 
@@ -105,27 +115,35 @@ public:
 	void spawnEnemies(float delta);
 	void spawnEnergyBarriers(float delta);
 	void spawnEnemyBoss(float delta);
+	void spawnDebris(float delta);
 
 	void iterateLevel();
 
 	virtual bool checkForCollisionAddiction(GameObject* obj1, GameObject* obj2);
 
-	void setLevelData(LevelData data);
-	LevelData getLevelData();
+	virtual void setPlayerObject(GameObject* obj);
+	void setSecretBehaviour(LevelBehaviour* behaviour);
+	void setLevelData(StartLevelData data);
+	StartLevelData getLevelData();
 
 	void addController(AIController* controller);
 
+	virtual void teleport(GameObject* object);
+
 	void setFinishLevelCallback(void(*actionCallback)(void));
 	void setIterateLevelCallback(void(*actionCallback)(void));
+	void setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*));
 
 protected:
 	SpacecraftObject* playerCraft = NULL;
 	std::vector<AIController*> aiControllers;
 	ISound* levelMusic = NULL;
+	LevelBehaviour* pSecretBehaviour = NULL;
 
 	// level's data.
-	LevelData levelData;
+	StartLevelData levelData;
 
 	void(*finishLevelCallback)(void) = NULL;
 	void(*updateLevelIterationCallback)(void) = NULL;
+	void(*teleportPlayerCallback)(GameObject*, LevelBehaviour*) = NULL;
 };

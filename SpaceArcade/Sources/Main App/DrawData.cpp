@@ -30,6 +30,7 @@ void MainApp::render()
 	case PageType::Game:
 	case PageType::PauseGame:
 	case PageType::GameOver:
+	case PageType::StationDialogue:
 		drawScene();
 		break;
 	default:
@@ -115,16 +116,15 @@ void MainApp::render()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	drawPage(currentPage);
-
-	// Draw text.
-	//drawTextData();
+	if(currentPage == PageType::StationDialogue)
+		drawPage(PageType::Game);
 
 	glEnable(GL_DEPTH_TEST);
 }
 
 void MainApp::drawScene()
 {
-	base_level->draw();
+	pCurrentLevel->draw();
 }
 
 void MainApp::drawMenuBackground()

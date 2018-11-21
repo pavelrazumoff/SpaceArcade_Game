@@ -41,7 +41,9 @@ public:
 	void									doCollisions();
 
 	void									addNewObject(GameObject* obj);
+	void									addExternalObject(GameObject* obj);
 	void									removeObject(GameObject* obj);
+	void									removeExternalObject(GameObject* obj);
 
 	void									addSound(std::string soundName, std::string soundPath);
 	ISound*									playSound(std::string soundName, bool loop);
@@ -76,6 +78,7 @@ public:
 
 private:
 	std::vector<GameObject*>				objects;
+	std::vector<GameObject*>				externalObjects;			// these objects were created in another level and not have to be deleted.
 	LevelBehaviour*							behaviour = NULL;
 	QuadTree*								quadTree = NULL;
 

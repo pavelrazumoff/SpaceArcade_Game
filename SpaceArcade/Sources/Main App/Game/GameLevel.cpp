@@ -214,11 +214,12 @@ void GameLevel::resize()
 	playerRestrictionHeight = playerRestrictionHeight * screenRatio.y;
 
 	for (int i = 0; i < objects.size(); ++i)
-		if(!objects[i]->getParentObject())
+		if(!objects[i]->getParentObject() && objects[i]->getLevel() == this)
 			objects[i]->resize();
 
 	for (int i = 0; i < objects.size(); ++i)
-		objects[i]->updateModelMatrix();
+		if(objects[i]->getLevel() == this)
+			objects[i]->updateModelMatrix();
 }
 
 void GameLevel::handleInput(GLFWwindow *window, float delta)
@@ -240,6 +241,9 @@ void GameLevel::processKey(int key, int action, bool* key_pressed)
 		return;
 
 	if (behaviour && behaviour->isUserInputBlocked())
+		return;
+
+	if (behaviour && behaviour->isUserAttackBlocked())
 		return;
 
 	for (int i = 0; i < objects.size(); ++i)
@@ -358,6 +362,12 @@ void GameLevel::addNewObject(GameObject* obj)
 		objectsMatrices[obj->getObjectType()] = NULL;
 }
 
+void GameLevel::addExternalObject(GameObject* obj)
+{
+	addNewObject(obj);
+	externalObjects.push_back(obj);
+}
+
 void GameLevel::removeObject(GameObject* obj)
 {
 	std::vector<GameObject*>::iterator it;
@@ -373,6 +383,16 @@ void GameLevel::removeObject(GameObject* obj)
 		if (it3 != it2->second.end())
 			it2->second.erase(it3);
 	}
+}
+
+void GameLevel::removeExternalObject(GameObject* obj)
+{
+	removeObject(obj);
+
+	std::vector<GameObject*>::iterator it;
+	it = find(externalObjects.begin(), externalObjects.end(), obj);
+	if (it != externalObjects.end())
+		externalObjects.erase(it);
 }
 
 void GameLevel::addSound(std::string soundName, std::string soundPath)
@@ -589,6 +609,16 @@ void GameLevel::clear()
 				objectsMatrices[it->first] = NULL;
 			}
 		}
+
+	// remove all external objects from base objects array.
+	for (int i = 0; i < externalObjects.size(); ++i)
+	{
+		auto it = std::find(objects.begin(), objects.end(), externalObjects[i]);
+		if (it != objects.end())
+			objects.erase(it);
+	}
+
+	externalObjects.clear();
 
 	for (int i = 0; i < objects.size(); ++i)
 		if (!objects[i]->getParentObject())

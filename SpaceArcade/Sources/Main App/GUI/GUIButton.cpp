@@ -22,7 +22,7 @@ void GUIButton::init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool
 
 void GUIButton::draw()
 {
-	if (!renderer)
+	if (!renderer || !visible)
 		return;
 
 	switch (buttonState)
@@ -49,7 +49,7 @@ void GUIButton::resize(bool useParentResize)
 	GUIObject::resize(useParentResize);
 }
 
-void GUIButton::processMouseMove(GLFWwindow* window, float xpos, float ypos)
+bool GUIButton::processMouseMove(GLFWwindow* window, float xpos, float ypos)
 {
 	if (checkForIntersect(xpos, ypos))
 	{
@@ -62,6 +62,8 @@ void GUIButton::processMouseMove(GLFWwindow* window, float xpos, float ypos)
 		default:
 			break;
 		}
+
+		return true;
 	}
 	else
 	{
@@ -74,9 +76,11 @@ void GUIButton::processMouseMove(GLFWwindow* window, float xpos, float ypos)
 			break;
 		}
 	}
+
+	return false;
 }
 
-void GUIButton::processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos)
+bool GUIButton::processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT)
 	{
@@ -84,6 +88,8 @@ void GUIButton::processMouseClick(GLFWwindow* window, int button, int action, fl
 		{
 			if (!checkable)
 				buttonState = GUI_ButtonState::PressedState;
+
+			return true;
 		}
 		else if (action == GLFW_RELEASE)
 		{
@@ -94,13 +100,16 @@ void GUIButton::processMouseClick(GLFWwindow* window, int button, int action, fl
 					buttonState = GUI_ButtonState::HoveredState;
 
 					if (actionFunc)
-						actionFunc();
+						actionFunc(actionId);
+					return true;
 				}
 				else
 					buttonState = GUI_ButtonState::DefaultState;
 			}
 		}
 	}
+
+	return false;
 }
 
 void GUIButton::setHoveredTexture(Texture2D* tex)
@@ -113,9 +122,19 @@ void GUIButton::setPressedTexture(Texture2D* tex)
 	pressedTexture = tex;
 }
 
-void GUIButton::setActionCallback(void(*actionCallback)(void))
+void GUIButton::setActionCallback(void(*actionCallback)(int))
 {
 	actionFunc = actionCallback;
+}
+
+void GUIButton::setActionID(int id)
+{
+	actionId = id;
+}
+
+int GUIButton::getActionID()
+{
+	return actionId;
 }
 
 void GUIButton::clear()

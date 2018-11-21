@@ -122,4 +122,6 @@ void ImprovementStruct::improve(SpacecraftObject* spacecraft)
 		spacecraft->setMaxEnergy(spacecraft->getMaxEnergy() + energy);
 	if (useRocketDetail)
 		spacecraft->setRocketDetail(spacecraft->getRocketIntegrity() + rocketDetail);
+	if (useBlackHole)
+		spacecraft->setBlackHolePortal(blackHole);
 }

@@ -23,13 +23,16 @@ public:
 
 	virtual void clear();
 
-	virtual void processMouseMove(GLFWwindow* window, float xpos, float ypos);
-	virtual void processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos);
+	virtual bool processMouseMove(GLFWwindow* window, float xpos, float ypos);
+	virtual bool processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos);
 
 	void setHoveredTexture(Texture2D* tex);
 	void setPressedTexture(Texture2D* tex);
 
-	void setActionCallback(void(*actionCallback)(void));
+	void setActionCallback(void(*actionCallback)(int));
+	void setActionID(int id);
+
+	int getActionID();
 
 protected:
 	Texture2D* hoveredTexture = NULL;
@@ -38,5 +41,6 @@ protected:
 	int buttonState = GUI_ButtonState::DefaultState;			// 0 - default, 1 - hovered, 2 - pressed.
 	bool checkable = false;
 
-	void(*actionFunc)(void) = NULL;
+	int actionId = -1;
+	void(*actionFunc)(int) = NULL;
 };

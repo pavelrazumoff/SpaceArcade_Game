@@ -133,8 +133,10 @@
     <ClInclude Include="Sources\Main App\Game\AI\BasicShipAIController.h" />
     <ClInclude Include="Sources\Main App\Game\AI\BossShipAIController.h" />
     <ClInclude Include="Sources\Main App\Game\AI\LevelBehaviour.h" />
+    <ClInclude Include="Sources\Main App\Game\AI\SecretLevelBehaviour.h" />
     <ClInclude Include="Sources\Main App\Game\AI\StartLevelBehaviour.h" />
     <ClInclude Include="Sources\Main App\Game\AI\TeamShipAIController.h" />
+    <ClInclude Include="Sources\Main App\Game\BlackHoleObject.h" />
     <ClInclude Include="Sources\Main App\Game\BlastWaveObject.h" />
     <ClInclude Include="Sources\Main App\Game\BossSpacecraftObject.h" />
     <ClInclude Include="Sources\Main App\Game\EnergyBarrierObject.h" />
@@ -142,6 +144,7 @@
     <ClInclude Include="Sources\Main App\Game\GameObject.h" />
     <ClInclude Include="Sources\Main App\Game\ImprovementBoxObject.h" />
     <ClInclude Include="Sources\Main App\Game\SpacecraftObject.h" />
+    <ClInclude Include="Sources\Main App\Game\SpaceStationObject.h" />
     <ClInclude Include="Sources\Main App\GUI\GUIButton.h" />
     <ClInclude Include="Sources\Main App\GUI\GUICheckBox.h" />
     <ClInclude Include="Sources\Main App\GUI\GUILayout.h" />
@@ -166,8 +169,10 @@
     <ClCompile Include="Sources\Main App\Game\AI\BasicShipAIController.cpp" />
     <ClCompile Include="Sources\Main App\Game\AI\BossShipAIController.cpp" />
     <ClCompile Include="Sources\Main App\Game\AI\LevelBehaviour.cpp" />
+    <ClCompile Include="Sources\Main App\Game\AI\SecretLevelBehaviour.cpp" />
     <ClCompile Include="Sources\Main App\Game\AI\StartLevelBehaviour.cpp" />
     <ClCompile Include="Sources\Main App\Game\AI\TeamShipAIController.cpp" />
+    <ClCompile Include="Sources\Main App\Game\BlackHoleObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\BlastWaveObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\BossSpacecraftObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\EnergyBarrierObject.cpp" />
@@ -175,6 +180,7 @@
     <ClCompile Include="Sources\Main App\Game\GameObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\ImprovementBoxObject.cpp" />
     <ClCompile Include="Sources\Main App\Game\SpacecraftObject.cpp" />
+    <ClCompile Include="Sources\Main App\Game\SpaceStationObject.cpp" />
     <ClCompile Include="Sources\Main App\GUI\GUIButton.cpp" />
     <ClCompile Include="Sources\Main App\GUI\GUICheckBox.cpp" />
     <ClCompile Include="Sources\Main App\GUI\GUILayout.cpp" />

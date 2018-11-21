@@ -6,7 +6,7 @@ void MainApp::processInput(GLFWwindow *window)
 		glfwSetWindowShouldClose(window, true);
 	
 	if(currentPage == PageType::Game)
-		base_level->handleInput(window, deltaTime);
+		pCurrentLevel->handleInput(window, deltaTime);
 }
 
 void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -43,11 +43,12 @@ void MainApp::processKey(GLFWwindow* window, int key, int scancode, int action, 
 	}
 
 	if (currentPage == PageType::Game)
-		base_level->processKey(key, action, &key_pressed);
+		pCurrentLevel->processKey(key, action, &key_pressed);
 	
 	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
-		if(gui_objects[currentPage][i]->isVisible())
-			gui_objects[currentPage][i]->processKey(key, action);
+		if (gui_objects[currentPage][i]->isVisible())
+			if (gui_objects[currentPage][i]->processKey(key, action))
+				break;
 }
 
 void MainApp::processMouseMove(GLFWwindow* window, double xpos, double ypos)
@@ -61,7 +62,8 @@ void MainApp::processMouseMove(GLFWwindow* window, double xpos, double ypos)
 
 	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
 		if (gui_objects[currentPage][i]->isVisible())
-			gui_objects[currentPage][i]->processMouseMove(window, xpos, ypos);
+			if (gui_objects[currentPage][i]->processMouseMove(window, xpos, ypos))
+				break;
 
 	lastMouseX = xpos;
 	lastMouseY = ypos;
@@ -78,7 +80,8 @@ void MainApp::processMouseClick(GLFWwindow* window, int button, int action, int 
 
 	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
 		if (gui_objects[currentPage][i]->isVisible())
-			gui_objects[currentPage][i]->processMouseClick(window, button, action, lastMouseX, lastMouseY);
+			if (gui_objects[currentPage][i]->processMouseClick(window, button, action, lastMouseX, lastMouseY))
+				break;
 }
 
 void MainApp::processMouseScroll(GLFWwindow* window, double xoffset, double yoffset)

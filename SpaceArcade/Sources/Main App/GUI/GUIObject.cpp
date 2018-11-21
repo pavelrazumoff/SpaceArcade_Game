@@ -96,28 +96,40 @@ void GUIObject::resize(bool useParentResize)
 		children[i]->resize();
 }
 
-void GUIObject::handleInput(GLFWwindow *window, float delta)
+bool GUIObject::handleInput(GLFWwindow *window, float delta)
 {
 	for (int i = 0; i < children.size(); ++i)
-		children[i]->handleInput(window, delta);
+		if (children[i]->isVisible())
+			if (children[i]->handleInput(window, delta))
+				return true;
+	return false;
 }
 
-void GUIObject::processKey(int key, int action)
+bool GUIObject::processKey(int key, int action)
 {
 	for (int i = 0; i < children.size(); ++i)
-		children[i]->processKey(key, action);
+		if (children[i]->isVisible())
+			if(children[i]->processKey(key, action))
+				return true;
+	return false;
 }
 
-void GUIObject::processMouseMove(GLFWwindow* window, float xpos, float ypos)
+bool GUIObject::processMouseMove(GLFWwindow* window, float xpos, float ypos)
 {
 	for (int i = 0; i < children.size(); ++i)
-		children[i]->processMouseMove(window, xpos, ypos);
+		if (children[i]->isVisible())
+			if(children[i]->processMouseMove(window, xpos, ypos))
+				return true;
+	return false;
 }
 
-void GUIObject::processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos)
+bool GUIObject::processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos)
 {
 	for (int i = 0; i < children.size(); ++i)
-		children[i]->processMouseClick(window, button, action, xpos, ypos);
+		if (children[i]->isVisible())
+			if (children[i]->processMouseClick(window, button, action, xpos, ypos))
+				return true;
+	return false;
 }
 
 void GUIObject::addSound(std::string soundName, std::string soundPath)

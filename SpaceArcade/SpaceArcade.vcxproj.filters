@@ -156,6 +156,15 @@
     <ClInclude Include="Sources\Main App\Game\AI\BossShipAIController.h">
       <Filter>Header Files\Main App\Game\AI</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\AI\SecretLevelBehaviour.h">
+      <Filter>Header Files\Main App\Game\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\BlackHoleObject.h">
+      <Filter>Header Files\Main App\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Main App\Game\SpaceStationObject.h">
+      <Filter>Header Files\Main App\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image.cpp">
@@ -259,6 +268,15 @@
     </ClCompile>
     <ClCompile Include="Sources\Main App\Game\AI\BossShipAIController.cpp">
       <Filter>Source Files\Main App\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\AI\SecretLevelBehaviour.cpp">
+      <Filter>Source Files\Main App\Game\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\BlackHoleObject.cpp">
+      <Filter>Source Files\Main App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Main App\Game\SpaceStationObject.cpp">
+      <Filter>Source Files\Main App\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

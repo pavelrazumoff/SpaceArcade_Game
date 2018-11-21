@@ -29,17 +29,23 @@ public:
 	virtual void clear();
 
 	void setLevel(GameLevel* level);
+	virtual void setPlayerObject(GameObject* obj);
 	void blockUserInput();
+	void blockUserAttack();
 	void unblockUserInput();
+	void unblockUserAttack();
 	// returns true if both objects can collide with each other. This func has to be implemented in child classes.
 	virtual bool checkForCollisionAddiction(GameObject* obj1, GameObject* obj2) = 0;
 
 	GameLevel* getLevel();
 	GameObject* getPlayerObject();
 	bool isUserInputBlocked();
+	bool isUserAttackBlocked();
 	int getLevelIteration();
 
 	void addComplexAIController(AIController* controller);
+	// teleports selected object into another place, level and etc.
+	virtual void teleport(GameObject* object);
 
 protected:
 	// pointer to the controlling level.
@@ -50,6 +56,7 @@ protected:
 
 	// false - all user input is blocked.
 	bool userInput = true;
+	bool userAttack = true;
 
 	// holds current sublevel.
 	int levelMode = -1;

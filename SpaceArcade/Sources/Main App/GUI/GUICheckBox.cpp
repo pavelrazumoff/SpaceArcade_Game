@@ -38,14 +38,14 @@ void GUICheckBox::resize(bool useParentResize)
 	}
 }
 
-void GUICheckBox::processMouseMove(GLFWwindow* window, float xpos, float ypos)
+bool GUICheckBox::processMouseMove(GLFWwindow* window, float xpos, float ypos)
 {
-	GUIButton::processMouseMove(window, xpos, ypos);
+	return GUIButton::processMouseMove(window, xpos, ypos);
 }
 
-void GUICheckBox::processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos)
+bool GUICheckBox::processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos)
 {
-	GUIButton::processMouseClick(window, button, action, xpos, ypos);
+	bool res = GUIButton::processMouseClick(window, button, action, xpos, ypos);
 
 	if (action == GLFW_RELEASE && checkForIntersect(xpos, ypos))
 	{
@@ -53,7 +53,11 @@ void GUICheckBox::processMouseClick(GLFWwindow* window, int button, int action, 
 
 		if (checkFunc)
 			checkFunc(this->checked);
+
+		return true;
 	}
+
+	return res;
 }
 
 void GUICheckBox::setChecked(bool checked)

@@ -61,14 +61,29 @@ void LevelBehaviour::setLevel(GameLevel* level)
 	pLevel = level;
 }
 
+void LevelBehaviour::setPlayerObject(GameObject* obj)
+{
+	playerObject = obj;
+}
+
 void LevelBehaviour::blockUserInput()
 {
 	userInput = false;
 }
 
+void LevelBehaviour::blockUserAttack()
+{
+	userAttack = false;
+}
+
 void LevelBehaviour::unblockUserInput()
 {
 	userInput = true;
+}
+
+void LevelBehaviour::unblockUserAttack()
+{
+	userAttack = true;
 }
 
 GameLevel* LevelBehaviour::getLevel()
@@ -86,6 +101,11 @@ bool LevelBehaviour::isUserInputBlocked()
 	return !userInput;
 }
 
+bool LevelBehaviour::isUserAttackBlocked()
+{
+	return !userAttack;
+}
+
 int LevelBehaviour::getLevelIteration()
 {
 	return levelIteration;
@@ -94,6 +114,11 @@ int LevelBehaviour::getLevelIteration()
 void LevelBehaviour::addComplexAIController(AIController* controller)
 {
 	complexControllers.push_back(controller);
+}
+
+void LevelBehaviour::teleport(GameObject* object)
+{
+	
 }
 
 void LevelBehaviour::clear()

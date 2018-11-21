@@ -77,6 +77,7 @@ void MainApp::initGUI()
 	std::vector<GUIObject*> gameInterfaceObjects;
 	std::vector<GUIObject*> gamePauseInterfaceObjects;
 	std::vector<GUIObject*> gameOverInterfaceObjects;
+	std::vector<GUIObject*> stationInterfaceObjects;
 
 	// Main Menu.
 	GUILayout* mainMenuLayout = new GUILayout(&renderer);
@@ -675,12 +676,238 @@ void MainApp::initGUI()
 	playAgainButton->setPressedTexture(res_manager->GetTexture("playAgainButtonPressed"));
 	playAgainButton->setActionCallback(restartScene);
 
+	// Space Station Interface.
+	GUILayout* stationLayout = new GUILayout(&renderer);
+	stationInterfaceObjects.push_back(stationLayout);
+
+	stationLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(screenWidth, screenHeight), true);
+	stationLayout->setSpace(50);
+	stationLayout->setTypeLayout(GUILayout_Type::Vertical);
+	stationLayout->setAlignment(GUILayout_Alignment::Center);
+	stationLayout->setIndents(glm::vec4(50.0f, 50.0f, 50.0f, 50.0f));
+
+	GUIObject* dialogueInterface = new GUIObject(&renderer);
+	stationLayout->addChild(dialogueInterface);
+
+	dialogueInterface->init(res_manager->GetTexture("dialogueInterface"), glm::vec2(0.0f, 0.0f), glm::vec2(800.0f, 360.0f), true);
+	dialogueInterface->setMaximumSize(glm::vec2(800.0f, 360.0f));
+	dialogueInterface->setSizeRatio(2.22f, true);
+
+	GUILayout* dialogueLayout = new GUILayout(&renderer);
+	dialogueInterface->addChild(dialogueLayout);
+
+	dialogueLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	dialogueLayout->setSpace(10);
+	dialogueLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	dialogueLayout->setAlignment(GUILayout_Alignment::Left);
+	dialogueLayout->setIndents(glm::vec4(8.0f, 8.0f, 8.0f, 8.0f));
+	dialogueLayout->setUseParentDimensions(true);
+
+	GUIObject* starmanIcon = new GUIObject(&renderer);
+	dialogueLayout->addChild(starmanIcon);
+
+	starmanIcon->init(res_manager->GetTexture("starmanIcon"), glm::vec2(8.0f, 8.0f), glm::vec2(297.0f, 343.0f), true);
+	starmanIcon->setMaximumSize(glm::vec2(297.0f, 343.0f));
+	starmanIcon->setSizeRatio(0.865f, true);
+
+	// dialogues.
+	std::string starmanCaptions[] = {
+		"Hey! How can i help you?",
+		"What do you want to buy?"
+	};
+
+	std::string playerCaptions[2][2] = {
+		{
+			"I want to look at your goods.",
+			"Nothing. Bye!"
+		},
+		{
+		}
+	};
+
+	int dialoguePhrases[2][2] = {
+		{
+			DialoguePhrase::ShowGoods,
+			DialoguePhrase::Bye
+		},
+		{
+		}
+	};
+
+	int numOfDialoguePhrases[] = {
+		2, 0
+	};
+
+	for (int i = 0; i < 2; ++i)
+	{
+		GUILayout* textLayout = new GUILayout(&renderer);
+		dialogueLayout->addChild(textLayout);
+
+		textLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		textLayout->setSpace(15);
+		textLayout->setTypeLayout(GUILayout_Type::Vertical);
+		textLayout->setAlignment(GUILayout_Alignment::Top);
+		textLayout->setIndents(glm::vec4(10.0f, 0.0f, 0.0f, 0.0f));
+
+		if (i > 0)
+			textLayout->setVisible(false);
+
+		dialogueTextLayouts.push_back(textLayout);
+
+		GUITextBox* starmanPhrase = new GUITextBox(&renderer);
+		textLayout->addChild(starmanPhrase);
+
+		starmanPhrase->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+		starmanPhrase->setMinimumHeight(30.0f);
+		starmanPhrase->setMaximumHeight(30.0f);
+		starmanPhrase->setText(starmanCaptions[i]);
+		starmanPhrase->setTextColor(glm::vec3(0.23f, 0.63f, 1.0f));
+		starmanPhrase->setFont(res_manager->Fonts["Unispace18"]);
+		starmanPhrase->setFontShader(&font_shader);
+		starmanPhrase->setFontBuffers(fontVAO, fontVBO);
+		//starmanPhrase->setColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.5f));
+
+		for (int j = 0; j < numOfDialoguePhrases[i]; ++j)
+		{
+			GUIButton* dialogueButton = new GUIButton(&renderer);
+			textLayout->addChild(dialogueButton);
+
+			dialogueButton->init(res_manager->GetTexture("dialogueButton"), glm::vec2(0.0f, 0.0f), glm::vec2(461.0f, 39.0f), true);
+			dialogueButton->setMaximumSize(glm::vec2(461.0f, 39.0f));
+			dialogueButton->setSizeRatio(11.82f, true);
+			dialogueButton->setHoveredTexture(res_manager->GetTexture("dialogueButtonHovered"));
+			dialogueButton->setPressedTexture(res_manager->GetTexture("dialogueButtonPressed"));
+			dialogueButton->setActionCallback(handleDialogue);
+			dialogueButton->setActionID(dialoguePhrases[i][j]);
+
+			GUILayout* buttonLayout = new GUILayout(&renderer);
+			dialogueButton->addChild(buttonLayout);
+
+			buttonLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+			buttonLayout->setTypeLayout(GUILayout_Type::Horizontal);
+			buttonLayout->setAlignment(GUILayout_Alignment::Left);
+			buttonLayout->setIndents(glm::vec4(10.0f, 0.0f, 10.0f, 0.0f));
+			buttonLayout->setUseParentDimensions(true);
+
+			GUITextBox* playerPhrase = new GUITextBox(&renderer);
+			buttonLayout->addChild(playerPhrase);
+
+			playerPhrase->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+			playerPhrase->setMinimumHeight(30.0f);
+			playerPhrase->setMaximumHeight(30.0f);
+			playerPhrase->setText(playerCaptions[i][j]);
+			playerPhrase->setTextColor(glm::vec3(0.05f, 0.05f, 0.05f));
+			playerPhrase->setFont(res_manager->Fonts["Unispace18"]);
+			playerPhrase->setFontShader(&font_shader);
+			playerPhrase->setFontBuffers(fontVAO, fontVBO);
+		}
+
+		// create here merch content.
+		if (i == 1)
+		{
+			GUILayout* merchLayout = new GUILayout(&renderer);
+			textLayout->addChild(merchLayout);
+
+			merchLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+			merchLayout->setSpace(10);
+			merchLayout->setTypeLayout(GUILayout_Type::Horizontal);
+			merchLayout->setAlignment(GUILayout_Alignment::Left);
+			merchLayout->setIndents(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			//merchLayout->setColor(glm::vec4(0.0f, 1.0f, 0.0f, 0.5f));
+
+			std::string merchTexes[2][3] = {
+				{
+					"ionWeaponButton",
+					"ionWeaponButtonHovered",
+					"ionWeaponButtonPressed"
+				},
+				{
+					"healthFillButton",
+					"healthFillButtonHovered",
+					"healthFillButtonPressed"
+				}
+			};
+
+			std::string merchCaptions[] = {
+				"Ion Weapon",
+				"Fill Health"
+			};
+
+			int merchIds[] = { MerchType::IonWeapon, MerchType::HealthFill };
+
+			for (int j = 0; j < 2; ++j)
+			{
+				GUILayout* merchButtonLayout = new GUILayout(&renderer);
+				merchLayout->addChild(merchButtonLayout);
+
+				merchButtonLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+				merchButtonLayout->setSpace(10);
+				merchButtonLayout->setTypeLayout(GUILayout_Type::Vertical);
+				merchButtonLayout->setAlignment(GUILayout_Alignment::Top);
+
+				// merch icon.
+				GUIButton* merchButton = new GUIButton(&renderer);
+				merchButtonLayout->addChild(merchButton);
+
+				merchButton->init(res_manager->GetTexture(merchTexes[j][0]), glm::vec2(0.0f, 0.0f), glm::vec2(191.0f, 207.0f), true);
+				merchButton->setMaximumSize(glm::vec2(191.0f, 207.0f));
+				merchButton->setSizeRatio(0.922f, true);
+				merchButton->setHoveredTexture(res_manager->GetTexture(merchTexes[j][1]));
+				merchButton->setPressedTexture(res_manager->GetTexture(merchTexes[j][2]));
+				merchButton->setActionCallback(handleMerch);
+				merchButton->setActionID(merchIds[j]);
+
+				// merch name.
+				GUITextBox* merchCaption = new GUITextBox(&renderer);
+				merchButtonLayout->addChild(merchCaption);
+
+				merchCaption->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+				merchCaption->setMinimumHeight(30.0f);
+				merchCaption->setMaximumHeight(30.0f);
+				merchCaption->setText(merchCaptions[j]);
+				merchCaption->setTextColor(glm::vec3(1.0f, 0.28f, 0.0f));
+				merchCaption->setFont(res_manager->Fonts["Unispace18"]);
+				merchCaption->setFontShader(&font_shader);
+				merchCaption->setFontBuffers(fontVAO, fontVBO);
+				merchCaption->setTextAlignment(TextAlignment::TextAlignCenter);
+
+				// merch price layout.
+				GUILayout* merchPriceLayout = new GUILayout(&renderer);
+				merchButtonLayout->addChild(merchPriceLayout);
+
+				merchPriceLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+				merchPriceLayout->setSpace(5);
+				merchPriceLayout->setTypeLayout(GUILayout_Type::Horizontal);
+				merchPriceLayout->setAlignment(GUILayout_Alignment::Center);
+
+				GUIObject* coinIcon = new GUIObject(&renderer);
+				merchPriceLayout->addChild(coinIcon);
+
+				coinIcon->init(res_manager->GetTexture("coinIcon"), glm::vec2(0.0f, 0.0f), glm::vec2(32.0f, 32.0f), false);
+
+				GUITextBox* merchPriceText = new GUITextBox(&renderer);
+				merchPriceLayout->addChild(merchPriceText);
+
+				// merch price text.
+				merchPriceText->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+				merchPriceText->setMinimumSize(glm::vec2(60.0f, 20.0f));
+				merchPriceText->setMaximumSize(glm::vec2(60.0f, 20.0f));
+				merchPriceText->setText(std::to_string(merchPrices[j]));
+				merchPriceText->setTextColor(glm::vec3(0.23f, 0.63f, 1.0f));
+				merchPriceText->setFont(res_manager->Fonts["Unispace14"]);
+				merchPriceText->setFontShader(&font_shader);
+				merchPriceText->setFontBuffers(fontVAO, fontVBO);
+			}
+		}
+	}
+
 	mainMenuLayout->resize();
 	settingsLayout->resize();
 	creditsLayout->resize();
 	gameLayout->resize();
 	gamePauseLayout->resize();
 	gameOverLayout->resize();
+	stationLayout->resize();
 
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::MainMenu, mainMenuObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Settings, settingsObjects));
@@ -688,6 +915,7 @@ void MainApp::initGUI()
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::Game, gameInterfaceObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::PauseGame, gamePauseInterfaceObjects));
 	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::GameOver, gameOverInterfaceObjects));
+	gui_objects.insert(std::pair<int, std::vector<GUIObject*>>(PageType::StationDialogue, stationInterfaceObjects));
 }
 
 void MainApp::initScene()
@@ -707,9 +935,26 @@ void MainApp::initScene()
 	base_level->addSound("GeneratorEffect", res_manager->getSoundPath("GeneratorEffect"));
 	base_level->setScoreChangedCallback(scoreChanged);
 
+	pCurrentLevel = base_level;
+
 	StartLevelBehaviour* basicBehaviour = new StartLevelBehaviour(base_level, res_manager);
+	basicBehaviour->setTeleportPlayerCallback(teleportObject);
 	levelBehaviours.push_back(basicBehaviour);
-	
+
+	secret_level = new GameLevel();
+	secret_level->init(res_manager->GetCubemap("NebulaSpace"), res_manager->GetShader("Skybox"), &renderer);
+	secret_level->setScreenIndents(glm::vec4(10, 10, 10, 10));
+	secret_level->setPlayerRestrictionHeight(screenHeight / 2.5f);
+	secret_level->setSoundEnginePointer(res_manager->getSoundEngine());
+	secret_level->setScoreChangedCallback(scoreChanged);
+
+	SecretLevelBehaviour* secretBehaviour = new SecretLevelBehaviour(secret_level, res_manager);
+	secretBehaviour->setTeleportPlayerCallback(teleportObject);
+	levelBehaviours.push_back(secretBehaviour);
+
+	basicBehaviour->setSecretBehaviour(secretBehaviour);
+	secretBehaviour->setMainBehaviour(basicBehaviour);
+
 	resetInitialSceneData();
 }
 
@@ -718,17 +963,21 @@ void MainApp::resetInitialSceneData()
 	if (levelBehaviours.size() == 0)
 		return;
 
-	StartLevelBehaviour* behavior = (StartLevelBehaviour*)levelBehaviours[0];
+	StartLevelBehaviour* behavior = dynamic_cast<StartLevelBehaviour*>(levelBehaviours[0]);
+	if (!behavior)
+		return;
 	behavior->setFinishLevelCallback(finishScene);
 	behavior->setIterateLevelCallback(iterateScene);
 
-	LevelData levelData = behavior->getLevelData();
+	StartLevelData levelData = behavior->getLevelData();
 	levelData.maxNumOfMeteorites = 30;
+	levelData.maxNumOfDebris = 50;
 	levelData.maxNumOfHealthKits = 2;
 	levelData.maxNumOfBarriers = 16;
 	levelData.maxNumOfTeamEnemies = 2;
 
-	levelData.meteoritesZone = glm::vec2(0.0f, 1000.0f);
+	levelData.meteoritesZone = glm::vec2(-50.0f, -1000.0f);
+	levelData.debrisZone = glm::vec2(-100.0f, -1000.0f);
 	levelData.barriersZone = glm::vec2(0.0f, 1000.0f);
 	levelData.healthKitsZone = glm::vec2(-1500.0f, -6000.0f);
 
@@ -740,4 +989,15 @@ void MainApp::resetInitialSceneData()
 	levelData.maxTimeWithoutShield = 12.0f;
 
 	behavior->setLevelData(levelData);
+
+	SecretLevelBehaviour* secretBehavior = dynamic_cast<SecretLevelBehaviour*>(levelBehaviours[1]);
+	if (!secretBehavior)
+		return;
+
+	SecretLevelData secretLevelData = secretBehavior->getLevelData();
+	secretLevelData.maxNumOfBlackHoles = 19;
+	secretLevelData.blackHolesZone = glm::vec2(-100.0f, -3000.0f);
+	secretLevelData.blackHolesSpeed = glm::vec2(50, 100);
+
+	secretBehavior->setLevelData(secretLevelData);
 }

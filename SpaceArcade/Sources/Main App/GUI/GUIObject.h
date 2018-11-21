@@ -15,10 +15,10 @@ public:
 
 	virtual void clear();
 
-	virtual void handleInput(GLFWwindow *window, float delta);
-	virtual void processKey(int key, int action);
-	virtual void processMouseMove(GLFWwindow* window, float xpos, float ypos);
-	virtual void processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos);
+	virtual bool handleInput(GLFWwindow *window, float delta);
+	virtual bool processKey(int key, int action);
+	virtual bool processMouseMove(GLFWwindow* window, float xpos, float ypos);
+	virtual bool processMouseClick(GLFWwindow* window, int button, int action, float xpos, float ypos);
 
 	void addSound(std::string soundName, std::string soundPath);
 	ISound*	playSound(std::string soundName, bool loop);

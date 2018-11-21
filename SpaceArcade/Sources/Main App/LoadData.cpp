@@ -31,12 +31,28 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//energy_shield.png", "energyShield", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//rocket.png", "rocket", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//smoke.png", "smoke", useGammaCorrection, &gameObjectsParams);
+	res_manager->LoadTexture("Images//space_station.png", "spaceStation", useGammaCorrection, &gameObjectsParams);
+	res_manager->LoadTexture("Images//ionWeapon.png", "ionWeapon", useGammaCorrection, &gameObjectsParams);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		std::string path = "Images//black_hole" + std::to_string(i + 1) + ".png";
+		std::string name = "blackHole" + std::to_string(i + 1);
+		res_manager->LoadTexture(path.c_str(), name, useGammaCorrection, &gameObjectsParams);
+	}
+
+	for (int i = 0; i < 6; ++i)
+	{
+		std::string path = "Images//debris1_" + std::to_string(i) + ".png";
+		std::string name = "debris1_" + std::to_string(i);
+		res_manager->LoadTexture(path.c_str(), name, useGammaCorrection, &gameObjectsParams);
+	}
 
 	for (int i = 0; i < 3; ++i)
 	{
 		std::string path = "Images//rocket_detail1_" + std::to_string(i) + ".png";
 		std::string name = "rocketDetail1_" + std::to_string(i);
-		res_manager->LoadTexture(path.c_str(), name.c_str(), useGammaCorrection);
+		res_manager->LoadTexture(path.c_str(), name, useGammaCorrection);
 	}
 
 	Texture2D* tex = res_manager->GetTexture("explosion");
@@ -130,13 +146,26 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//Interface//creditsButtonHovered.png", "creditsButtonHovered", false);
 	res_manager->LoadTexture("Images//Interface//creditsButtonPressed.png", "creditsButtonPressed", false);
 
+	res_manager->LoadTexture("Images//Interface//dialogueInterface.png", "dialogueInterface", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//starmanIcon.png", "starmanIcon", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//dialogueButton.png", "dialogueButton", false);
+	res_manager->LoadTexture("Images//Interface//dialogueButtonHovered.png", "dialogueButtonHovered", false);
+	res_manager->LoadTexture("Images//Interface//dialogueButtonPressed.png", "dialogueButtonPressed", false);
+	res_manager->LoadTexture("Images//Interface//ionWeaponButton.png", "ionWeaponButton", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//ionWeaponButtonHovered.png", "ionWeaponButtonHovered", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//ionWeaponButtonPressed.png", "ionWeaponButtonPressed", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//healthFillButton.png", "healthFillButton", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//healthFillButtonHovered.png", "healthFillButtonHovered", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//healthFillButtonPressed.png", "healthFillButtonPressed", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//coinIcon.png", "coinIcon", false);
+
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");
 }
 
 void MainApp::loadTextures()
 {
-	std::vector<const GLchar*> faces = {
+	std::vector<const GLchar*> facesBlue = {
 		"Images//Skybox//blue//bkg1_right.png",
 		"Images//Skybox//blue//bkg1_left.png",
 		"Images//Skybox//blue//bkg1_top.png",
@@ -145,5 +174,16 @@ void MainApp::loadTextures()
 		"Images//Skybox//blue//bkg1_back.png"
 	};
 
-	res_manager->LoadCubemap(faces, "BlueSpace", useGammaCorrection);
+	res_manager->LoadCubemap(facesBlue, "BlueSpace", useGammaCorrection);
+
+	std::vector<const GLchar*> facesNebula = {
+		"Images//Skybox//nebula//bkg1_right.png",
+		"Images//Skybox//nebula//bkg1_left.png",
+		"Images//Skybox//nebula//bkg1_top.png",
+		"Images//Skybox//nebula//bkg1_bot.png",
+		"Images//Skybox//nebula//bkg1_front.png",
+		"Images//Skybox//nebula//bkg1_back.png"
+	};
+
+	res_manager->LoadCubemap(facesNebula, "NebulaSpace", useGammaCorrection);
 }

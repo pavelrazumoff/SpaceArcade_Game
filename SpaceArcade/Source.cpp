@@ -100,38 +100,43 @@ void scoreChanged(int score)
 	app.updateScore(score);
 }
 
-void showScene()
+void showScene(int actionId)
 {
 	app.currentPage = PageType::Game;
 	app.startGame();
 }
 
-void showSettings()
+void showSettings(int actionId)
 {
 	app.currentPage = PageType::Settings;
 }
 
-void showCredits()
+void showCredits(int actionId)
 {
 	app.currentPage = PageType::Credits;
 }
 
-void quitGame()
+void showStationDialogue()
+{
+	app.currentPage = PageType::StationDialogue;
+}
+
+void quitGame(int actionId)
 {
 	glfwSetWindowShouldClose(app.getWindow(), true);
 }
 
-void backToMainMenu()
+void backToMainMenu(int actionId)
 {
 	app.currentPage = PageType::MainMenu;
 }
 
-void pauseScene()
+void pauseScene(int actionId)
 {
 	app.pauseGame();
 }
 
-void resumeScene()
+void resumeScene(int actionId)
 {
 	app.resumeGame();
 }
@@ -141,7 +146,7 @@ void finishScene()
 	app.finishGame();
 }
 
-void restartScene()
+void restartScene(int actionId)
 {
 	app.restartGame();
 }
@@ -149,6 +154,21 @@ void restartScene()
 void iterateScene()
 {
 	app.iterateLevel();
+}
+
+void handleDialogue(int actionId)
+{
+	app.handleDialogueButton(actionId);
+}
+
+void handleMerch(int actionId)
+{
+	app.handleMerchButton(actionId);
+}
+
+void teleportObject(GameObject* obj, LevelBehaviour* behaviour)
+{
+	app.teleportPlayer(obj, behaviour);
 }
 
 void enableMultisampling(bool enable)
