@@ -78,6 +78,7 @@ public:
 	void initGUI();
 	void initScene();
 	void resetInitialSceneData();
+	void resetSecretSceneData();
 	void initBuffers();
 
 	void loadShaders();
@@ -101,6 +102,7 @@ public:
 	void updateEnergyBar(float usedEnergy, float maxEnergy);
 	void updateRocketIntegrity(int integrity, int maxIntegrity);
 	void updateScore(int score);
+	void updateCoins(int coins);
 
 	// input.
 	void processInput(GLFWwindow *window);
@@ -201,6 +203,7 @@ private:
 	GUITextBox* pScoreBox = NULL;
 	GUITextBox* pFinalScore = NULL;
 	GUITextBox* pLevelBox = NULL;
+	GUITextBox* pCoinsBox = NULL;
 
 	std::vector<GUILayout*> dialogueTextLayouts;
 };

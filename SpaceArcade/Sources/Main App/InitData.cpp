@@ -401,7 +401,7 @@ void MainApp::initGUI()
 	gameLayout->setAlignment(GUILayout_Alignment::Center);
 
 	GUILayout* screenLayouts[3];
-	int screenPercents[3] = { 1, 7, 1 };
+	int screenPercents[3] = { 1, 7, 2 };
 
 	// Top Screen and bottom (health and energy bars).
 	for (int i = 0; i < 3; ++i)
@@ -489,8 +489,9 @@ void MainApp::initGUI()
 
 		screenBottomLayouts[i]->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
 		screenBottomLayouts[i]->setIndents(glm::vec4(20, 0, 20, 0));
+		screenBottomLayouts[i]->setSpace(5);
 		screenBottomLayouts[i]->setTypeLayout(GUILayout_Type::Vertical);
-		screenBottomLayouts[i]->setAlignment(GUILayout_Alignment::Center);
+		screenBottomLayouts[i]->setAlignment(GUILayout_Alignment::Bottom);
 		screenBottomLayouts[i]->setLayoutFillPercent(bottomScreenPercents[i]);
 	}
 
@@ -503,6 +504,38 @@ void MainApp::initGUI()
 	GUILayout* barLayouts[2];
 	for (int i = 0; i < 2; ++i)
 	{
+		if (i == 1)
+		{
+			GUILayout* coinsLayout = new GUILayout(&renderer);
+			screenBottomLayouts[i * 2]->addChild(coinsLayout);
+
+			coinsLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+			coinsLayout->setMinimumHeight(35.0f);
+			coinsLayout->setMaximumHeight(35.0f);
+			coinsLayout->setSpace(10.0f);
+			coinsLayout->setTypeLayout(GUILayout_Type::Horizontal);
+			coinsLayout->setAlignment(GUILayout_Alignment::Right);
+
+			// coins text.
+			pCoinsBox = new GUITextBox(&renderer);
+			coinsLayout->addChild(pCoinsBox);
+
+			pCoinsBox->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+			pCoinsBox->setMinimumHeight(35.0f);
+			pCoinsBox->setMaximumHeight(35.0f);
+			pCoinsBox->setText("0");
+			pCoinsBox->setTextColor(glm::vec3(0.23f, 0.63f, 1.0f));
+			pCoinsBox->setFont(res_manager->Fonts["TTLakes26"]);
+			pCoinsBox->setFontShader(&font_shader);
+			pCoinsBox->setFontBuffers(fontVAO, fontVBO);
+			pCoinsBox->setTextAlignment(TextAlignment::TextAlignRight);
+
+			GUIObject* coinIcon = new GUIObject(&renderer);
+			coinsLayout->addChild(coinIcon);
+
+			coinIcon->init(res_manager->GetTexture("coinIcon"), glm::vec2(0.0f, 0.0f), glm::vec2(32.0f, 32.0f), false);
+		}
+
 		GUIObject* barCaption = new GUIObject(&renderer);
 		screenBottomLayouts[i * 2]->addChild(barCaption);
 
@@ -665,6 +698,7 @@ void MainApp::initGUI()
 	pFinalScore->setFont(res_manager->Fonts["TTLakes30"]);
 	pFinalScore->setFontShader(&font_shader);
 	pFinalScore->setFontBuffers(fontVAO, fontVBO);
+	pFinalScore->setTextAlignment(TextAlignment::TextAlignCenter);
 
 	GUIButton* playAgainButton = new GUIButton(&renderer);
 	gameOverLayout->addChild(playAgainButton);
@@ -786,7 +820,7 @@ void MainApp::initGUI()
 			buttonLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
 			buttonLayout->setTypeLayout(GUILayout_Type::Horizontal);
 			buttonLayout->setAlignment(GUILayout_Alignment::Left);
-			buttonLayout->setIndents(glm::vec4(10.0f, 0.0f, 10.0f, 0.0f));
+			buttonLayout->setIndents(glm::vec4(10.0f, 10.0f, 10.0f, 0.0f));
 			buttonLayout->setUseParentDimensions(true);
 
 			GUITextBox* playerPhrase = new GUITextBox(&renderer);
@@ -990,9 +1024,16 @@ void MainApp::resetInitialSceneData()
 
 	behavior->setLevelData(levelData);
 
+	resetSecretSceneData();
+}
+
+void MainApp::resetSecretSceneData()
+{
 	SecretLevelBehaviour* secretBehavior = dynamic_cast<SecretLevelBehaviour*>(levelBehaviours[1]);
 	if (!secretBehavior)
 		return;
+
+	secretBehavior->setFinishLevelCallback(finishScene);
 
 	SecretLevelData secretLevelData = secretBehavior->getLevelData();
 	secretLevelData.maxNumOfBlackHoles = 19;

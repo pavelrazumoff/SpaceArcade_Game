@@ -63,6 +63,7 @@ void GUILayout::resize(bool useParentResize)
 		}
 
 	int shift = 0;
+
 	for (int i = 0; i < children.size(); ++i)
 	{
 		if (!children[i]->isVisible())
@@ -93,6 +94,11 @@ void GUILayout::resize(bool useParentResize)
 					totalFills -= children[i]->getLayoutFillPercent();
 				}
 			}
+			else
+			{
+				shift += children[i]->getSize().y;
+				totalFills -= children[i]->getLayoutFillPercent();
+			}
 		}
 		else if (typeLayout == GUILayout_Type::Horizontal)
 		{
@@ -119,6 +125,11 @@ void GUILayout::resize(bool useParentResize)
 					totalFills -= children[i]->getLayoutFillPercent();
 				}
 			}
+			else
+			{
+				shift += children[i]->getSize().x;
+				totalFills -= children[i]->getLayoutFillPercent();
+			}
 		}
 	}
 
@@ -139,15 +150,14 @@ void GUILayout::resize(bool useParentResize)
 		if (typeLayout == GUILayout_Type::Vertical)
 		{
 			if (alignment == GUILayout_Alignment::Top)
-			{
 				children[i]->setPosition(glm::vec2(layout_center.x - children[i]->getSize().x / 2, this->Position.y + currentIndents.y + shift));
-				shift += children[i]->getSize().y + currentSpace;
-			}
 			else if (alignment == GUILayout_Alignment::Center)
-			{
 				children[i]->setPosition(glm::vec2(layout_center.x - children[i]->getSize().x / 2, layout_center.y - content_size.y / 2 + shift));
-				shift += children[i]->getSize().y + currentSpace;
-			}
+			else if (alignment == GUILayout_Alignment::Bottom)
+				children[i]->setPosition(glm::vec2(layout_center.x - children[i]->getSize().x / 2,
+					this->Position.y + this->Size.y - content_size.y - currentIndents.w + shift));
+
+			shift += children[i]->getSize().y + currentSpace;
 		}
 		else if(typeLayout == GUILayout_Type::Horizontal)
 		{

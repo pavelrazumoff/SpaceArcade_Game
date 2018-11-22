@@ -28,7 +28,8 @@ enum ObjectTypes
 	Rocket,
 	Debris,
 	BlackHole,
-	SpaceStation
+	SpaceStation,
+	IonCharge
 };
 
 class GameObject

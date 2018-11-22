@@ -10,14 +10,14 @@ SpacecraftObject::SpacecraftObject()
 	usePhysics = true;
 	objectType = ObjectTypes::SpaceCraft;
 
-	laser_ray = new GameObject();
-	laser_ray->setIsDamagingObject(true);
-	laser_ray->setDamage(20.0f);
-	laser_ray->setMaxHealth(1.0f);
-	laser_ray->setHealth(1.0f); // destroys momentally.
-	laser_ray->setUsePhysics(false);
-	laser_ray->setParentObject(this);
-	laser_ray->setObjectType(ObjectTypes::LaserRay);
+	pLaserRay = new GameObject();
+	pLaserRay->setIsDamagingObject(true);
+	pLaserRay->setDamage(20.0f);
+	pLaserRay->setMaxHealth(1.0f);
+	pLaserRay->setHealth(1.0f); // destroys momentally.
+	pLaserRay->setUsePhysics(false);
+	pLaserRay->setParentObject(this);
+	pLaserRay->setObjectType(ObjectTypes::LaserRay);
 
 	pRocket = new GameObject();
 	pRocket->setIsDamagingObject(true);
@@ -32,7 +32,7 @@ SpacecraftObject::SpacecraftObject()
 SpacecraftObject::SpacecraftObject(bool createChildren)
 {
 	if(createChildren)
-		laser_ray = new GameObject();
+		pLaserRay = new GameObject();
 }
 
 SpacecraftObject::~SpacecraftObject()
@@ -126,6 +126,20 @@ void SpacecraftObject::update(float delta)
 		}
 	}
 
+	for (int i = 0; i < ion_charges.size(); ++i)
+	{
+		ion_charges[i]->InitialRotation = this->InitialRotation;
+		ion_charges[i]->update(delta);
+		if (ion_charges[i]->isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
+		{
+			GameObject* charge = ion_charges[i];
+			pLevel->removeObject(charge);
+			delete charge;
+			ion_charges.erase(ion_charges.begin() + i);
+			i--;
+		}
+	}
+
 	if (pBlackHole)
 		pBlackHole->update(delta);
 }
@@ -136,6 +150,8 @@ void SpacecraftObject::draw(bool useInstanced, int amount)
 		laser_rays[i]->draw(useInstanced, amount);
 	for (int i = 0; i < rockets.size(); ++i)
 		rockets[i]->draw(useInstanced, amount);
+	for (int i = 0; i < ion_charges.size(); ++i)
+		ion_charges[i]->draw(useInstanced, amount);
 
 	if (pBlackHole && !pBlackHole->isHiddenFromLevel())
 		pBlackHole->draw(useInstanced, amount);
@@ -173,10 +189,14 @@ void SpacecraftObject::resize()
 	for (int i = 0; i < rockets.size(); ++i)
 		rockets[i]->Position = glm::vec2(rockets[i]->Position.x * screenRatio.x, rockets[i]->Position.y * screenRatio.y);
 
+	for (int i = 0; i < ion_charges.size(); ++i)
+		ion_charges[i]->Position = glm::vec2(ion_charges[i]->Position.x * screenRatio.x, ion_charges[i]->Position.y * screenRatio.y);
+
 	if (pBlackHole && !isNonPlayerObject())
 		pBlackHole->resize();
 
-	laser_ray->resize();
+	pLaserRay->resize();
+	pIonCharge->resize();
 
 	for (int i = 0; i < attachedObjects.size(); ++i)
 		attachedObjects[i]->resize();
@@ -240,6 +260,12 @@ void SpacecraftObject::processKey(int key, int action, bool* key_pressed)
 		spawnBlackHole();
 		*key_pressed = true;
 	}
+
+	if (key == GLFW_KEY_F && action == GLFW_PRESS && *key_pressed == false)
+	{
+		spawnIonCharge();
+		*key_pressed = true;
+	}
 }
 
 bool SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
@@ -254,7 +280,11 @@ bool SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 	{
 		it = find(rockets.begin(), rockets.end(), notifiedObject);
 		if (it == rockets.end())
-			return false;
+		{
+			it = find(ion_charges.begin(), ion_charges.end(), notifiedObject);
+			if (it == ion_charges.end())
+				return false;
+		}
 	}
 
 	switch (code)
@@ -267,8 +297,11 @@ bool SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 		else
 			if (notifiedObject->getObjectType() == ObjectTypes::Rocket)
 				rockets.erase(it);
-		delete notifiedObject;
+			else
+				if(notifiedObject->getObjectType() == ObjectTypes::IonCharge)
+					ion_charges.erase(it);
 
+		delete notifiedObject;
 		return true;
 	}
 		break;
@@ -281,9 +314,9 @@ bool SpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 
 void SpacecraftObject::setLaserRay(GameObject* laser)
 {
-	if (laser_ray)
-		delete laser_ray;
-	laser_ray = laser;
+	if (pLaserRay)
+		delete pLaserRay;
+	pLaserRay = laser;
 }
 
 void SpacecraftObject::setBlackHole(BlackHoleObject* blackHole)
@@ -312,9 +345,22 @@ void SpacecraftObject::setIonWeapon(GameObject* weapon)
 	}
 }
 
+void SpacecraftObject::setIonCharge(GameObject* charge)
+{
+	if (pIonCharge)
+		delete pIonCharge;
+	pIonCharge = charge;
+
+	if (pIonCharge)
+	{
+		pIonCharge->setParentObject(this);
+		pIonCharge->hideFromLevel(true);
+	}
+}
+
 GameObject* SpacecraftObject::getLaserRay()
 {
-	return laser_ray;
+	return pLaserRay;
 }
 
 GameObject* SpacecraftObject::getRocket()
@@ -332,6 +378,11 @@ GameObject* SpacecraftObject::getIonWeapon()
 	return pIonWeapon;
 }
 
+GameObject* SpacecraftObject::getIonCharge()
+{
+	return pIonCharge;
+}
+
 void SpacecraftObject::setEnergyChangedCallback(void(*actionCallback)(float, float))
 {
 	energyChanged = actionCallback;
@@ -342,10 +393,18 @@ void SpacecraftObject::setRocketIntegrityChangedCallback(void(*actionCallback)(i
 	rocketIntegrityChanged = actionCallback;
 }
 
+void SpacecraftObject::setCoinsChangedCallback(void(*actionCallback)(int))
+{
+	coinsChanged = actionCallback;
+}
+
 void SpacecraftObject::setControlVelocityByRotation(bool control)
 {
 	GameObject::setControlVelocityByRotation(control);
-	laser_ray->setControlVelocityByRotation(control);
+	if (pLaserRay)
+		pLaserRay->setControlVelocityByRotation(control);
+	if(pIonCharge)
+		pIonCharge->setControlVelocityByRotation(control);
 }
 
 void SpacecraftObject::setMaxEnergy(float energy)
@@ -391,6 +450,9 @@ void SpacecraftObject::setBlackHolePortal(bool blackHole)
 void SpacecraftObject::setCoins(int coins)
 {
 	this->coins = coins;
+
+	if (coinsChanged)
+		coinsChanged(this->coins);
 }
 
 void SpacecraftObject::setRocketStartVelocity(glm::vec2 vel)
@@ -478,6 +540,8 @@ void SpacecraftObject::makeCollision(GameObject* obj)
 			GameLevel* level = blackHole->getLevel();
 			if (level->getBehaviour())
 				level->getBehaviour()->teleport(this);
+			// put this hole under the screen, so it will be destroyed automatically after this craft will return back.
+			blackHole->Position.y = level->getRenderer()->getCurrentScreenDimensions().y + 10.0f;
 		}
 	}
 }
@@ -507,7 +571,7 @@ void SpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherObj, 
 
 void SpacecraftObject::spawnLaserRay()
 {
-	if (!laser_ray || !laser_ray->getLevel())
+	if (!pLaserRay || !pLaserRay->getLevel())
 		return;
 
 	if (usedEnergy >= maxEnergy || exceedMaxEnergy)
@@ -518,8 +582,8 @@ void SpacecraftObject::spawnLaserRay()
 
 	usedEnergy += 15.0f;
 
-	laser_rays.push_back(laser_ray->clone());
-	laser_rays.back()->Position = glm::vec2(Position.x + Size.x / 2 - laser_ray->Size.x / 2, Position.y);
+	laser_rays.push_back(pLaserRay->clone());
+	laser_rays.back()->Position = glm::vec2(Position.x + Size.x / 2 - pLaserRay->Size.x / 2, Position.y);
 	laser_rays.back()->InitialRotation = this->InitialRotation;
 
 	if (laserSoundName.compare(""))
@@ -572,6 +636,24 @@ void SpacecraftObject::spawnIonWeapon()
 	pIonWeapon = NULL;
 }
 
+void SpacecraftObject::spawnIonCharge()
+{
+	if (!pIonCharge || !pIonCharge->getLevel() || pIonWeapon)
+		return;
+
+	if (usedEnergy >= maxEnergy || exceedMaxEnergy)
+	{
+		exceedMaxEnergy = true;
+		return;
+	}
+
+	usedEnergy += 50.0f;
+
+	ion_charges.push_back(pIonCharge->clone());
+	ion_charges.back()->Position = glm::vec2(Position.x + Size.x / 2 - pIonCharge->Size.x / 2, Position.y);
+	ion_charges.back()->InitialRotation = this->InitialRotation;
+}
+
 void SpacecraftObject::constructRocket()
 {
 	int rocketIndex = getRocketFreeIndex();
@@ -608,10 +690,15 @@ void SpacecraftObject::clear()
 
 	rockets.clear();
 
-	if (laser_ray)
+	for (int i = 0; i < ion_charges.size(); ++i)
+		ion_charges[i]->setParentObject(NULL);
+
+	ion_charges.clear();
+
+	if (pLaserRay)
 	{
-		delete laser_ray;
-		laser_ray = NULL;
+		delete pLaserRay;
+		pLaserRay = NULL;
 	}
 
 	if (pRocket)
@@ -632,5 +719,11 @@ void SpacecraftObject::clear()
 		pLevel->removeObject(pIonWeapon);
 		delete pIonWeapon;
 		pIonWeapon = NULL;
+	}
+
+	if (pIonCharge)
+	{
+		delete pIonCharge;
+		pIonCharge = NULL;
 	}
 }

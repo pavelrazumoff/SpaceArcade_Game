@@ -58,6 +58,7 @@ void SecretLevelBehaviour::resetBehaviour()
 {
 	LevelBehaviour::resetBehaviour();
 	playerCraft = NULL;
+	pSpaceStation = NULL;
 
 	for (int i = 0; i < aiControllers.size(); ++i)
 		delete aiControllers[i];
@@ -71,6 +72,11 @@ void SecretLevelBehaviour::resetBehaviour()
 	}
 
 	levelData.playerSpeed = glm::vec2(200.0f, 100.0f);
+
+	levelData.maxNumOfBlackHoles = 0;
+	levelData.numOfCreatedBlackHoles = 0;
+	levelData.blackHolesSpeed = glm::vec2(50, 100);
+	levelData.blackHolesZone = glm::vec2(0, 300);
 
 	levelMode = SecretLevelMode::SecretIntroducing;
 	// block user input from beginning of the level.

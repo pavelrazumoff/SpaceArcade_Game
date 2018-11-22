@@ -51,6 +51,9 @@ struct StartLevelData
 	float currentHealthKitsTime = 0.0f;
 	glm::vec2 healthKitsZone = glm::vec2(-500, -1500);		// min, max.
 
+	// coins data.
+	int coinRandomSeed = 4;
+
 	// enemies data.
 	int maxNumOfBasicEnemies = 1;
 	int numOfBasicEnemies = 0;
@@ -116,6 +119,8 @@ public:
 	void spawnEnergyBarriers(float delta);
 	void spawnEnemyBoss(float delta);
 	void spawnDebris(float delta);
+
+	void spawnCoinWithObject(GameObject* obj, int numOfCoins);
 
 	void iterateLevel();
 

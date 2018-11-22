@@ -42,6 +42,7 @@ void StartLevelBehaviour::startBehaviour()
 	pPlayerCraft->setHealthChangedCallback(healthBarChanged);
 	pPlayerCraft->setEnergyChangedCallback(energyBarChanged);
 	pPlayerCraft->setRocketIntegrityChangedCallback(rocketIntegrityChanged);
+	pPlayerCraft->setCoinsChangedCallback(coinsChanged);
 	pPlayerCraft->setNonPlayerObject(false);
 	pPlayerCraft->setLaserSoundName("LaserSound");
 	pPlayerCraft->setRocketSoundName("RocketSound");
@@ -78,6 +79,17 @@ void StartLevelBehaviour::startBehaviour()
 	ionWeapon->init(pLevel, glm::vec2(0, 0), glm::vec2(46, 47), pResourceManager->GetTexture("ionWeapon"), glm::vec2(0.0f, 0.0f), true);
 
 	pPlayerCraft->setIonWeapon(ionWeapon);
+
+	GameObject* ionCharge = new GameObject();
+	ionCharge->init(pLevel, glm::vec2(0, 0), glm::vec2(24, 47), pResourceManager->GetTexture("ionCharge"), glm::vec2(0.0f, -300.0f * screenRatio.y), false);
+	ionCharge->setObjectType(ObjectTypes::IonCharge);
+	ionCharge->setIsDamagingObject(true);
+	ionCharge->setDamage(400.0f);
+	ionCharge->setMaxHealth(1.0f);
+	ionCharge->setHealth(1.0f); // destroys momentally.
+	ionCharge->setUsePhysics(false);
+
+	pPlayerCraft->setIonCharge(ionCharge);
 
 	pPlayerCraft->setRocketRelativePosition(glm::vec2(42, 12), 0);
 	pPlayerCraft->setRocketRelativePosition(glm::vec2(3, 12), 1);
@@ -149,6 +161,8 @@ void StartLevelBehaviour::resetBehaviour()
 
 	levelData.bossHealth = 1000.0f;
 	levelData.bossEnergy = 200.0f;
+
+	levelData.coinRandomSeed = 4;
 
 	levelMode = StartLevelMode::Introducing;
 	// block user input from beginning of the level.
@@ -565,6 +579,9 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 			rocketDetail->resize();
 			asteroid->addPostDeathObject(rocketDetail);
 		}
+
+		if (rand() % levelData.coinRandomSeed == 1)
+			spawnCoinWithObject(asteroid, 1);
 	}
 
 	levelData.numOfCreatedMeteorites += numOfMeteorites;
@@ -694,6 +711,8 @@ void StartLevelBehaviour::spawnEnemies(float delta)
 
 		// also block its ai for a little time to be able to properly introduce this object on scene.
 		enemySpaceCraft->getAIController()->BlockAI();
+
+		spawnCoinWithObject(enemySpaceCraft, rand() % (8 - 5) + 5);
 	}
 }
 
@@ -763,6 +782,8 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	bossSpaceCraft->Position = glm::vec2(screenDimensions.x / 2 - 109, -200.0f);
 	// also block its ai for a little time to be able to properly introduce this object on scene.
 	bossSpaceCraft->getAIController()->BlockAI();
+
+	spawnCoinWithObject(bossSpaceCraft, rand() % (20 - 15) + 15);
 
 	levelData.bossHealthThreshold = (2.0f * bossSpaceCraft->getHealth()) / 3.0f;
 	levelData.bossHealthThresholdStep = bossSpaceCraft->getHealth() / 3.0f;
@@ -862,6 +883,9 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 			generators[j]->setScoreContribution(15);
 
 			generators[j]->init(pLevel, glm::vec2(0.0f, 0.0f), generatorSize, pResourceManager->GetTexture(texes[j]), glm::vec2(0.0f, 0.0f));
+
+			if (rand() % levelData.coinRandomSeed == 1)
+				spawnCoinWithObject(generators[j], 2);
 		}
 
 		barrier->setGenerators(generators[0], generators[1]);
@@ -940,6 +964,9 @@ void StartLevelBehaviour::spawnDebris(float delta)
 		wreck->Rotation = 10.0f;
 
 		wreck->resize();
+
+		if (rand() % levelData.coinRandomSeed == 1)
+			spawnCoinWithObject(wreck, 1);
 	}
 
 	if (!levelData.secretWreckCreated)
@@ -978,6 +1005,28 @@ void StartLevelBehaviour::spawnDebris(float delta)
 	}
 
 	levelData.numOfCreatedDebris += numOfDebris;
+}
+
+void StartLevelBehaviour::spawnCoinWithObject(GameObject* obj, int numOfCoins)
+{
+	ImprovementStruct coinKit;
+	coinKit.coinValue = 5;
+	coinKit.useCoinValue = true;
+
+	for (int i = 0; i < numOfCoins; ++i)
+	{
+		ImprovementBoxObject* coin = new ImprovementBoxObject();
+
+		coin->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(25.0f, 25.0f), pResourceManager->GetTexture("coin"),
+			glm::vec2(rand() % (20 + 1) - 20, rand() % (170 - 60 + 1) + 60));
+
+		coin->InitialRotation = rand() % 360;
+		coin->Rotation = 15.0f;
+		coin->setImprovement(coinKit);
+
+		coin->resize();
+		obj->addPostDeathObject(coin);
+	}
 }
 
 void StartLevelBehaviour::iterateLevel()
@@ -1069,7 +1118,8 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	case ObjectTypes::LaserRay:
 		if (obj2->getObjectType() != ObjectTypes::LaserRay &&
 			obj2->getObjectType() != ObjectTypes::Rocket &&
-			obj2->getObjectType() != ObjectTypes::EnergyShield)
+			obj2->getObjectType() != ObjectTypes::EnergyShield &&
+			obj2->getObjectType() != ObjectTypes::IonCharge)
 			return true;
 		else
 			return false;
@@ -1125,6 +1175,12 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 		break;
 	case ObjectTypes::BlackHole:
 		return true;
+		break;
+	case ObjectTypes::IonCharge:
+		if (obj2->getObjectType() != ObjectTypes::LaserRay)
+			return true;
+		else
+			return false;
 		break;
 	default:
 		break;

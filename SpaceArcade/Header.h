@@ -59,5 +59,6 @@ float lerp(float a, float b, float f);
 void healthBarChanged(float health, float initialHealth);
 void energyBarChanged(float usedEnergy, float maxEnergy);
 void rocketIntegrityChanged(int integrity, int maxIntegrity);
+void coinsChanged(int coins);
 
 void showStationDialogue();

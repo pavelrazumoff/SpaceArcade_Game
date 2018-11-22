@@ -124,4 +124,6 @@ void ImprovementStruct::improve(SpacecraftObject* spacecraft)
 		spacecraft->setRocketDetail(spacecraft->getRocketIntegrity() + rocketDetail);
 	if (useBlackHole)
 		spacecraft->setBlackHolePortal(blackHole);
+	if (useCoinValue)
+		spacecraft->setCoins(spacecraft->getCoins() + coinValue);
 }

@@ -28,14 +28,17 @@ public:
 	void setLaserRay(GameObject* laser);
 	void setBlackHole(BlackHoleObject* blackHole);
 	void setIonWeapon(GameObject* weapon);
+	void setIonCharge(GameObject* charge);
 
 	GameObject* getLaserRay();
 	GameObject* getRocket();
 	BlackHoleObject* getBlackHole();
 	GameObject* getIonWeapon();
+	GameObject* getIonCharge();
 
 	void setEnergyChangedCallback(void(*actionCallback)(float, float));
 	void setRocketIntegrityChangedCallback(void(*actionCallback)(int, int));
+	void setCoinsChangedCallback(void(*actionCallback)(int));
 
 	void setControlVelocityByRotation(bool control);
 	void setMaxEnergy(float energy);
@@ -61,16 +64,23 @@ public:
 	void spawnRocket();
 	void spawnBlackHole();
 	void spawnIonWeapon();
+	void spawnIonCharge();
 
 	void constructRocket();
 
 protected:
-	GameObject* laser_ray;
-	GameObject* pRocket;
 	BlackHoleObject* pBlackHole = NULL;
 	GameObject* pIonWeapon = NULL;
+
+	// templates.
+	GameObject* pLaserRay = NULL;
+	GameObject* pRocket = NULL;
+	GameObject* pIonCharge = NULL;
+
 	std::vector<GameObject*> laser_rays;
 	std::vector<GameObject*> rockets;
+	std::vector<GameObject*> ion_charges;
+
 	std::string laserSoundName;
 	std::string rocketSoundName;
 
@@ -86,4 +96,5 @@ protected:
 
 	bool blackHolePortal = true;
 	int coins = 0;
+	void(*coinsChanged)(int) = NULL;
 };

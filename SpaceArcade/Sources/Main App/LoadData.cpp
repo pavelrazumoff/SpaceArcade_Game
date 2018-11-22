@@ -33,6 +33,8 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//smoke.png", "smoke", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//space_station.png", "spaceStation", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//ionWeapon.png", "ionWeapon", useGammaCorrection, &gameObjectsParams);
+	res_manager->LoadTexture("Images//ion_charge.png", "ionCharge", useGammaCorrection, &gameObjectsParams);
+	res_manager->LoadTexture("Images//coin.png", "coin", useGammaCorrection, &gameObjectsParams);
 
 	for (int i = 0; i < 4; ++i)
 	{
@@ -157,7 +159,7 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//Interface//healthFillButton.png", "healthFillButton", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//healthFillButtonHovered.png", "healthFillButtonHovered", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//healthFillButtonPressed.png", "healthFillButtonPressed", false, &gameObjectsParams);
-	res_manager->LoadTexture("Images//Interface//coinIcon.png", "coinIcon", false);
+	res_manager->LoadTexture("Images//Interface//coinIcon.png", "coinIcon", false, &gameObjectsParams);
 
 	//font.
 	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");

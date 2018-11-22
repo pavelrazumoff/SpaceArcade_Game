@@ -14,7 +14,7 @@ BossSpacecraftObject::BossSpacecraftObject()
 BossSpacecraftObject::BossSpacecraftObject(bool createChildren)
 {
 	if (createChildren)
-		laser_ray = new GameObject();
+		pLaserRay = new GameObject();
 }
 
 BossSpacecraftObject::~BossSpacecraftObject()

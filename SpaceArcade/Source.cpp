@@ -95,6 +95,11 @@ void rocketIntegrityChanged(int integrity, int maxIntegrity)
 	app.updateRocketIntegrity(integrity, maxIntegrity);
 }
 
+void coinsChanged(int coins)
+{
+	app.updateCoins(coins);
+}
+
 void scoreChanged(int score)
 {
 	app.updateScore(score);

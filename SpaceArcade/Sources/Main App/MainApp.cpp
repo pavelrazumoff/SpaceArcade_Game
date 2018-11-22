@@ -172,6 +172,13 @@ void MainApp::updateScore(int score)
 	prevScore = score;
 }
 
+void MainApp::updateCoins(int coins)
+{
+	std::string text = std::to_string(coins);
+	if (pCoinsBox)
+		pCoinsBox->setText(text);
+}
+
 void MainApp::resize(int width, int height)
 {
 	if (width == 0 || height == 0)
@@ -247,7 +254,12 @@ void MainApp::pauseGame()
 		pPauseButton->setVisible(false);
 	if (pResumeButton)
 		pResumeButton->setVisible(true);
+
 	currentPage = PageType::PauseGame;
+
+	renderer.resize(screenWidth, screenHeight);
+	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+		gui_objects[currentPage][i]->resize();
 }
 
 void MainApp::resumeGame()
@@ -259,14 +271,19 @@ void MainApp::resumeGame()
 	if (pResumeButton)
 		pResumeButton->setVisible(false);
 	currentPage = PageType::Game;
+
+	renderer.resize(screenWidth, screenHeight);
+	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+		gui_objects[currentPage][i]->resize();
 }
 
 void MainApp::finishGame()
 {
 	currentPage = PageType::GameOver;
-	pCurrentLevel->finishLevel();
+	base_level->finishLevel();
+	secret_level->finishLevel();
 
-	int score = pCurrentLevel->getScore();
+	int score = base_level->getScore();
 	std::string textScore = std::to_string(score);
 	std::string text = "Score: " + textScore;
 	if (pFinalScore)
@@ -292,8 +309,10 @@ void MainApp::restartGame()
 	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
 		gui_objects[currentPage][i]->resize();
 
+	base_level->resetLevel();
+	secret_level->resetLevel();
+
 	pCurrentLevel = base_level;
-	pCurrentLevel->resetLevel();
 	resetInitialSceneData();
 	pCurrentLevel->startLevel();
 
@@ -393,6 +412,7 @@ void MainApp::teleportPlayer(GameObject* obj, LevelBehaviour* behaviour)
 	if (pCurrentLevel == secret_level)
 	{
 		pCurrentLevel->resetLevel();
+		resetSecretSceneData();
 		pCurrentLevel->addScore(base_level->getScore());
 
 		behaviour->setPlayerObject(obj);

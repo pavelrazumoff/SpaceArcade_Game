@@ -10,11 +10,13 @@ struct ImprovementStruct
 	float energy;
 	int rocketDetail;
 	bool blackHole;
+	int coinValue;
 
 	bool useHealth = false;
 	bool useEnergy = false;
 	bool useRocketDetail = false;
 	bool useBlackHole = false;
+	bool useCoinValue = false;
 };
 
 class ImprovementBoxObject : public GameObject
