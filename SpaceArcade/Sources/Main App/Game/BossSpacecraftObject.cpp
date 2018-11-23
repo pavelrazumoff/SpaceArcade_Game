@@ -1,6 +1,6 @@
 #include "BossSpacecraftObject.h"
 #include "GameLevel.h"
-#include "AI/AIController.h"
+#include "AI/BossShipAIController.h"
 #include "AI/LevelBehaviour.h"
 
 BossSpacecraftObject::BossSpacecraftObject()
@@ -98,8 +98,13 @@ void BossSpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherO
 {
 	SpacecraftObject::makeReaction(difference, otherObj, collisionChecker);
 
-	if (!otherObj->isUsePhysics())
-		return;
+	if (otherObj->getObjectType() == ObjectTypes::IonCharge)
+	{
+		BossShipAIController* bossController = dynamic_cast<BossShipAIController*>(getAIController());
+		if (!bossController)
+			return;
+		bossController->setDisableHealthRecoveryTimer(5.0f);
+	}
 }
 
 void BossSpacecraftObject::spawnLaserRays()

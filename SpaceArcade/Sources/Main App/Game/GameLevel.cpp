@@ -306,6 +306,12 @@ void GameLevel::doCollisions()
 				if (objects[i] == objects[currentIndex])
 					continue;
 
+				// optimize for checking improvement boxes for collision only with player.
+				if (dynamic_cast<ImprovementBoxObject*>(objects[i]) && objects[currentIndex]->isNonPlayerObject())
+					continue;
+				if (objects[i]->isNonPlayerObject() && dynamic_cast<ImprovementBoxObject*>(objects[currentIndex]))
+					continue;
+
 				auto it = collidedList.find(objects[currentIndex]);
 				if (it != collidedList.end())
 				{

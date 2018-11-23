@@ -418,7 +418,7 @@ void MainApp::initGUI()
 		//screenLayouts[i]->setColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.1f)); // debug color.
 	}
 
-	// Top Layout (Pause and Score Menu).
+	// Top Layout (Pause, Boss HealthBar and Score Menu).
 	GUILayout* screenTopLayout = new GUILayout(&renderer);
 	screenLayouts[0]->addChild(screenTopLayout);
 
@@ -426,10 +426,13 @@ void MainApp::initGUI()
 	screenTopLayout->setIndents(glm::vec4(20, 0, 20, 0));
 	screenTopLayout->setTypeLayout(GUILayout_Type::Horizontal);
 	screenTopLayout->setAlignment(GUILayout_Alignment::Left);
+	screenTopLayout->setSpace(10.0f);
 
-	GUILayout* topLayouts[2];
-	int topAlignments[] = { GUILayout_Alignment::Left, GUILayout_Alignment::Right };
-	for (int i = 0; i < 2; ++i)
+	GUILayout* topLayouts[3];
+	int topAlignments[] = { GUILayout_Alignment::Left, GUILayout_Alignment::Left, GUILayout_Alignment::Right };
+	int topFillPercents[] = { 2, 3, 12 };
+
+	for (int i = 0; i < 3; ++i)
 	{
 		topLayouts[i] = new GUILayout(&renderer);
 		screenTopLayout->addChild(topLayouts[i]);
@@ -438,6 +441,8 @@ void MainApp::initGUI()
 		topLayouts[i]->setIndents(glm::vec4(0, 0, 0, 0));
 		topLayouts[i]->setTypeLayout(GUILayout_Type::Horizontal);
 		topLayouts[i]->setAlignment(topAlignments[i]);
+		topLayouts[i]->setLayoutFillPercent(topFillPercents[i]);
+		//topLayouts[i]->setColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 	}
 
 	pPauseButton = new GUIButton(&renderer);
@@ -451,8 +456,32 @@ void MainApp::initGUI()
 	pPauseButton->setPressedTexture(res_manager->GetTexture("pauseButtonPressed"));
 	pPauseButton->setActionCallback(pauseScene);
 
+	// here we have to create boss enemy healthbar.
+	pEnemyBarFrame = new GUIObject(&renderer);
+	topLayouts[1]->addChild(pEnemyBarFrame);
+
+	pEnemyBarFrame->init(res_manager->GetTexture("enemyBarFrame"), glm::vec2(0.0f, 0.0f), glm::vec2(360.0f, 40.0f), true);
+	pEnemyBarFrame->setMaximumSize(glm::vec2(360.0f, 40.0f));
+	pEnemyBarFrame->setSizeRatio(9.0f, true);
+	pEnemyBarFrame->setVisible(false);
+
+	GUILayout* enemyBarLayout = new GUILayout(&renderer);
+	pEnemyBarFrame->addChild(enemyBarLayout);
+
+	enemyBarLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
+	enemyBarLayout->setIndents(glm::vec4(0, 0, 0, 0));
+	enemyBarLayout->setTypeLayout(GUILayout_Type::Horizontal);
+	enemyBarLayout->setAlignment(GUILayout_Alignment::Left);
+	enemyBarLayout->setUseParentDimensions(true);
+
+	pEnemyHealthBar = new GUIObject(&renderer);
+	enemyBarLayout->addChild(pEnemyHealthBar);
+
+	pEnemyHealthBar->init(res_manager->GetTexture("enemyHealthBar"), glm::vec2(0.0f, 0.0f), glm::vec2(360.0f, 40.0f), true);
+	pEnemyHealthBar->setMinimumHeight(5.0f);
+
 	pLevelBox = new GUITextBox(&renderer);
-	topLayouts[1]->addChild(pLevelBox);
+	topLayouts[2]->addChild(pLevelBox);
 
 	pLevelBox->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
 	pLevelBox->setMaximumWidth(140.0f);
@@ -465,7 +494,7 @@ void MainApp::initGUI()
 	pLevelBox->setFontBuffers(fontVAO, fontVBO);
 
 	pScoreBox = new GUITextBox(&renderer);
-	topLayouts[1]->addChild(pScoreBox);
+	topLayouts[2]->addChild(pScoreBox);
 
 	pScoreBox->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
 	pScoreBox->setMaximumWidth(140.0f);
@@ -609,9 +638,9 @@ void MainApp::initGUI()
 		pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), true);
 	}
 
-	std::string rocketTexes[] = { "rocketFireCaption", "rocketCreateCaption" };
+	std::string rocketTexes[] = { "rocketFireCaption", "rocketCreateCaption", "deviceActivateCaption" };
 
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		GUIObject* rocketCaption = new GUIObject(&renderer);
 		rocketsLayout->addChild(rocketCaption);
@@ -619,6 +648,12 @@ void MainApp::initGUI()
 		rocketCaption->init(res_manager->GetTexture(rocketTexes[i]), glm::vec2(0.0f, 0.0f), glm::vec2(212.0f, 72.0f), true);
 		rocketCaption->setMaximumSize(glm::vec2(212.0f, 72.0f));
 		rocketCaption->setSizeRatio(2.94f, true);
+
+		if (i == 2)
+		{
+			rocketCaption->setVisible(false);
+			pActivateDeviceCaption = rocketCaption;
+		}
 	}
 
 	// Game Pause Interface.
@@ -756,20 +791,22 @@ void MainApp::initGUI()
 			"Nothing. Bye!"
 		},
 		{
+			"I changed my mind."
 		}
 	};
 
 	int dialoguePhrases[2][2] = {
 		{
 			DialoguePhrase::ShowGoods,
-			DialoguePhrase::Bye
+			DialoguePhrase::Bye,
 		},
 		{
+			DialoguePhrase::GoBack
 		}
 	};
 
 	int numOfDialoguePhrases[] = {
-		2, 0
+		2, 1
 	};
 
 	for (int i = 0; i < 2; ++i)
@@ -784,7 +821,10 @@ void MainApp::initGUI()
 		textLayout->setIndents(glm::vec4(10.0f, 0.0f, 0.0f, 0.0f));
 
 		if (i > 0)
+		{
 			textLayout->setVisible(false);
+			textLayout->setSpace(10);
+		}
 
 		dialogueTextLayouts.push_back(textLayout);
 
@@ -843,7 +883,7 @@ void MainApp::initGUI()
 			textLayout->addChild(merchLayout);
 
 			merchLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
-			merchLayout->setSpace(10);
+			merchLayout->setSpace(5);
 			merchLayout->setTypeLayout(GUILayout_Type::Horizontal);
 			merchLayout->setAlignment(GUILayout_Alignment::Left);
 			merchLayout->setIndents(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -875,7 +915,7 @@ void MainApp::initGUI()
 				merchLayout->addChild(merchButtonLayout);
 
 				merchButtonLayout->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
-				merchButtonLayout->setSpace(10);
+				merchButtonLayout->setSpace(5);
 				merchButtonLayout->setTypeLayout(GUILayout_Type::Vertical);
 				merchButtonLayout->setAlignment(GUILayout_Alignment::Top);
 
@@ -883,9 +923,9 @@ void MainApp::initGUI()
 				GUIButton* merchButton = new GUIButton(&renderer);
 				merchButtonLayout->addChild(merchButton);
 
-				merchButton->init(res_manager->GetTexture(merchTexes[j][0]), glm::vec2(0.0f, 0.0f), glm::vec2(191.0f, 207.0f), true);
-				merchButton->setMaximumSize(glm::vec2(191.0f, 207.0f));
-				merchButton->setSizeRatio(0.922f, true);
+				merchButton->init(res_manager->GetTexture(merchTexes[j][0]), glm::vec2(0.0f, 0.0f), glm::vec2(152.0f, 164.0f), true);
+				merchButton->setMaximumSize(glm::vec2(152.0f, 164.0f));
+				merchButton->setSizeRatio(0.923f, true);
 				merchButton->setHoveredTexture(res_manager->GetTexture(merchTexes[j][1]));
 				merchButton->setPressedTexture(res_manager->GetTexture(merchTexes[j][2]));
 				merchButton->setActionCallback(handleMerch);
@@ -896,8 +936,8 @@ void MainApp::initGUI()
 				merchButtonLayout->addChild(merchCaption);
 
 				merchCaption->init(NULL, glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), true);
-				merchCaption->setMinimumHeight(30.0f);
-				merchCaption->setMaximumHeight(30.0f);
+				merchCaption->setMinimumHeight(32.0f);
+				merchCaption->setMaximumHeight(32.0f);
 				merchCaption->setText(merchCaptions[j]);
 				merchCaption->setTextColor(glm::vec3(1.0f, 0.28f, 0.0f));
 				merchCaption->setFont(res_manager->Fonts["Unispace18"]);
@@ -1002,6 +1042,7 @@ void MainApp::resetInitialSceneData()
 		return;
 	behavior->setFinishLevelCallback(finishScene);
 	behavior->setIterateLevelCallback(iterateScene);
+	behavior->setShowEnemyBarCallback(showEnemyBar);
 
 	StartLevelData levelData = behavior->getLevelData();
 	levelData.maxNumOfMeteorites = 30;

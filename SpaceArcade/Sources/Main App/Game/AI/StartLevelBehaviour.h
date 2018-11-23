@@ -21,6 +21,9 @@ enum StartLevelMode
 	BossSpaceCraftFighting,
 	BossSpaceCraftLeaving,
 	DebrisFighting,
+	FinalBossSpaceCraftIntroducing,
+	FinalBossSpaceCraftFighting,
+	FinalBossSpaceCraftLeaving,
 	End
 };
 
@@ -74,6 +77,13 @@ struct StartLevelData
 	float timeWithoutShield = 0.0f;
 	float maxTimeWithoutShield = 10.0f;
 
+	// final boss data.
+	float finalBossHealth = 2000.0f;
+	float finalBossEnergy = 300.0f;
+	float finalBossEnemySpeed = 150.0f;
+	bool finalBossWasDefeated = false;
+	bool battleStarted = false;
+
 	// energy barriers data.
 	int maxNumOfBarriers = 0;
 	int numOfCreatedBarriers = 0;
@@ -110,6 +120,9 @@ public:
 	void updateBossSpaceCraftFightMode(float delta);
 	void updateBossSpaceCraftLeaveMode(float delta);
 	void updateDebrisMode(float delta);
+	void updateFinalBossSpaceCraftIntroduceMode(float delta);
+	void updateFinalBossSpaceCraftFightMode(float delta);
+	void updateFinalBossSpaceCraftLeaveMode(float delta);
 
 	void updateParallelEvents(float delta);
 
@@ -118,6 +131,7 @@ public:
 	void spawnEnemies(float delta);
 	void spawnEnergyBarriers(float delta);
 	void spawnEnemyBoss(float delta);
+	void spawnFinalBoss(float delta);
 	void spawnDebris(float delta);
 
 	void spawnCoinWithObject(GameObject* obj, int numOfCoins);
@@ -138,12 +152,16 @@ public:
 	void setFinishLevelCallback(void(*actionCallback)(void));
 	void setIterateLevelCallback(void(*actionCallback)(void));
 	void setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*));
+	void setShowEnemyBarCallback(void(*actionCallback)(bool));
 
 protected:
 	SpacecraftObject* playerCraft = NULL;
 	std::vector<AIController*> aiControllers;
 	ISound* levelMusic = NULL;
 	LevelBehaviour* pSecretBehaviour = NULL;
+	BossSpacecraftObject* pFinalBoss = NULL;
+
+	bool bossEnemyBarWasShown = false;
 
 	// level's data.
 	StartLevelData levelData;
@@ -151,4 +169,5 @@ protected:
 	void(*finishLevelCallback)(void) = NULL;
 	void(*updateLevelIterationCallback)(void) = NULL;
 	void(*teleportPlayerCallback)(GameObject*, LevelBehaviour*) = NULL;
+	void(*showEnemyBarCallback)(bool) = NULL;
 };

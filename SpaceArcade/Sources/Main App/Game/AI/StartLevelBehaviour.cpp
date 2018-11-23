@@ -42,12 +42,14 @@ void StartLevelBehaviour::startBehaviour()
 	pPlayerCraft->setHealthChangedCallback(healthBarChanged);
 	pPlayerCraft->setEnergyChangedCallback(energyBarChanged);
 	pPlayerCraft->setRocketIntegrityChangedCallback(rocketIntegrityChanged);
+	pPlayerCraft->setBlackHolePortalChangedCallback(blackHolePortalChanged);
 	pPlayerCraft->setCoinsChangedCallback(coinsChanged);
 	pPlayerCraft->setNonPlayerObject(false);
 	pPlayerCraft->setLaserSoundName("LaserSound");
 	pPlayerCraft->setRocketSoundName("RocketSound");
 	pPlayerCraft->setExplosionSoundName("ExplosionEffect");
 	pPlayerCraft->setRocketStartVelocity(glm::vec2(0.0f, -450.0f * screenRatio.y));
+	//pPlayerCraft->setBlackHolePortal(true);
 
 	pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayBlue"), glm::vec2(0.0f, -400.0f * screenRatio.y), false);
 
@@ -84,7 +86,7 @@ void StartLevelBehaviour::startBehaviour()
 	ionCharge->init(pLevel, glm::vec2(0, 0), glm::vec2(24, 47), pResourceManager->GetTexture("ionCharge"), glm::vec2(0.0f, -300.0f * screenRatio.y), false);
 	ionCharge->setObjectType(ObjectTypes::IonCharge);
 	ionCharge->setIsDamagingObject(true);
-	ionCharge->setDamage(400.0f);
+	ionCharge->setDamage(100.0f);
 	ionCharge->setMaxHealth(1.0f);
 	ionCharge->setHealth(1.0f); // destroys momentally.
 	ionCharge->setUsePhysics(false);
@@ -99,7 +101,7 @@ void StartLevelBehaviour::startBehaviour()
 	pPlayerCraft->setHealth(pPlayerCraft->getHealth());
 	pPlayerCraft->setRocketDetail(0);
 
-	pPlayerCraft->setCoins(4000);
+	//pPlayerCraft->setCoins(4000);
 
 	setPlayerObject(pPlayerCraft);
 	levelMusic = pLevel->playSound("BackgroundSound", true);
@@ -127,6 +129,7 @@ void StartLevelBehaviour::resetBehaviour()
 {
 	LevelBehaviour::resetBehaviour();
 	playerCraft = NULL;
+	pFinalBoss = NULL;
 
 	for (int i = 0; i < aiControllers.size(); ++i)
 		delete aiControllers[i];
@@ -137,6 +140,12 @@ void StartLevelBehaviour::resetBehaviour()
 		levelMusic->stop();
 		levelMusic->drop();
 		levelMusic = NULL;
+	}
+
+	if (bossEnemyBarWasShown && showEnemyBarCallback)
+	{
+		showEnemyBarCallback(false);
+		bossEnemyBarWasShown = false;
 	}
 
 	levelData.playerSpeed = glm::vec2(200.0f, 100.0f);
@@ -161,6 +170,11 @@ void StartLevelBehaviour::resetBehaviour()
 
 	levelData.bossHealth = 1000.0f;
 	levelData.bossEnergy = 200.0f;
+
+	levelData.finalBossHealth = 1000.0f;
+	levelData.finalBossEnergy = 200.0f;
+	levelData.finalBossWasDefeated = false;
+	levelData.battleStarted = false;
 
 	levelData.coinRandomSeed = 4;
 
@@ -209,6 +223,15 @@ void StartLevelBehaviour::update(float delta)
 		break;
 	case StartLevelMode::DebrisFighting:
 		updateDebrisMode(delta);
+		break;
+	case StartLevelMode::FinalBossSpaceCraftIntroducing:
+		updateFinalBossSpaceCraftIntroduceMode(delta);
+		break;
+	case StartLevelMode::FinalBossSpaceCraftFighting:
+		updateFinalBossSpaceCraftFightMode(delta);
+		break;
+	case StartLevelMode::FinalBossSpaceCraftLeaving:
+		updateFinalBossSpaceCraftLeaveMode(delta);
 		break;
 	case StartLevelMode::End:
 		levelMode = StartLevelMode::MeteorFighting;
@@ -347,6 +370,12 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 	spawnEnemyBoss(delta);
 	bool updateLevel = true;
 
+	if (!bossEnemyBarWasShown && showEnemyBarCallback)
+	{
+		showEnemyBarCallback(true);
+		bossEnemyBarWasShown = true;
+	}
+
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::BossSpaceCraft); ++i)
 	{
 		BossSpacecraftObject* spacecraft = (BossSpacecraftObject*)pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
@@ -432,10 +461,16 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 	{
 		levelData.numOfBossEnemies = 0;
 		// 11.
-		if (levelIteration < 1)
+		if (levelIteration < 11)
 			levelMode = StartLevelMode::End;		// skip boss leaving mode.
 		else
 			levelMode = StartLevelMode::DebrisFighting;
+	}
+
+	if (bossEnemyBarWasShown && showEnemyBarCallback)
+	{
+		showEnemyBarCallback(false);
+		bossEnemyBarWasShown = false;
 	}
 }
 
@@ -483,7 +518,126 @@ void StartLevelBehaviour::updateDebrisMode(float delta)
 	{
 		// change to the next level mode.
 		levelMode++;
+		blockUserInput();
 	}
+}
+
+void StartLevelBehaviour::updateFinalBossSpaceCraftIntroduceMode(float delta)
+{
+	// In this mode we simply introducing all ai controlled spacecrafts on the screen.
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
+
+	spawnFinalBoss(delta);
+	bool updateLevel = true;
+
+	if (!bossEnemyBarWasShown && showEnemyBarCallback)
+	{
+		showEnemyBarCallback(true);
+		bossEnemyBarWasShown = true;
+	}
+
+	// reset boss starting introduce position in case screen size was changed.
+	if (!levelData.introduceBegins)
+	{
+		pFinalBoss->Position.y = -pFinalBoss->Size.y - 10.0f;
+		levelData.introduceBegins = true;
+		playerCraft->dropTimeWithoutMoving();
+	}
+
+	if (pFinalBoss->Position.y < (screenDimensions.y / 3 - pFinalBoss->Size.y / 2))
+	{
+		pFinalBoss->Velocity.y = -50.0f * screenRatio.y;
+		pFinalBoss->setUsePhysics(false);
+		updateLevel = false;
+		pFinalBoss->hideFromLevel(false);
+	}
+	else
+	{
+		pFinalBoss->Velocity.y = 0.0f;
+		pFinalBoss->setUsePhysics(true);
+		pFinalBoss->enableShield(true);
+		pFinalBoss->getAIController()->unblockAI();
+		unblockUserInput();
+		levelData.introduceBegins = false;
+
+		if (playerCraft->getHealth() / playerCraft->getMaxHealth() < 0.3f && !levelData.battleStarted)
+		{
+			if (playerCraft->getTimeWithoutMoving() > 2.0f)
+				pFinalBoss->getAIController()->BlockAI();
+		}
+	}
+	
+	if (updateLevel)
+		levelMode++;
+}
+
+void StartLevelBehaviour::updateFinalBossSpaceCraftFightMode(float delta)
+{
+	// In this mode a battle between player's spacecraft and enemies happens.
+	if (pFinalBoss->getHealth() > 0.0f)
+	{
+		if (playerCraft->getHealth() / playerCraft->getMaxHealth() < 0.3f && !levelData.battleStarted)
+		{
+			if (playerCraft->getTimeWithoutMoving() >= 10.0f)
+			{
+				levelMode++;
+				blockUserAttack();
+				levelData.battleStarted = false;
+			}
+
+			if (playerCraft->getTimeWithoutMoving() < 2.0f)
+			{
+				pFinalBoss->getAIController()->unblockAI();
+				levelData.battleStarted = true;
+				return;
+			}
+			else
+				return;
+		}
+		else
+			return;
+	}
+	else
+	{
+		pFinalBoss = NULL;
+		levelData.finalBossWasDefeated = true;
+		levelMode = StartLevelMode::End;
+	}
+
+	if (bossEnemyBarWasShown && showEnemyBarCallback)
+	{
+		showEnemyBarCallback(false);
+		bossEnemyBarWasShown = false;
+	}
+}
+
+void StartLevelBehaviour::updateFinalBossSpaceCraftLeaveMode(float delta)
+{
+	// In this mode we simply introducing all ai controlled spacecrafts on the screen.
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
+
+	bool updateLevel = true;
+
+	if (pFinalBoss->getHealth() > 0.0f)
+	{
+		if (pFinalBoss->Position.y + pFinalBoss->Size.y > -10.0f)
+		{
+			pFinalBoss->Velocity.y = 150.0f * screenRatio.y;
+			pFinalBoss->setUsePhysics(false);
+			updateLevel = false;
+		}
+		else
+		{
+			pFinalBoss->Velocity.y = 0.0f;
+			unblockUserAttack();
+			pFinalBoss->hideFromLevel(true);
+		}
+	}
+	
+	if (updateLevel)
+		levelMode = StartLevelMode::End;
 }
 
 void StartLevelBehaviour::updateParallelEvents(float delta)
@@ -739,6 +893,7 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	bossSpaceCraft->setExplosionSprite(pResourceManager->GetTexture("explosion"));
 	bossSpaceCraft->setAIController(bossAI);
 	bossSpaceCraft->setControlVelocityByRotation(true);
+	bossSpaceCraft->setHealthChangedCallback(enemyHealthBarChanged);
 	bossSpaceCraft->setMaxHealth(levelData.bossHealth);
 	bossSpaceCraft->setHealth(levelData.bossHealth);
 	bossSpaceCraft->setMaxEnergy(levelData.bossEnergy);
@@ -788,6 +943,61 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	levelData.bossHealthThreshold = (2.0f * bossSpaceCraft->getHealth()) / 3.0f;
 	levelData.bossHealthThresholdStep = bossSpaceCraft->getHealth() / 3.0f;
 	levelData.numOfBossEnemies++;
+}
+
+void StartLevelBehaviour::spawnFinalBoss(float delta)
+{
+	if (pFinalBoss)
+		return;
+
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+	glm::vec2 screenRatio = screenDimensions / pLevel->getRenderer()->getInitialScreenDimensions();
+
+	BossShipAIController* bossAI = new BossShipAIController();
+	addController(bossAI);
+	bossAI->setSourcePosition(glm::vec2(0.5f, 0.5f));
+	bossAI->setControlledArea(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	bossAI->enableHealthRecovery();
+	bossAI->setHealthRecoveryValue(50.0f);
+
+	pFinalBoss = new BossSpacecraftObject();
+	pFinalBoss->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(218, 134), pResourceManager->GetTexture("spacecraftBoss2"), glm::vec2(0.0f, 0.0f));
+	pFinalBoss->InitialRotation = 180.0f;
+	pFinalBoss->VelocityScale = glm::vec2(levelData.finalBossEnemySpeed, 100.0f);
+	pFinalBoss->setExplosionSprite(pResourceManager->GetTexture("explosion"));
+	pFinalBoss->setAIController(bossAI);
+	pFinalBoss->setControlVelocityByRotation(true);
+	pFinalBoss->setHealthChangedCallback(enemyHealthBarChanged);
+	pFinalBoss->setMaxHealth(levelData.finalBossHealth);
+	pFinalBoss->setHealth(levelData.finalBossHealth);
+	pFinalBoss->setMaxEnergy(levelData.finalBossEnergy);
+	pFinalBoss->setLaserSoundName("LaserEnemySound");
+	pFinalBoss->setExplosionSoundName("ExplosionEffect");
+	pFinalBoss->setScoreContribution(300);
+
+	GameObject* pLaserRay = pFinalBoss->getLaserRay();
+	pLaserRay->setObjectType(ObjectTypes::LaserRay);
+	pLaserRay->init(pLevel, glm::vec2(0, 0), glm::vec2(13, 55), pResourceManager->GetTexture("laserRayRed"), glm::vec2(0.0f, -400.0f * screenRatio.y), false);
+
+	glm::vec2 laserPoints[] = {
+		glm::vec2(50, 54),
+		glm::vec2(160, 54),
+		glm::vec2(15, 80),
+		glm::vec2(200, 80),
+		glm::vec2(106, 60),
+	};
+
+	for (int i = 0; i < 5; ++i)
+		pFinalBoss->addLaserStartPoint(laserPoints[i]);
+	pFinalBoss->setIndexOfPreferredLaserPoint(4);
+
+	// show ai controlled spacecraft and position it a little above the screen.
+	pFinalBoss->getAIController()->setTargetEnemy(playerCraft);
+	pFinalBoss->Position = glm::vec2(screenDimensions.x / 2 - 109, -200.0f);
+	// also block its ai for a little time to be able to properly introduce this object on scene.
+	pFinalBoss->getAIController()->BlockAI();
+
+	spawnCoinWithObject(pFinalBoss, rand() % (200 - 150) + 150);
 }
 
 void StartLevelBehaviour::spawnEnergyBarriers(float delta)
@@ -1075,7 +1285,7 @@ void StartLevelBehaviour::iterateLevel()
 
 	// debris.
 	// 11.
-	if (levelIteration > 1)
+	if (levelIteration > 11)
 	{
 		levelData.numOfCreatedDebris = 0;
 		levelData.maxNumOfDebris += 10;
@@ -1237,6 +1447,11 @@ void StartLevelBehaviour::setIterateLevelCallback(void(*actionCallback)(void))
 void StartLevelBehaviour::setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*))
 {
 	teleportPlayerCallback = actionCallback;
+}
+
+void StartLevelBehaviour::setShowEnemyBarCallback(void(*actionCallback)(bool))
+{
+	showEnemyBarCallback = actionCallback;
 }
 
 void StartLevelBehaviour::clear()

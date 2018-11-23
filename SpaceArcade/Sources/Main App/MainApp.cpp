@@ -128,6 +128,15 @@ void MainApp::updateEnergyBar(float usedEnergy, float maxEnergy)
 	}
 }
 
+void MainApp::updateEnemyHealthBar(float health, float initialHealth)
+{
+	if (pEnemyHealthBar)
+	{
+		float percent = health / initialHealth;
+		pEnemyHealthBar->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f - percent, 0.0f), true);
+	}
+}
+
 void MainApp::updateRocketIntegrity(int integrity, int maxIntegrity)
 {
 	float currentIntegrity = integrity;
@@ -172,11 +181,27 @@ void MainApp::updateScore(int score)
 	prevScore = score;
 }
 
+void MainApp::updateDeviceActivization(bool activate)
+{
+	pActivateDeviceCaption->setVisible(activate);
+	renderer.resize(screenWidth, screenHeight);
+	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+		gui_objects[currentPage][i]->resize();
+}
+
 void MainApp::updateCoins(int coins)
 {
 	std::string text = std::to_string(coins);
 	if (pCoinsBox)
 		pCoinsBox->setText(text);
+}
+
+void MainApp::enableEnemyBar(bool enable)
+{
+	pEnemyBarFrame->setVisible(enable);
+	renderer.resize(screenWidth, screenHeight);
+	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
+		gui_objects[currentPage][i]->resize();
 }
 
 void MainApp::resize(int width, int height)
@@ -362,6 +387,12 @@ void MainApp::handleDialogueButton(int buttonId)
 		currentPage = PageType::Game;
 		if(behaviour)
 			behaviour->finishStationDialogue();
+		break;
+	case DialoguePhrase::GoBack:
+		// go back to the prev layout.
+		dialogueTextLayouts[1]->setVisible(false);
+		dialogueTextLayouts[0]->setVisible(true);
+		dialogueTextLayouts[0]->getParent()->resize();
 		break;
 	default:
 		break;

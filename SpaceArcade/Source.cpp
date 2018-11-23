@@ -90,9 +90,19 @@ void energyBarChanged(float usedEnergy, float maxEnergy)
 	app.updateEnergyBar(usedEnergy, maxEnergy);
 }
 
+void enemyHealthBarChanged(float health, float initialHealth)
+{
+	app.updateEnemyHealthBar(health, initialHealth);
+}
+
 void rocketIntegrityChanged(int integrity, int maxIntegrity)
 {
 	app.updateRocketIntegrity(integrity, maxIntegrity);
+}
+
+void blackHolePortalChanged(bool value)
+{
+	app.updateDeviceActivization(value);
 }
 
 void coinsChanged(int coins)
@@ -159,6 +169,11 @@ void restartScene(int actionId)
 void iterateScene()
 {
 	app.iterateLevel();
+}
+
+void showEnemyBar(bool show)
+{
+	app.enableEnemyBar(show);
 }
 
 void handleDialogue(int actionId)

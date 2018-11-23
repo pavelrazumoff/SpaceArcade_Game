@@ -33,6 +33,7 @@ void BlackHoleObject::cloneParams(GameObject* obj)
 	GameObject::cloneParams(obj);
 
 	BlackHoleObject* hole = (BlackHoleObject*)obj;
+	hole->setBlackHoleType(this->getBlackHoleType());
 }
 
 void BlackHoleObject::init(GameLevel* level, glm::vec2 pos, glm::vec2 size, Texture2D* sprite, glm::vec2 velocity)

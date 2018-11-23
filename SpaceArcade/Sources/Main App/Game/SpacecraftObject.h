@@ -38,6 +38,7 @@ public:
 
 	void setEnergyChangedCallback(void(*actionCallback)(float, float));
 	void setRocketIntegrityChangedCallback(void(*actionCallback)(int, int));
+	void setBlackHolePortalChangedCallback(void(*actionCallback)(bool));
 	void setCoinsChangedCallback(void(*actionCallback)(int));
 
 	void setControlVelocityByRotation(bool control);
@@ -46,6 +47,7 @@ public:
 	void setRocketDetail(int detail);
 	void setBlackHolePortal(bool blackHole);
 	void setCoins(int coins);
+	void dropTimeWithoutMoving();
 	void setRocketStartVelocity(glm::vec2 vel);
 	void setRocketRelativePosition(glm::vec2 pos, int rocket_index);
 	void setLaserSoundName(std::string name);
@@ -56,6 +58,7 @@ public:
 	int getRocketIntegrity();
 	int getRocketFreeIndex();
 	int getCoins();
+	float getTimeWithoutMoving();
 
 	virtual void makeCollision(GameObject* obj);
 	virtual void makeReaction(glm::vec2 difference, GameObject* otherObj, bool collisionChecker);
@@ -69,12 +72,12 @@ public:
 	void constructRocket();
 
 protected:
-	BlackHoleObject* pBlackHole = NULL;
 	GameObject* pIonWeapon = NULL;
 
 	// templates.
 	GameObject* pLaserRay = NULL;
 	GameObject* pRocket = NULL;
+	BlackHoleObject* pBlackHole = NULL;
 	GameObject* pIonCharge = NULL;
 
 	std::vector<GameObject*> laser_rays;
@@ -94,7 +97,11 @@ protected:
 	glm::vec2 rocketRelativePoses[3];
 	void(*rocketIntegrityChanged)(int, int) = NULL;
 
-	bool blackHolePortal = true;
+	bool blackHolePortal = false;
+	void(*blackHolePortalChanged)(bool) = NULL;
+
 	int coins = 0;
 	void(*coinsChanged)(int) = NULL;
+
+	float timeWithoutMoving = 0.0f;
 };

@@ -53,12 +53,42 @@ void BossShipAIController::update(float delta)
 			timeToFire = fireFrequency;
 		}
 	}
+
+	// recover health if this option is enabled.
+	if (healthRecovery && disableHealthRecoveryTimer <= 0.0f)
+	{
+		if(controlledPawn->getHealth() < controlledPawn->getMaxHealth())
+			controlledPawn->setHealth(controlledPawn->getHealth() + recoveredHealth * delta);
+	}
+
+	if(disableHealthRecoveryTimer > 0.0f)
+		disableHealthRecoveryTimer -= delta;
 }
 
 void BossShipAIController::setPawn(GameObject* pawn)
 {
 	BasicShipAIController::setPawn(pawn);
 	controlledBossSpacecraft = dynamic_cast<BossSpacecraftObject*>(pawn);
+}
+
+void BossShipAIController::enableHealthRecovery()
+{
+	healthRecovery = true;
+}
+
+void BossShipAIController::disableHealthRecovery()
+{
+	healthRecovery = false;
+}
+
+void BossShipAIController::setDisableHealthRecoveryTimer(float time)
+{
+	disableHealthRecoveryTimer = time;
+}
+
+void BossShipAIController::setHealthRecoveryValue(float health)
+{
+	recoveredHealth = health;
 }
 
 void BossShipAIController::clear()

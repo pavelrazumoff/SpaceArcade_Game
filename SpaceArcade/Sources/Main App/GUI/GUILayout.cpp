@@ -73,10 +73,11 @@ void GUILayout::resize(bool useParentResize)
 		{
 			if (children[i]->getResizable())
 			{
+				float sizeY = (this->Size.y - shift - (currentIndents.y + currentIndents.w + currentSpace * (numOfVisibleChildren - 1))) *
+					children[i]->getLayoutFillPercent() / totalFills;
+
 				if (!children[i]->isUseSizeRatio())
 				{
-					float sizeY = (this->Size.y - shift - (currentIndents.y + currentIndents.w + currentSpace * (numOfVisibleChildren - 1))) *
-						children[i]->getLayoutFillPercent() / totalFills;
 					children[i]->setSize(glm::vec2(this->Size.x - (currentIndents.x + currentIndents.z), sizeY));
 
 					if (sizeY != children[i]->getSize().y)
@@ -87,8 +88,15 @@ void GUILayout::resize(bool useParentResize)
 				}
 				else
 				{
-					float xSize = this->Size.x - (currentIndents.x + currentIndents.z);
-					children[i]->setSize(glm::vec2(xSize, xSize / children[i]->getSizeRatio()));
+					//float xSize = this->Size.x - (currentIndents.x + currentIndents.z);
+					float sizeX = this->Size.y * children[i]->getSizeRatio();
+					if (sizeX > this->Size.x - (currentIndents.x + currentIndents.z))
+					{
+						sizeX = this->Size.x - (currentIndents.x + currentIndents.z);
+						sizeY = sizeX / children[i]->getSizeRatio();
+					}
+
+					children[i]->setSize(glm::vec2(sizeX, sizeY));
 
 					shift += children[i]->getSize().y;
 					totalFills -= children[i]->getLayoutFillPercent();
@@ -104,10 +112,11 @@ void GUILayout::resize(bool useParentResize)
 		{
 			if (children[i]->getResizable())
 			{
+				float sizeX = (this->Size.x - shift - (currentIndents.x + currentIndents.z + currentSpace * (numOfVisibleChildren - 1))) *
+					children[i]->getLayoutFillPercent() / totalFills;
 				if (!children[i]->isUseSizeRatio())
 				{
-					float sizeX = (this->Size.x - shift - (currentIndents.x + currentIndents.z + currentSpace * (numOfVisibleChildren - 1))) *
-						children[i]->getLayoutFillPercent() / totalFills;
+					
 					children[i]->setSize(glm::vec2(sizeX, this->Size.y - (currentIndents.y + currentIndents.w)));
 
 					if (sizeX != children[i]->getSize().x)
@@ -118,8 +127,15 @@ void GUILayout::resize(bool useParentResize)
 				}
 				else
 				{
-					float ySize = this->Size.y - (currentIndents.y + currentIndents.w);
-					children[i]->setSize(glm::vec2(children[i]->getSizeRatio() * ySize, ySize));
+					//float ySize = this->Size.y - (currentIndents.y + currentIndents.w);
+					float sizeY = sizeX / children[i]->getSizeRatio();
+					if (sizeY > this->Size.y - (currentIndents.y + currentIndents.w))
+					{
+						sizeY = this->Size.y - (currentIndents.y + currentIndents.w);
+						sizeX = children[i]->getSizeRatio() * sizeY;
+					}
+
+					children[i]->setSize(glm::vec2(sizeX, sizeY));
 
 					shift += children[i]->getSize().x;
 					totalFills -= children[i]->getLayoutFillPercent();

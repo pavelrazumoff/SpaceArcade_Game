@@ -31,6 +31,8 @@ void finishScene();
 void restartScene(int actionId);
 void iterateScene();
 
+void showEnemyBar(bool show);
+
 void handleDialogue(int actionId);
 void handleMerch(int actionId);
 
@@ -56,7 +58,8 @@ enum PageType
 enum DialoguePhrase
 {
 	ShowGoods = 0,
-	Bye
+	Bye,
+	GoBack
 };
 
 enum MerchType
@@ -100,9 +103,12 @@ public:
 
 	void updateHealthBar(float health, float initialHealth);
 	void updateEnergyBar(float usedEnergy, float maxEnergy);
+	void updateEnemyHealthBar(float health, float initialHealth);
 	void updateRocketIntegrity(int integrity, int maxIntegrity);
 	void updateScore(int score);
+	void updateDeviceActivization(bool activate);
 	void updateCoins(int coins);
+	void enableEnemyBar(bool enable);
 
 	// input.
 	void processInput(GLFWwindow *window);
@@ -197,6 +203,8 @@ private:
 
 	GUIObject* pHealthBar = NULL;
 	GUIObject* pEnergyBar = NULL;
+	GUIObject* pEnemyBarFrame = NULL;
+	GUIObject* pEnemyHealthBar = NULL;
 	GUIObject* pRocketBars[3];
 	GUIButton* pPauseButton = NULL;
 	GUIButton* pResumeButton = NULL;
@@ -204,6 +212,7 @@ private:
 	GUITextBox* pFinalScore = NULL;
 	GUITextBox* pLevelBox = NULL;
 	GUITextBox* pCoinsBox = NULL;
+	GUIObject* pActivateDeviceCaption = NULL;
 
 	std::vector<GUILayout*> dialogueTextLayouts;
 };

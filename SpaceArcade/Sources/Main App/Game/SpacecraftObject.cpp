@@ -96,6 +96,8 @@ void SpacecraftObject::update(float delta)
 
 		if (energyChanged)
 			energyChanged(usedEnergy, maxEnergy);
+
+		timeWithoutMoving += delta;
 	}
 
 	for(int i = 0; i < laser_rays.size(); ++i)
@@ -196,7 +198,8 @@ void SpacecraftObject::resize()
 		pBlackHole->resize();
 
 	pLaserRay->resize();
-	pIonCharge->resize();
+	if(pIonCharge)
+		pIonCharge->resize();
 
 	for (int i = 0; i < attachedObjects.size(); ++i)
 		attachedObjects[i]->resize();
@@ -237,6 +240,8 @@ void SpacecraftObject::handleInput(GLFWwindow *window, float delta)
 
 void SpacecraftObject::processKey(int key, int action, bool* key_pressed)
 {
+	timeWithoutMoving = 0.0f;
+
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && *key_pressed == false)
 	{
 		spawnLaserRay();
@@ -393,6 +398,11 @@ void SpacecraftObject::setRocketIntegrityChangedCallback(void(*actionCallback)(i
 	rocketIntegrityChanged = actionCallback;
 }
 
+void SpacecraftObject::setBlackHolePortalChangedCallback(void(*actionCallback)(bool))
+{
+	blackHolePortalChanged = actionCallback;
+}
+
 void SpacecraftObject::setCoinsChangedCallback(void(*actionCallback)(int))
 {
 	coinsChanged = actionCallback;
@@ -445,6 +455,9 @@ void SpacecraftObject::setRocketDetail(int detail)
 void SpacecraftObject::setBlackHolePortal(bool blackHole)
 {
 	blackHolePortal = blackHole;
+
+	if (blackHolePortalChanged)
+		blackHolePortalChanged(blackHolePortal);
 }
 
 void SpacecraftObject::setCoins(int coins)
@@ -453,6 +466,11 @@ void SpacecraftObject::setCoins(int coins)
 
 	if (coinsChanged)
 		coinsChanged(this->coins);
+}
+
+void SpacecraftObject::dropTimeWithoutMoving()
+{
+	timeWithoutMoving = 0.0f;
 }
 
 void SpacecraftObject::setRocketStartVelocity(glm::vec2 vel)
@@ -519,6 +537,11 @@ int SpacecraftObject::getRocketFreeIndex()
 int SpacecraftObject::getCoins()
 {
 	return coins;
+}
+
+float SpacecraftObject::getTimeWithoutMoving()
+{
+	return timeWithoutMoving;
 }
 
 void SpacecraftObject::makeCollision(GameObject* obj)
@@ -615,13 +638,16 @@ void SpacecraftObject::spawnBlackHole()
 {
 	if (!pBlackHole || !blackHolePortal)
 		return;
-	pBlackHole->hideFromLevel(false);
-	pBlackHole->setParentObject(NULL);
-	pBlackHole->Position = glm::vec2(this->Position.x + this->Size.x / 2 - pBlackHole->Size.x / 2,
-		this->Position.y - pBlackHole->Size.y - 50.0f);
-	pBlackHole->startSelfDestroying(true);
-	pBlackHole = NULL;
-	blackHolePortal = false;
+
+	BlackHoleObject* newBlackHole = (BlackHoleObject*)pBlackHole->clone();
+
+	//pBlackHole->hideFromLevel(false);
+	newBlackHole->setParentObject(NULL);
+	newBlackHole->Position = glm::vec2(this->Position.x + this->Size.x / 2 - newBlackHole->Size.x / 2,
+		this->Position.y - newBlackHole->Size.y - 50.0f);
+	newBlackHole->startSelfDestroying(true);
+	//pBlackHole = NULL;
+	setBlackHolePortal(false);
 }
 
 void SpacecraftObject::spawnIonWeapon()

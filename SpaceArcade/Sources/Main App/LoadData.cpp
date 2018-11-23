@@ -18,6 +18,7 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//SpaceShip.png", "spacecraft", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//SpaceShipEnemy.png", "spacecraftEnemy", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//SpaceShipBoss.png", "spacecraftBoss", useGammaCorrection, &gameObjectsParams);
+	res_manager->LoadTexture("Images//SpaceShipBoss2.png", "spacecraftBoss2", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//laser_ray.png", "laserRayBlue", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//laser_rayEnemy.png", "laserRayRed", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//asteroid.png", "asteroid", useGammaCorrection, &gameObjectsParams);
@@ -130,14 +131,17 @@ void MainApp::loadShaders()
 
 	res_manager->LoadTexture("Images//Interface//healthBar.png", "healthBar", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//energyBar.png", "energyBar", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//enemyHealthBar.png", "enemyHealthBar", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//rocketContent.png", "rocketContent", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//rocketContentFilled.png", "rocketFilledContent", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//barFrame.png", "barFrame", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//enemyBarFrame.png", "enemyBarFrame", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//rocketFrame.png", "rocketFrame", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//healthCaption.png", "healthCaption", false);
 	res_manager->LoadTexture("Images//Interface//energyCaption.png", "energyCaption", false);
 	res_manager->LoadTexture("Images//Interface//rocketFireCaption.png", "rocketFireCaption", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//rocketCreateCaption.png", "rocketCreateCaption", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//deviceActivateCaption.png", "deviceActivateCaption", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//pauseButton.png", "pauseButton", false);
 	res_manager->LoadTexture("Images//Interface//pauseButtonHovered.png", "pauseButtonHovered", false);
 	res_manager->LoadTexture("Images//Interface//pauseButtonPressed.png", "pauseButtonPressed", false);
