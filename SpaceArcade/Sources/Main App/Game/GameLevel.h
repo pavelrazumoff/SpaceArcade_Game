@@ -55,6 +55,7 @@ public:
 	void									setPlayerRestrictionHeight(float height);
 	void									setUseInstancing(int object_type, bool use);
 	void									setInstancesTransforms(int object_type, glm::mat4* transforms, int size);
+	void									configureInstancedArray(int object_type, GLuint &buffer);
 	void									setSoundEnginePointer(ISoundEngine* soundEngine);
 	void									addScore(int score);
 

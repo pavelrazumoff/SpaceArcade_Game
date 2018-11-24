@@ -517,8 +517,13 @@ void StartLevelBehaviour::updateDebrisMode(float delta)
 	if (numOfDebris == 0)
 	{
 		// change to the next level mode.
-		levelMode++;
-		blockUserInput();
+		if (!levelData.finalBossWasDefeated)
+		{
+			levelMode++;
+			blockUserInput();
+		}
+		else
+			levelMode = StartLevelMode::End;
 	}
 }
 
@@ -1088,7 +1093,7 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 			generators[j]->setExplosionTime(1.0f);
 			generators[j]->setExplosionSprite(pResourceManager->GetTexture("explosion"));
 			generators[j]->setUsePhysics(true);
-			generators[j]->setObjectType(ObjectTypes::Basic);
+			generators[j]->setObjectType(ObjectTypes::Generator);
 			generators[j]->setExplosionSoundName("ExplosionEffect2");
 			generators[j]->setScoreContribution(15);
 
@@ -1226,6 +1231,7 @@ void StartLevelBehaviour::spawnCoinWithObject(GameObject* obj, int numOfCoins)
 	for (int i = 0; i < numOfCoins; ++i)
 	{
 		ImprovementBoxObject* coin = new ImprovementBoxObject();
+		coin->setObjectType(ObjectTypes::Coin);
 
 		coin->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(25.0f, 25.0f), pResourceManager->GetTexture("coin"),
 			glm::vec2(rand() % (20 + 1) - 20, rand() % (170 - 60 + 1) + 60));
@@ -1311,6 +1317,7 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	case ObjectTypes::BlastWave:
 	case ObjectTypes::ElectricShock:
 	case ObjectTypes::ImprovementBox:
+	case ObjectTypes::Coin:
 	case ObjectTypes::EnergyBarrier:
 	case ObjectTypes::None:
 	case ObjectTypes::BlackHole:
@@ -1323,6 +1330,7 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	switch (obj1->getObjectType())
 	{
 	case ObjectTypes::Basic:
+	case ObjectTypes::Generator:
 		return true;
 		break;
 	case ObjectTypes::LaserRay:
@@ -1366,6 +1374,7 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 			return false;
 		break;
 	case ObjectTypes::ImprovementBox:
+	case ObjectTypes::Coin:
 		if (obj2->getObjectType() == ObjectTypes::SpaceCraft)
 			return true;
 		else

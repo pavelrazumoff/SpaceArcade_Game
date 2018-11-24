@@ -25,6 +25,8 @@ void GameLevel::startLevel()
 {
 	levelStatus = LevelStatus::Playing;
 	setUseInstancing(ObjectTypes::Meteorite, true);
+	setUseInstancing(ObjectTypes::Coin, true);
+	setUseInstancing(ObjectTypes::Generator, true);
 	setUseInstancing(ObjectTypes::LaserRay, false);
 	setUseInstancing(ObjectTypes::SpaceCraft, false);
 	setUseInstancing(ObjectTypes::Basic, false);
@@ -183,8 +185,14 @@ void GameLevel::draw()
 	// first we have to draw all instanced objects (one draw call for every type).
 	for (auto it = instancedObjects.begin(); it != instancedObjects.end(); ++it)
 	{
-		if(it->second.size() > 0)
+		if (it->second.size() > 0)
+		{
+			GLuint buffer;
+			configureInstancedArray(it->first, buffer);
 			it->second[0]->draw(true, it->second.size());
+
+			glDeleteBuffers(1, &buffer);
+		}
 	}
 
 	// second draw all normal objects as usual.
@@ -306,10 +314,8 @@ void GameLevel::doCollisions()
 				if (objects[i] == objects[currentIndex])
 					continue;
 
-				// optimize for checking improvement boxes for collision only with player.
-				if (dynamic_cast<ImprovementBoxObject*>(objects[i]) && objects[currentIndex]->isNonPlayerObject())
-					continue;
-				if (objects[i]->isNonPlayerObject() && dynamic_cast<ImprovementBoxObject*>(objects[currentIndex]))
+				if (!behaviour->checkForCollisionAddiction(objects[i], objects[currentIndex]) &&
+					!behaviour->checkForCollisionAddiction(objects[currentIndex], objects[i]))
 					continue;
 
 				auto it = collidedList.find(objects[currentIndex]);
@@ -451,7 +457,10 @@ void GameLevel::setInstancesTransforms(int object_type, glm::mat4* transforms, i
 	}
 
 	objectsMatrices[object_type] = transforms;
+}
 
+void GameLevel::configureInstancedArray(int object_type, GLuint &buffer)
+{
 	// if there is no current type in types array or there is no objects of this type, return.
 	auto it = typeObjects.find(object_type);
 	if (it == typeObjects.end() || it->second.size() == 0)
@@ -459,10 +468,10 @@ void GameLevel::setInstancesTransforms(int object_type, glm::mat4* transforms, i
 
 	// configure instanced array
 	// -------------------------
-	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, size * sizeof(glm::mat4), &transforms[0], GL_STATIC_DRAW);
+
+	glBufferData(GL_ARRAY_BUFFER, instancedObjects[object_type].size() * sizeof(glm::mat4), &objectsMatrices[object_type][0], GL_STATIC_DRAW);
 
 	glBindVertexArray(renderer->getVAO());
 

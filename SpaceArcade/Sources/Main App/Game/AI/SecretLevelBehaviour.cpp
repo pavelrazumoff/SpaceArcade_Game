@@ -330,6 +330,7 @@ bool SecretLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObje
 	case ObjectTypes::BlastWave:
 	case ObjectTypes::ElectricShock:
 	case ObjectTypes::ImprovementBox:
+	case ObjectTypes::Coin:
 	case ObjectTypes::EnergyBarrier:
 	case ObjectTypes::None:
 	case ObjectTypes::BlackHole:
@@ -385,6 +386,7 @@ bool SecretLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObje
 			return false;
 		break;
 	case ObjectTypes::ImprovementBox:
+	case ObjectTypes::Coin:
 		if (obj2->getObjectType() == ObjectTypes::SpaceCraft)
 			return true;
 		else
