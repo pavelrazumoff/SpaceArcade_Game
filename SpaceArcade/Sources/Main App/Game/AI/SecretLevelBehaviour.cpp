@@ -34,6 +34,8 @@ void SecretLevelBehaviour::startBehaviour()
 
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	playerCraft->Position = glm::vec2(screenDimensions.x / 2 - playerCraft->Size.x / 2, screenDimensions.y + 50);
+
+	levelMusic = pLevel->playSound("BackgroundSound2", true);
 }
 
 void SecretLevelBehaviour::pauseBehaviour()
@@ -84,6 +86,11 @@ void SecretLevelBehaviour::resetBehaviour()
 
 	if (updateLevelIterationCallback)
 		updateLevelIterationCallback();
+}
+
+void SecretLevelBehaviour::restartLevelMusic()
+{
+	levelMusic = pLevel->playSound("BackgroundSound2", true);
 }
 
 void SecretLevelBehaviour::update(float delta)
@@ -454,6 +461,9 @@ void SecretLevelBehaviour::teleport(GameObject* object)
 
 	object->setParentObject(NULL);
 	pSpaceStation->setSpaceCraft(NULL);
+
+	levelMusic->stop();
+
 	if (teleportPlayerCallback)
 		teleportPlayerCallback(object, pMainBehaviour);
 }

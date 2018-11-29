@@ -105,6 +105,11 @@ void blackHolePortalChanged(bool value)
 	app.updateDeviceActivization(value);
 }
 
+void ionWeaponChanged(bool value)
+{
+	app.updateIonWeaponActivization(value);
+}
+
 void coinsChanged(int coins)
 {
 	app.updateCoins(coins);

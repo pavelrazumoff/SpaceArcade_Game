@@ -26,7 +26,6 @@ void GameLevel::startLevel()
 	levelStatus = LevelStatus::Playing;
 	setUseInstancing(ObjectTypes::Meteorite, true);
 	setUseInstancing(ObjectTypes::Coin, true);
-	setUseInstancing(ObjectTypes::Generator, true);
 	setUseInstancing(ObjectTypes::LaserRay, false);
 	setUseInstancing(ObjectTypes::SpaceCraft, false);
 	setUseInstancing(ObjectTypes::Basic, false);

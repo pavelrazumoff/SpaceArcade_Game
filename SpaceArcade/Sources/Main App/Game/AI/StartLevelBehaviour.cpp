@@ -43,10 +43,12 @@ void StartLevelBehaviour::startBehaviour()
 	pPlayerCraft->setEnergyChangedCallback(energyBarChanged);
 	pPlayerCraft->setRocketIntegrityChangedCallback(rocketIntegrityChanged);
 	pPlayerCraft->setBlackHolePortalChangedCallback(blackHolePortalChanged);
+	pPlayerCraft->setIonWeaponActivateChangedCallback(ionWeaponChanged);
 	pPlayerCraft->setCoinsChangedCallback(coinsChanged);
 	pPlayerCraft->setNonPlayerObject(false);
 	pPlayerCraft->setLaserSoundName("LaserSound");
 	pPlayerCraft->setRocketSoundName("RocketSound");
+	pPlayerCraft->setIonChargeSoundName("IonChargeEffect");
 	pPlayerCraft->setExplosionSoundName("ExplosionEffect");
 	pPlayerCraft->setRocketStartVelocity(glm::vec2(0.0f, -450.0f * screenRatio.y));
 	//pPlayerCraft->setBlackHolePortal(true);
@@ -78,13 +80,14 @@ void StartLevelBehaviour::startBehaviour()
 	pPlayerCraft->setBlackHole(blackHole);
 
 	GameObject* ionWeapon = new GameObject();
+	ionWeapon->setObjectType(ObjectTypes::Basic);
 	ionWeapon->init(pLevel, glm::vec2(0, 0), glm::vec2(46, 47), pResourceManager->GetTexture("ionWeapon"), glm::vec2(0.0f, 0.0f), true);
 
 	pPlayerCraft->setIonWeapon(ionWeapon);
 
 	GameObject* ionCharge = new GameObject();
-	ionCharge->init(pLevel, glm::vec2(0, 0), glm::vec2(24, 47), pResourceManager->GetTexture("ionCharge"), glm::vec2(0.0f, -300.0f * screenRatio.y), false);
 	ionCharge->setObjectType(ObjectTypes::IonCharge);
+	ionCharge->init(pLevel, glm::vec2(0, 0), glm::vec2(24, 47), pResourceManager->GetTexture("ionCharge"), glm::vec2(0.0f, -300.0f * screenRatio.y), false);
 	ionCharge->setIsDamagingObject(true);
 	ionCharge->setDamage(100.0f);
 	ionCharge->setMaxHealth(1.0f);
@@ -184,6 +187,11 @@ void StartLevelBehaviour::resetBehaviour()
 
 	if (updateLevelIterationCallback)
 		updateLevelIterationCallback();
+}
+
+void StartLevelBehaviour::restartLevelMusic()
+{
+	levelMusic = pLevel->playSound("BackgroundSound", true);
 }
 
 void StartLevelBehaviour::update(float delta)
@@ -924,13 +932,13 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 
 	GameObject* energyShield = new GameObject();
 
-	energyShield->init(pLevel, glm::vec2(0, 0), glm::vec2(289, 249), pResourceManager->GetTexture("energyShield"), glm::vec2(0.0f, 0.0f));
+	energyShield->setObjectType(ObjectTypes::EnergyShield);
 	energyShield->RelativePosition = glm::vec2(-35, -47);
 	energyShield->setUseAnimation(true);
 	energyShield->setAnimationDuration(0.5f);
 	energyShield->setUseBackAndForthAnimation(true);
-	energyShield->setObjectType(ObjectTypes::EnergyShield);
 	energyShield->setScoreContribution(20);
+	energyShield->init(pLevel, glm::vec2(0, 0), glm::vec2(289, 249), pResourceManager->GetTexture("energyShield"), glm::vec2(0.0f, 0.0f));
 
 	bossSpaceCraft->setEnergyShield(energyShield);
 
@@ -1093,7 +1101,7 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 			generators[j]->setExplosionTime(1.0f);
 			generators[j]->setExplosionSprite(pResourceManager->GetTexture("explosion"));
 			generators[j]->setUsePhysics(true);
-			generators[j]->setObjectType(ObjectTypes::Generator);
+			generators[j]->setObjectType(ObjectTypes::Basic);
 			generators[j]->setExplosionSoundName("ExplosionEffect2");
 			generators[j]->setScoreContribution(15);
 
@@ -1264,7 +1272,7 @@ void StartLevelBehaviour::iterateLevel()
 		levelData.meteorRandomSeed++;
 
 	// health kits.
-	if (levelIteration % 4 == 0)
+	if (levelIteration % 6 == 0)
 		levelData.maxNumOfHealthKits++;
 
 	// energy barriers.
@@ -1330,7 +1338,6 @@ bool StartLevelBehaviour::checkForCollisionAddiction(GameObject* obj1, GameObjec
 	switch (obj1->getObjectType())
 	{
 	case ObjectTypes::Basic:
-	case ObjectTypes::Generator:
 		return true;
 		break;
 	case ObjectTypes::LaserRay:
@@ -1439,6 +1446,9 @@ void StartLevelBehaviour::teleport(GameObject* object)
 	// here we have to put selected object into another level.
 	if (!pSecretBehaviour)
 		return;
+
+	levelMusic->stop();
+
 	if (teleportPlayerCallback)
 		teleportPlayerCallback(object, pSecretBehaviour);
 }

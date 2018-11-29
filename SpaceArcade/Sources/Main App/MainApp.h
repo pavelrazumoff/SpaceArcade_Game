@@ -107,6 +107,7 @@ public:
 	void updateRocketIntegrity(int integrity, int maxIntegrity);
 	void updateScore(int score);
 	void updateDeviceActivization(bool activate);
+	void updateIonWeaponActivization(bool activate);
 	void updateCoins(int coins);
 	void enableEnemyBar(bool enable);
 
@@ -213,6 +214,7 @@ private:
 	GUITextBox* pLevelBox = NULL;
 	GUITextBox* pCoinsBox = NULL;
 	GUIObject* pActivateDeviceCaption = NULL;
+	GUIObject* pIonFireCaption = NULL;
 
 	std::vector<GUILayout*> dialogueTextLayouts;
 };

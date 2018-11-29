@@ -403,6 +403,11 @@ void SpacecraftObject::setBlackHolePortalChangedCallback(void(*actionCallback)(b
 	blackHolePortalChanged = actionCallback;
 }
 
+void SpacecraftObject::setIonWeaponActivateChangedCallback(void(*actionCallback)(bool))
+{
+	ionWeaponActivateChanged = actionCallback;
+}
+
 void SpacecraftObject::setCoinsChangedCallback(void(*actionCallback)(int))
 {
 	coinsChanged = actionCallback;
@@ -493,6 +498,11 @@ void SpacecraftObject::setLaserSoundName(std::string name)
 void SpacecraftObject::setRocketSoundName(std::string name)
 {
 	rocketSoundName = name;
+}
+
+void SpacecraftObject::setIonChargeSoundName(std::string name)
+{
+	ionChargeSoundName = name;
 }
 
 float SpacecraftObject::getMaxEnergy()
@@ -660,6 +670,8 @@ void SpacecraftObject::spawnIonWeapon()
 	pIonWeapon->RelativePosition = glm::vec2(this->Size.x / 2 - pIonWeapon->Size.x / 2, 5.0f);
 	attachNewObject(pIonWeapon);
 	pIonWeapon = NULL;
+
+	ionWeaponActivateChanged(true);
 }
 
 void SpacecraftObject::spawnIonCharge()
@@ -678,6 +690,9 @@ void SpacecraftObject::spawnIonCharge()
 	ion_charges.push_back(pIonCharge->clone());
 	ion_charges.back()->Position = glm::vec2(Position.x + Size.x / 2 - pIonCharge->Size.x / 2, Position.y);
 	ion_charges.back()->InitialRotation = this->InitialRotation;
+
+	if (ionChargeSoundName.compare(""))
+		pLevel->playSound(ionChargeSoundName, false);
 }
 
 void SpacecraftObject::constructRocket()

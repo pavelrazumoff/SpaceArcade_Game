@@ -44,6 +44,8 @@ public:
 	virtual void finishBehaviour();
 	virtual void resetBehaviour();
 
+	virtual void restartLevelMusic();
+
 	virtual void clear();
 
 	// only one of these functions is called in one time.
@@ -81,7 +83,6 @@ protected:
 	SpacecraftObject* playerCraft = NULL;
 	SpaceStationObject* pSpaceStation = NULL;
 	std::vector<AIController*> aiControllers;
-	ISound* levelMusic = NULL;
 	LevelBehaviour* pMainBehaviour = NULL;
 
 	// level's data.

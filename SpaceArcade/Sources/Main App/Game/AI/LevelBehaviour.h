@@ -26,6 +26,8 @@ public:
 	virtual void finishBehaviour();
 	virtual void resetBehaviour();
 
+	virtual void restartLevelMusic();
+
 	virtual void clear();
 
 	void setLevel(GameLevel* level);
@@ -53,6 +55,7 @@ protected:
 	GameObject* playerObject = NULL;
 	ResourceManager* pResourceManager = NULL;
 	std::vector<AIController*> complexControllers;
+	ISound* levelMusic = NULL;
 
 	// false - all user input is blocked.
 	bool userInput = true;

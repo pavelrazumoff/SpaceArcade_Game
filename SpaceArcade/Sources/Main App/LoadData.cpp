@@ -90,9 +90,11 @@ void MainApp::loadShaders()
 
 	// sounds.
 	res_manager->addSound("Sounds//sound1_0.mp3", "BackgroundSound");
+	res_manager->addSound("Sounds//sound1_1.wav", "BackgroundSound2");
 	res_manager->addSound("Sounds//laser_effect.mp3", "LaserSound");
 	res_manager->addSound("Sounds//rocketFire_effect.wav", "RocketSound");
 	res_manager->addSound("Sounds//laser_effectEnemy.mp3", "LaserEnemySound");
+	res_manager->addSound("Sounds//ionCharge_effect.wav", "IonChargeEffect");
 	res_manager->addSound("Sounds//explosion_effect1_0.mp3", "ExplosionEffect");
 	res_manager->addSound("Sounds//explosion_effect1_1.mp3", "ExplosionEffect2");
 	res_manager->addSound("Sounds//electricExplosion_effect.mp3", "ElectricExplosionEffect");
@@ -142,6 +144,7 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//Interface//rocketFireCaption.png", "rocketFireCaption", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//rocketCreateCaption.png", "rocketCreateCaption", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//deviceActivateCaption.png", "deviceActivateCaption", false, &gameObjectsParams);
+	res_manager->LoadTexture("Images//Interface//ionFireCaption.png", "ionFireCaption", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//pauseButton.png", "pauseButton", false);
 	res_manager->LoadTexture("Images//Interface//pauseButtonHovered.png", "pauseButtonHovered", false);
 	res_manager->LoadTexture("Images//Interface//pauseButtonPressed.png", "pauseButtonPressed", false);

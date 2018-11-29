@@ -21,7 +21,6 @@ enum ObjectTypes
 	SpaceCraft,
 	BossSpaceCraft,
 	EnergyBarrier,
-	Generator,
 	ElectricShock,
 	EnergyShield,
 	BlastWave,

@@ -51,6 +51,10 @@ void LevelBehaviour::resetBehaviour()
 	levelIteration = 0;
 }
 
+void LevelBehaviour::restartLevelMusic()
+{
+}
+
 void LevelBehaviour::update(float delta)
 {
 	

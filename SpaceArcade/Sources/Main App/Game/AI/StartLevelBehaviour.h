@@ -106,6 +106,8 @@ public:
 	virtual void finishBehaviour();
 	virtual void resetBehaviour();
 
+	virtual void restartLevelMusic();
+
 	virtual void clear();
 
 	// only one of these functions is called in one time.
@@ -157,7 +159,6 @@ public:
 protected:
 	SpacecraftObject* playerCraft = NULL;
 	std::vector<AIController*> aiControllers;
-	ISound* levelMusic = NULL;
 	LevelBehaviour* pSecretBehaviour = NULL;
 	BossSpacecraftObject* pFinalBoss = NULL;
 

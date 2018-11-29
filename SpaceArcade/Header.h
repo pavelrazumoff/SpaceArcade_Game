@@ -61,6 +61,7 @@ void energyBarChanged(float usedEnergy, float maxEnergy);
 void enemyHealthBarChanged(float health, float initialHealth);
 void rocketIntegrityChanged(int integrity, int maxIntegrity);
 void blackHolePortalChanged(bool value);
+void ionWeaponChanged(bool value);
 void coinsChanged(int coins);
 
 void showStationDialogue();

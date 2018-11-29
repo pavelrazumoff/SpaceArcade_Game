@@ -73,7 +73,7 @@ void MainApp::init()
 
 	renderer.init(res_manager->GetShader("Sprite"), screenWidth, screenHeight);
 
-	merchPrices[MerchType::IonWeapon] = 3000;
+	merchPrices[MerchType::IonWeapon] = 2200;
 	merchPrices[MerchType::HealthFill] = 200;
 
 	initGUI();
@@ -185,8 +185,16 @@ void MainApp::updateDeviceActivization(bool activate)
 {
 	pActivateDeviceCaption->setVisible(activate);
 	renderer.resize(screenWidth, screenHeight);
-	for (int i = 0; i < gui_objects[currentPage].size(); ++i)
-		gui_objects[currentPage][i]->resize();
+	for (int i = 0; i < gui_objects[PageType::Game].size(); ++i)
+		gui_objects[PageType::Game][i]->resize();
+}
+
+void MainApp::updateIonWeaponActivization(bool activate)
+{
+	pIonFireCaption->setVisible(activate);
+	renderer.resize(screenWidth, screenHeight);
+	for (int i = 0; i < gui_objects[PageType::Game].size(); ++i)
+		gui_objects[PageType::Game][i]->resize();
 }
 
 void MainApp::updateCoins(int coins)
@@ -461,6 +469,8 @@ void MainApp::teleportPlayer(GameObject* obj, LevelBehaviour* behaviour)
 			playerCraft->Position = glm::vec2(screenDimensions.x / 2 - playerCraft->Size.x / 2, screenDimensions.y - 50);
 			playerCraft->Velocity = glm::vec2(0.0f, 0.0f);
 			playerCraft->applyImpulse(0.0f);
+
+			behaviour->restartLevelMusic();
 		}
 }
 

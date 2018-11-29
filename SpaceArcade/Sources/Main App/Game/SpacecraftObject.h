@@ -39,6 +39,7 @@ public:
 	void setEnergyChangedCallback(void(*actionCallback)(float, float));
 	void setRocketIntegrityChangedCallback(void(*actionCallback)(int, int));
 	void setBlackHolePortalChangedCallback(void(*actionCallback)(bool));
+	void setIonWeaponActivateChangedCallback(void(*actionCallback)(bool));
 	void setCoinsChangedCallback(void(*actionCallback)(int));
 
 	void setControlVelocityByRotation(bool control);
@@ -52,6 +53,7 @@ public:
 	void setRocketRelativePosition(glm::vec2 pos, int rocket_index);
 	void setLaserSoundName(std::string name);
 	void setRocketSoundName(std::string name);
+	void setIonChargeSoundName(std::string name);
 
 	float getMaxEnergy();
 	float getUsedEnergy();
@@ -86,6 +88,7 @@ protected:
 
 	std::string laserSoundName;
 	std::string rocketSoundName;
+	std::string ionChargeSoundName;
 
 	float maxEnergy = 100.0f;
 	float usedEnergy = 0.0f;
@@ -99,6 +102,8 @@ protected:
 
 	bool blackHolePortal = false;
 	void(*blackHolePortalChanged)(bool) = NULL;
+
+	void(*ionWeaponActivateChanged)(bool) = NULL;
 
 	int coins = 0;
 	void(*coinsChanged)(int) = NULL;

@@ -638,9 +638,9 @@ void MainApp::initGUI()
 		pRocketBars[i]->setClipSpace(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f), true);
 	}
 
-	std::string rocketTexes[] = { "rocketFireCaption", "rocketCreateCaption", "deviceActivateCaption" };
+	std::string rocketTexes[] = { "rocketFireCaption", "rocketCreateCaption", "deviceActivateCaption", "ionFireCaption" };
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		GUIObject* rocketCaption = new GUIObject(&renderer);
 		rocketsLayout->addChild(rocketCaption);
@@ -653,6 +653,12 @@ void MainApp::initGUI()
 		{
 			rocketCaption->setVisible(false);
 			pActivateDeviceCaption = rocketCaption;
+		}
+
+		if (i == 3)
+		{
+			rocketCaption->setVisible(false);
+			pIonFireCaption = rocketCaption;
 		}
 	}
 
@@ -1003,6 +1009,7 @@ void MainApp::initScene()
 	base_level->addSound("LaserSound", res_manager->getSoundPath("LaserSound"));
 	base_level->addSound("RocketSound", res_manager->getSoundPath("RocketSound"));
 	base_level->addSound("LaserEnemySound", res_manager->getSoundPath("LaserEnemySound"));
+	base_level->addSound("IonChargeEffect", res_manager->getSoundPath("IonChargeEffect"));
 	base_level->addSound("ExplosionEffect", res_manager->getSoundPath("ExplosionEffect"));
 	base_level->addSound("ExplosionEffect2", res_manager->getSoundPath("ExplosionEffect2"));
 	base_level->addSound("ElectricExplosionEffect", res_manager->getSoundPath("ElectricExplosionEffect"));
@@ -1021,6 +1028,7 @@ void MainApp::initScene()
 	secret_level->setPlayerRestrictionHeight(screenHeight / 2.5f);
 	secret_level->setSoundEnginePointer(res_manager->getSoundEngine());
 	secret_level->setScoreChangedCallback(scoreChanged);
+	secret_level->addSound("BackgroundSound2", res_manager->getSoundPath("BackgroundSound2"));
 
 	SecretLevelBehaviour* secretBehaviour = new SecretLevelBehaviour(secret_level, res_manager);
 	secretBehaviour->setTeleportPlayerCallback(teleportObject);
