@@ -1,4 +1,9 @@
 #pragma once
+/*
+	GameObject.h
+	This class represents basic game object with many opportunities.
+*/
+
 #include "../../Miscellaneous/SpriteRenderer.h"
 
 // Container object for holding all state relevant for a single
@@ -6,12 +11,14 @@
 class GameLevel;
 class AIController;
 
+// holds notification code, that this object can send to his parent.
 enum NotifyCode
 {
 	Destroyed = 0,
 	BlastFinished
 };
 
+// all object types, that can be presented in this game.
 enum ObjectTypes
 {
 	None = 0,
@@ -151,31 +158,35 @@ public:
 protected:
 	GameLevel* pLevel = NULL;
 	GameObject* parentObject = NULL;
+	// pointer to ai controller, that controls this object behaviour.
 	AIController* aiController = NULL;
 
+	// holds all attached objects, that can be used as phycial object improvement (rockets for example).
 	std::vector<GameObject*> attachedObjects;
+	// holds all objects, that have to be rendered on top or behind this object.
 	std::vector<GameObject*> attachedOnTop;
 	std::vector<GameObject*> attachedOnBottom;
 	std::vector<GameObject*> postDeathObjects;		// spawned after death of this object (when readyForDeath = true).
 
+	// holds this object world matrix and explosion effect matrix.
 	glm::mat4 model;
 	glm::mat4 explosionModel;
 
 	int objectType = ObjectTypes::None;
 	bool visible = true;
 	bool hidden = false;
-	bool damagingObject = true;
-	float damage = 1.0f;
-	float health = 100.0f;
-	float maxHealth = 100.0f;
-	float explosionTime = 0.0f;
+	bool damagingObject = true;				// whether this object can harm another object or not.
+	float damage = 1.0f;					// damage, that can produce this object.
+	float health = 100.0f;					// current object health.
+	float maxHealth = 100.0f;				// maximum object's health.
+	float explosionTime = 0.0f;				// if this <= 0.0f, object gets destroyed momentally.
 	float selfDestroyTime = 0.0f;
 	bool selfDestroying = false;
-	bool nonPlayerObject = true;
+	bool nonPlayerObject = true;			// false - this object is player controlled.
 	bool usePhysics = false;
 	bool collisionCheck = true;
-	bool controlVelocityByRot = false;
-	bool damageAsAttachment = false;
+	bool controlVelocityByRot = false;		// true - velocity vector is pointed in rotation direction.
+	bool damageAsAttachment = false;		// true - if this object is attached to another object, it will damage other objects with its parent.
 
 	bool useAnimation = false;
 	bool useBackAndForthAnim = false;
@@ -183,19 +194,20 @@ protected:
 	int currentAnimationFrame = 0;
 	float animationDuration = 0.0f;
 	float animationTime = 0.0f;
-	float animationTimeStep = 0.0f;
+	float animationTimeStep = 0.0f;			// holds time, that needed to rendering one animation frame.	
 
 	int currentExplosionFrame = 0;
 	float explosionTimeStep = 0.0f;
-	bool readyForDeath = false;
-	bool useExplosionSize = false;
+	bool readyForDeath = false;				// true - this object will destroy momentally in the next game iteration.		
 	std::string explosionSoundName;
 
-	float impulseFactor = 200;
-	float appliedImpulse = 0;
-	bool freeImpulse = false;
+	// this is applied to current object's velocity.
+	float impulseFactor = 200;				// holds force, with which this object will collide to another object.
+	float appliedImpulse = 0;				// holds applied force after colliding with another object.
+	bool freeImpulse = false;				// false - it will disable player's input until applied impulse will dissapear.
 
-	int scoreContribution = 10;
+	int scoreContribution = 10;				// holds score points, that player will get after destroying this object.
 
+	// calls after health was changed.
 	void(*healthChanged)(float, float) = NULL;
 };

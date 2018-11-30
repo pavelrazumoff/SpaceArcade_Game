@@ -1,22 +1,26 @@
 #pragma once
 /*
-	StartLevelBehaviour.h
-	This class is derived from LevelBehaviour. It presents basic level
-	with alternating level modes one by one. Base level objects here
-	are playerCraft, enemyCraft and meteorites.
+	SecretLevelBehaviour.h
+	This class is derived from LevelBehaviour. It presents secret level
+	with alternating level modes one by one. This level is presented to
+	give player an opportunity to get ion weapon from space station object
+	to be able to defeat final boss enemy.
 */
 
 #include "LevelBehaviour.h"
 #include "../SpaceStationObject.h"
 
+// enumeration of different level modes.
 enum SecretLevelMode
 {
 	SecretIntroducing = 0,
 	BlackHolesFighting,
 	SpaceStationIntroducing,
-	SecretEnd
+	SecretEnd,
+	SecretWaitForLeaving
 };
 
+// holds several level data to control level complexity.
 struct SecretLevelData
 {
 	// player's data.
@@ -75,20 +79,13 @@ public:
 	virtual void teleport(GameObject* object);
 	void finishStationDialogue();
 
-	void setFinishLevelCallback(void(*actionCallback)(void));
-	void setIterateLevelCallback(void(*actionCallback)(void));
-	void setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*));
-
 protected:
 	SpacecraftObject* playerCraft = NULL;
 	SpaceStationObject* pSpaceStation = NULL;
 	std::vector<AIController*> aiControllers;
+	// pointer to the main behaviour (using in teleportation).
 	LevelBehaviour* pMainBehaviour = NULL;
 
 	// level's data.
 	SecretLevelData levelData;
-
-	void(*finishLevelCallback)(void) = NULL;
-	void(*updateLevelIterationCallback)(void) = NULL;
-	void(*teleportPlayerCallback)(GameObject*, LevelBehaviour*) = NULL;
 };

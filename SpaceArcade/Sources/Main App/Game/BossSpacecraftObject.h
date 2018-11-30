@@ -1,4 +1,12 @@
 #pragma once
+/*
+	BossSpacecraftObject.h
+	This class represents improved spacecraft object class.
+	It can spawn many lasers in one time. Plus it has opportunity to
+	enable energy shield, that can be destroyed only by specific object types
+	such as rockets or ion charges.
+*/
+
 #include "SpacecraftObject.h"
 
 class BossSpacecraftObject : public SpacecraftObject
@@ -39,5 +47,7 @@ protected:
 
 	// relative laser starting positions.
 	std::vector<glm::vec2>	lasersStartPoints;
+	// this indicates, what laser starting point to use when there is a few energy
+	// to produce all laser rays in current time.
 	int indexOfPrefferedLaserPoint = 0;
 };

@@ -27,9 +27,6 @@ void GUILayout::draw()
 		return;
 
 	GUIObject::draw();
-
-	//for (int i = 0; i < children.size(); ++i)
-	//	children[i]->draw();
 }
 
 void GUILayout::resize(bool useParentResize)
@@ -46,14 +43,17 @@ void GUILayout::resize(bool useParentResize)
 	glm::vec2 screenRatio = renderer->getCurrentScreenDimensions() / renderer->getInitialScreenDimensions();
 	glm::vec4 currentIndents = glm::vec4(indents.x * screenRatio.x, indents.y * screenRatio.y, indents.z * screenRatio.x, indents.w * screenRatio.y);
 	int currentSpace = space;
-	
+
+	// first we have to get current space between layout children according to the current screen dimensions.
 	if (typeLayout == GUILayout_Type::Vertical)
 		currentSpace = space * screenRatio.x; // not screenRatio.y cause this works better.
 	else
 		if (typeLayout == GUILayout_Type::Horizontal)
 			currentSpace = space * screenRatio.y;
 
+	// holds sum of all fill percentages of every child.
 	int totalFills = 0;
+	// this needs to be able to exclude not visible children from layout children calculation positions and dimensions.
 	int numOfVisibleChildren = 0;
 	for (int i = 0; i < children.size(); ++i)
 		if (children[i]->isVisible())
@@ -64,22 +64,27 @@ void GUILayout::resize(bool useParentResize)
 
 	int shift = 0;
 
+	// second we have to calculate all children sizes according to the new layout dimensions.
 	for (int i = 0; i < children.size(); ++i)
 	{
+		// if this child is invisible, don't take it into account
 		if (!children[i]->isVisible())
 			continue;
 
 		if (typeLayout == GUILayout_Type::Vertical)
 		{
+			// if this child is resizable, set its new size.
 			if (children[i]->getResizable())
 			{
 				float sizeY = (this->Size.y - shift - (currentIndents.y + currentIndents.w + currentSpace * (numOfVisibleChildren - 1))) *
 					children[i]->getLayoutFillPercent() / totalFills;
 
+				// if this child doesn't use size ratio, calculate simple sizeX.
 				if (!children[i]->isUseSizeRatio())
 				{
 					children[i]->setSize(glm::vec2(this->Size.x - (currentIndents.x + currentIndents.z), sizeY));
 
+					// if there was some size restrictions with this child, add its size into account and exclude this child from percentage sum.
 					if (sizeY != children[i]->getSize().y)
 					{
 						shift += children[i]->getSize().y;
@@ -88,22 +93,26 @@ void GUILayout::resize(bool useParentResize)
 				}
 				else
 				{
-					//float xSize = this->Size.x - (currentIndents.x + currentIndents.z);
+					// if this child uses size ratio, calculate sizeX according to it.
 					float sizeX = this->Size.y * children[i]->getSizeRatio();
+					// if sizeX is out of layout bounds, correct it.
 					if (sizeX > this->Size.x - (currentIndents.x + currentIndents.z))
 					{
+						// recalculate sizeY according to new sizeX.
 						sizeX = this->Size.x - (currentIndents.x + currentIndents.z);
 						sizeY = sizeX / children[i]->getSizeRatio();
 					}
 
 					children[i]->setSize(glm::vec2(sizeX, sizeY));
 
+					// don't take this child into percentage account.
 					shift += children[i]->getSize().y;
 					totalFills -= children[i]->getLayoutFillPercent();
 				}
 			}
 			else
 			{
+				// don't take this child into percentage account.
 				shift += children[i]->getSize().y;
 				totalFills -= children[i]->getLayoutFillPercent();
 			}
@@ -127,7 +136,6 @@ void GUILayout::resize(bool useParentResize)
 				}
 				else
 				{
-					//float ySize = this->Size.y - (currentIndents.y + currentIndents.w);
 					float sizeY = sizeX / children[i]->getSizeRatio();
 					if (sizeY > this->Size.y - (currentIndents.y + currentIndents.w))
 					{
@@ -151,13 +159,17 @@ void GUILayout::resize(bool useParentResize)
 
 	shift = 0;
 
+	// third we have to positioning all children on current layout.
 	glm::vec2 layout_center = glm::vec2(this->Position.x + this->Size.x / 2, this->Position.y + this->Size.y / 2);
 	glm::vec2 content_size = glm::vec2(0.0f, 0.0f);
+
+	// calculate content size (it will calculate size for both types of layout, but only one x or y will be used).
 	for (int i = 0; i < children.size(); ++i)
 		if(children[i]->isVisible())
 			content_size += glm::vec2(children[i]->getSize().x + currentSpace, children[i]->getSize().y + currentSpace);
 	content_size -= glm::vec2(currentSpace);
 
+	// positioning all children according to the alignment type.
 	for (int i = 0; i < children.size(); ++i)
 	{
 		if (!children[i]->isVisible())
@@ -188,7 +200,8 @@ void GUILayout::resize(bool useParentResize)
 			shift += children[i]->getSize().x + currentSpace;
 		}
 
-		//if (dynamic_cast<GUILayout*>(children[i]))
+		// after manually calculating every child size, we pointing it that we did this
+		// and this object doesn't need to be recalculated again.
 		children[i]->resize(true);
 	}
 }

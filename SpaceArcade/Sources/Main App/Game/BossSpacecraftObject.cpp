@@ -79,6 +79,7 @@ bool BossSpacecraftObject::notify(GameObject* notifiedObject, NotifyCode code)
 	{
 	case Destroyed:
 	{
+		// when this message was send, we have to manually destroy this child object here.
 		pLevel->removeObject(notifiedObject);
 		if (notifiedObject == energyShield)
 			energyShield = NULL;
@@ -98,6 +99,7 @@ void BossSpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherO
 {
 	SpacecraftObject::makeReaction(difference, otherObj, collisionChecker);
 
+	// if other object was ion charge, disable opportunity to recover some health for a specific time.
 	if (otherObj->getObjectType() == ObjectTypes::IonCharge)
 	{
 		BossShipAIController* bossController = dynamic_cast<BossShipAIController*>(getAIController());
@@ -109,6 +111,8 @@ void BossSpacecraftObject::makeReaction(glm::vec2 difference, GameObject* otherO
 
 void BossSpacecraftObject::spawnLaserRays()
 {
+	// if used energy is less than half of all energy stock, spawn many lasers
+	// else spawn only one.
 	if (maxEnergy - usedEnergy > maxEnergy / 2)
 	{
 		for (int i = 0; i < lasersStartPoints.size(); ++i)
@@ -182,7 +186,6 @@ void BossSpacecraftObject::clear()
 {
 	if (energyShield)
 	{
-		//energyShield->setParentObject(NULL);
 		pLevel->removeObject(energyShield);
 		delete energyShield;
 		energyShield = NULL;

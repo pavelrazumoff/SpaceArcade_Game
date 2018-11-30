@@ -1,4 +1,9 @@
 #pragma once
+/*
+	GUICheckBox.h
+	This class represents gui check box that is derived from button class.
+*/
+
 #include "GUIButton.h"
 
 class GUICheckBox : public GUIButton

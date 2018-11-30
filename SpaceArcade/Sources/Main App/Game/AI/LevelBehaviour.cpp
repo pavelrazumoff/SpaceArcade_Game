@@ -125,6 +125,21 @@ void LevelBehaviour::teleport(GameObject* object)
 	
 }
 
+void LevelBehaviour::setFinishLevelCallback(void(*actionCallback)(void))
+{
+	finishLevelCallback = actionCallback;
+}
+
+void LevelBehaviour::setIterateLevelCallback(void(*actionCallback)(void))
+{
+	updateLevelIterationCallback = actionCallback;
+}
+
+void LevelBehaviour::setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*))
+{
+	teleportPlayerCallback = actionCallback;
+}
+
 void LevelBehaviour::clear()
 {
 	

@@ -1,6 +1,7 @@
 #pragma once
 /*
 	TeamShipAIController.h
+	Controls many controllers behaviours (pawns) in one time.
 */
 
 #include "BasicShipAIController.h"

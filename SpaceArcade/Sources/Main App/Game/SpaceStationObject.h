@@ -1,4 +1,9 @@
 #pragma once
+/*
+	SpaceStationObject.h
+	This class defines space station, that can be used to trade some stuff.
+*/
+
 #include "SpacecraftObject.h"
 
 enum StationState

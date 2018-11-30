@@ -1,4 +1,13 @@
 #pragma once
+/*
+	EnergyBarrierObject.h
+	This class represents energy barrier object that has two generators on the sides of it
+	and lightning charge in the center with animation. To destroy this type of object
+	player has to defeat only one generator, so another will explode.
+	Also, when player is passing through the lightning charge it gets electric shock,
+	that will decrease its health points for a specific time.
+*/
+
 #include "GameObject.h"
 #include "BlastWaveObject.h"
 
@@ -44,6 +53,8 @@ protected:
 
 	std::vector<GameObject*> attachedShockers;
 	std::vector<float> shockersTime;
+	// holds all objects, that got shockers. 
+	// this needs to control, what object already got this and those, who didn't.
 	std::vector<GameObject*> objectsWithShockers;
 
 	bool onceAppears = false;		// false - was off the screen, true - on screen.

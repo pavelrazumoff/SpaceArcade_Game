@@ -3,11 +3,13 @@
 GUITextBox::GUITextBox()
 {
 	color = glm::vec4(0.0f);
+	useClipSpace = true;
 }
 
 GUITextBox::GUITextBox(SpriteRenderer* renderer, ISoundEngine* soundEngine) : GUIObject(renderer, soundEngine)
 {
 	color = glm::vec4(0.0f);
+	useClipSpace = true;
 }
 
 GUITextBox::~GUITextBox()

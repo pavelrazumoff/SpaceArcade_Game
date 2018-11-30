@@ -1,4 +1,10 @@
 #pragma once
+/*
+	GUILayout.h
+	This class represents gui vertical and horizontal layout types with
+	different alignements. It's not perfect layout realization, but it does basic work as it has to.
+*/
+
 #include "GUIObject.h"
 
 enum GUILayout_Type
@@ -48,5 +54,6 @@ private:
 	int space = 0;					// vertical or horizontal space between two adjacent objects.
 	glm::vec4 indents;				// indents on the sides of layout frame.
 
+	// true - this layout dimensions is taken from its parent.
 	bool useParentDimensions = false;
 };

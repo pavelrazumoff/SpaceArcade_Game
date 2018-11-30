@@ -37,6 +37,7 @@ void BossShipAIController::update(float delta)
 
 	followTargetEnemy(delta);
 
+	// if target is null, this ship has to return in its source position.
 	if (!targetEnemy)
 		returnToSourcePosition(delta);
 
@@ -61,6 +62,7 @@ void BossShipAIController::update(float delta)
 			controlledPawn->setHealth(controlledPawn->getHealth() + recoveredHealth * delta);
 	}
 
+	// if health recovery was disabled for a specific time, decrese this time.
 	if(disableHealthRecoveryTimer > 0.0f)
 		disableHealthRecoveryTimer -= delta;
 }

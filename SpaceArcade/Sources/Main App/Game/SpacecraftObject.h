@@ -1,4 +1,9 @@
 #pragma once
+/*
+	SpacecraftObject.h
+	This class defines basic attacking object, that whether can be ai or player controlled.
+*/
+
 #include "GameObject.h"
 #include "BlackHoleObject.h"
 
@@ -92,7 +97,7 @@ protected:
 
 	float maxEnergy = 100.0f;
 	float usedEnergy = 0.0f;
-	bool exceedMaxEnergy = false;
+	bool exceedMaxEnergy = false;				// true - this object can't use energy until it gets restored.
 	void(*energyChanged)(float, float) = NULL;
 
 	int rocketIntegrity = 0;					// 100 - one rocket is construct and can be fired. 3x rockets is max.
@@ -105,8 +110,10 @@ protected:
 
 	void(*ionWeaponActivateChanged)(bool) = NULL;
 
+	// holds all collected coins.
 	int coins = 0;
 	void(*coinsChanged)(int) = NULL;
 
+	// holds the time, while this object is not moving.
 	float timeWithoutMoving = 0.0f;
 };

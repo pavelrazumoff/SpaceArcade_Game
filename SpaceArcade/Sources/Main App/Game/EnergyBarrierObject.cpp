@@ -71,6 +71,7 @@ void EnergyBarrierObject::update(float delta)
 		}
 	}
 
+	// when this object appears, play sound effect. When it goes away from screen, stop it.
 	if (!onceAppears && !isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
 	{
 		onceAppears = true;
@@ -165,6 +166,7 @@ bool EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
 		if (generatorIndex < 0)
 			return false;
 
+		// if some of generators was destroyed, destroy second. 
 		pLevel->removeObject(notifiedObject);
 		generators[generatorIndex] = NULL;
 		delete notifiedObject;
@@ -185,6 +187,8 @@ bool EnergyBarrierObject::notify(GameObject* notifiedObject, NotifyCode code)
 	}
 		break;
 	case NotifyCode::BlastFinished:
+		// sends when explosion blast wave was finished its animation.
+		// so this is the time for destroying this object.
 		readyForDeath = true;
 		break;
 	default:
@@ -234,6 +238,7 @@ void EnergyBarrierObject::setGeneratorSoundName(std::string name)
 
 void EnergyBarrierObject::attachElectricShockToObject(GameObject* obj)
 {
+	// if this object has already got shocker, return.
 	auto it = find(objectsWithShockers.begin(), objectsWithShockers.end(), obj);
 	if (it != objectsWithShockers.end())
 		return;

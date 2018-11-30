@@ -1453,21 +1453,6 @@ void StartLevelBehaviour::teleport(GameObject* object)
 		teleportPlayerCallback(object, pSecretBehaviour);
 }
 
-void StartLevelBehaviour::setFinishLevelCallback(void(*actionCallback)(void))
-{
-	finishLevelCallback = actionCallback;
-}
-
-void StartLevelBehaviour::setIterateLevelCallback(void(*actionCallback)(void))
-{
-	updateLevelIterationCallback = actionCallback;
-}
-
-void StartLevelBehaviour::setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*))
-{
-	teleportPlayerCallback = actionCallback;
-}
-
 void StartLevelBehaviour::setShowEnemyBarCallback(void(*actionCallback)(bool))
 {
 	showEnemyBarCallback = actionCallback;

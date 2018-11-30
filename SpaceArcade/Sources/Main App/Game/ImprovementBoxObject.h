@@ -1,4 +1,9 @@
 #pragma once
+/*
+	ImprovementBoxObject.h
+	This class represents improvement kit, that player's craft can get by colliding with it.
+*/
+
 #include "SpacecraftObject.h"
 
 // this struct defines, what kind of improvement box object will have.
@@ -47,5 +52,6 @@ public:
 
 protected:
 	ImprovementStruct improvement;
+	// this spawns after player's craft collides with this box.
 	GameObject* smokeObject = NULL;
 };

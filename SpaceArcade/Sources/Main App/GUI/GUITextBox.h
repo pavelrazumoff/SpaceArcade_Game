@@ -1,4 +1,9 @@
 #pragma once
+/*
+	GUITextBox.h
+	This class represents simple text box, that can draw some text line without editing.
+*/
+
 #include "GUIObject.h"
 
 enum TextAlignment
@@ -43,10 +48,9 @@ public:
 protected:
 	std::string text;
 	Font font;
-	glm::vec2 textRelativePos;
+	glm::vec2 textRelativePos;							// position relative gui object top left corner.
 	glm::vec3 textColor;
 	int textAlignment = TextAlignment::TextAlignNone;
-	bool useClipSpace = true;
 
 	Shader* fontShader = NULL;
 	int fontVAO = -1, fontVBO = -1;

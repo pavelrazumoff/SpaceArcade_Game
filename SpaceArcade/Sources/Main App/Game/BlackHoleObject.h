@@ -1,6 +1,15 @@
 #pragma once
+/*
+	BlackHoleObject.h
+	This class represents black hole simulation object, that can be used
+	to destroy all another objects, that will fall into it, or to teleport
+	player controlled craft into another level (the teleportation itself is
+	implemented in that craft class).
+*/
+
 #include "GameObject.h"
 
+// represents current black hole type.
 enum BlackHoleType
 {
 	BasicHole,

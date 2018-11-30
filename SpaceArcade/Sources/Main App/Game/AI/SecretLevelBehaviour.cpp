@@ -282,6 +282,13 @@ void SecretLevelBehaviour::spawnSpaceStation(float delta)
 	pSpaceStation->setLandingPoint(glm::vec2(322, 355));
 	pSpaceStation->setImpulseFactor(200.0f);
 	pSpaceStation->setShowDialogueCallback(showStationDialogue);
+
+	GameObject* roadster = new GameObject();
+	roadster->init(pLevel, glm::vec2(0.0f, 0.0f), glm::vec2(80, 44), pResourceManager->GetTexture("roadster"), glm::vec2(0.0f, 0.0f), true);
+	roadster->RelativePosition = glm::vec2(158, 96);
+	roadster->InitialRotation = 45.0f;
+
+	pSpaceStation->attachNewObject(roadster);
 }
 
 void SecretLevelBehaviour::spawnExitBlackHole(float delta)
@@ -318,7 +325,7 @@ void SecretLevelBehaviour::spawnExitBlackHole(float delta)
 	blackHole->setSelfDestroyTime(10.0f);
 	blackHole->startSelfDestroying(true);
 
-	levelMode = SecretLevelMode::SecretIntroducing;
+	levelMode = SecretLevelMode::SecretWaitForLeaving;
 }
 
 void SecretLevelBehaviour::iterateLevel()
@@ -466,27 +473,14 @@ void SecretLevelBehaviour::teleport(GameObject* object)
 
 	if (teleportPlayerCallback)
 		teleportPlayerCallback(object, pMainBehaviour);
+
+	levelMode = SecretLevelMode::SpaceStationIntroducing;
 }
 
 void SecretLevelBehaviour::finishStationDialogue()
 {
 	if(pSpaceStation)
 		pSpaceStation->setStationState(StationState::SpaceCraftFree);
-}
-
-void SecretLevelBehaviour::setFinishLevelCallback(void(*actionCallback)(void))
-{
-	finishLevelCallback = actionCallback;
-}
-
-void SecretLevelBehaviour::setIterateLevelCallback(void(*actionCallback)(void))
-{
-	updateLevelIterationCallback = actionCallback;
-}
-
-void SecretLevelBehaviour::setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*))
-{
-	teleportPlayerCallback = actionCallback;
 }
 
 void SecretLevelBehaviour::clear()

@@ -27,24 +27,21 @@ void GUIObject::init(Texture2D* tex, glm::vec2 pos, glm::vec2 initial_size, bool
 
 void GUIObject::draw()
 {
-	if (!visible)
+	if (!visible || !renderer)
 		return;
 
-	if (renderer)
-	{
-		// set clip space.
-		Shader* pShader = renderer->getShader();
-		glm::vec4 realClip = glm::vec4(Position.x + Size.x * clipSpace.x, Position.y + Size.y * clipSpace.y,
-			Position.x + Size.x - (Size.x * clipSpace.z), Position.y + Size.y - (Size.y * clipSpace.w));
+	// set clip space.
+	Shader* pShader = renderer->getShader();
+	glm::vec4 realClip = glm::vec4(Position.x + Size.x * clipSpace.x, Position.y + Size.y * clipSpace.y,
+		Position.x + Size.x - (Size.x * clipSpace.z), Position.y + Size.y - (Size.y * clipSpace.w));
 
-		pShader->setBool("useClipSpace", useClipSpace);
-		pShader->setVec4("clipSpace", realClip);
+	pShader->setBool("useClipSpace", useClipSpace);
+	pShader->setVec4("clipSpace", realClip);
 
-		renderer->DrawSprite(Texture, Position, Size, color);
+	renderer->DrawSprite(Texture, Position, Size, color);
 
-		// restore default.
-		pShader->setBool("useClipSpace", false);
-	}
+	// restore default.
+	pShader->setBool("useClipSpace", false);
 
 	for (int i = 0; i < children.size(); ++i)
 		children[i]->draw();

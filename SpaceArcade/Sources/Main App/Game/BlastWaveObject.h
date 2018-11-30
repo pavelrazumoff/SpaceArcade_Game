@@ -1,4 +1,11 @@
 #pragma once
+/*
+	BlastWaveObject.h
+	This class represents simple explosion wave, that spawned after
+	some object was destroyed or in other cases and self destroys after
+	animation clip will complete.
+*/
+
 #include "GameObject.h"
 
 class BlastWaveObject : public GameObject
@@ -23,5 +30,6 @@ public:
 	virtual void startSelfDestroying(bool start);
 
 protected:
+	// pointer to the initiator of spawning this object.
 	GameObject* pSender = NULL;
 };

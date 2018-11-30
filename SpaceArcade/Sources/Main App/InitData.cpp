@@ -366,11 +366,13 @@ void MainApp::initGUI()
 		"Created by Paul Razumov",
 		"Programming: Paul Razumov",
 		"Game Sprites were taken from the Web",
-		"GUI: Paul Razumov",
-		"Main Music Theme by Paul Razumov"
+		"GUI Sprites: Paul Razumov",
+		"Main Music Theme by Paul Razumov",
+		"Tesla Roadster is a property of Tesla, Inc",
+		"Starman suit is a property of Space Exploration Technologies Corp"
 	};
 
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
 		GUITextBox* creditsBox = new GUITextBox(&renderer);
 		creditsFillLayouts[1]->addChild(creditsBox);

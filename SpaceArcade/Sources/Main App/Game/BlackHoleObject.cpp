@@ -76,6 +76,7 @@ void BlackHoleObject::makeCollision(GameObject* obj)
 	glm::vec2 diff;
 	this->checkCollision(obj, diff);
 
+	// if other object is positioned less than 20 points from center of the hole, destroy it momentally.
 	if (glm::length(diff) < 20.0f)
 		obj->setHealth(0.0f);
 }
@@ -88,6 +89,7 @@ void BlackHoleObject::makeReaction(glm::vec2 difference, GameObject* otherObj, b
 		!pLevel->getBehaviour()->checkForCollisionAddiction(this, otherObj))
 		return;
 
+	// implements here gravity mechanics.
 	glm::vec2 normalizedDiff = glm::normalize(difference);
 	if (!collisionChecker)
 		normalizedDiff = -normalizedDiff;

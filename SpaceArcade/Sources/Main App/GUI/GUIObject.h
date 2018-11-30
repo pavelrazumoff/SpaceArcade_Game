@@ -1,4 +1,10 @@
 #pragma once
+/*
+	GUIObject.h
+	This class represents basic gui object, that hasn't any of interactivity,
+	but can be rendered on screen with specified size and position.
+*/
+
 #include "../../Miscellaneous/SpriteRenderer.h"
 
 class GUIObject
@@ -77,7 +83,7 @@ public:
 
 protected:
 	glm::vec2 Position, SourcePosition;
-	glm::vec2 SourceSize, Size;
+	glm::vec2 Size, SourceSize;
 	glm::vec2 minimumSize, maximumSize;
 	glm::vec4 clipSpace;				// used in percentage displacement from (left, top, right, bottom).
 	glm::vec4 color = glm::vec4(1.0f);

@@ -45,9 +45,15 @@ public:
 	bool isUserAttackBlocked();
 	int getLevelIteration();
 
+	// adds team controllers and others, that controls more than one pawn in one time.
+	// these controllers are updating through level behaviour, not through pawn classes.
 	void addComplexAIController(AIController* controller);
 	// teleports selected object into another place, level and etc.
 	virtual void teleport(GameObject* object);
+
+	void setFinishLevelCallback(void(*actionCallback)(void));
+	void setIterateLevelCallback(void(*actionCallback)(void));
+	void setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*));
 
 protected:
 	// pointer to the controlling level.
@@ -59,9 +65,20 @@ protected:
 
 	// false - all user input is blocked.
 	bool userInput = true;
+	// false - all user attack input is blocked, but he still can move.
 	bool userAttack = true;
 
 	// holds current sublevel.
 	int levelMode = -1;
+	// holds current level interation. Used to increase several level parameters
+	// to increase level complexity.
 	int levelIteration = 0;
+
+	// these callback functions is used to send some data or commands into external code.
+	// calls when player's craft lost.
+	void(*finishLevelCallback)(void) = NULL;
+	// calls after every level iteration.
+	void(*updateLevelIterationCallback)(void) = NULL;
+	// calls when player craft needs to be transferred to another behaviour (level).
+	void(*teleportPlayerCallback)(GameObject*, LevelBehaviour*) = NULL;
 };

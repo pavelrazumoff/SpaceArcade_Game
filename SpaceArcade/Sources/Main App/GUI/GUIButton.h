@@ -1,4 +1,10 @@
 #pragma once
+/*
+	GUIButton.h
+	This class represents gui button with different button states.
+	Every button states presented with specific texture.
+*/
+
 #include "GUIObject.h"
 
 enum GUI_ButtonState
@@ -39,8 +45,8 @@ protected:
 	Texture2D* pressedTexture = NULL;
 
 	int buttonState = GUI_ButtonState::DefaultState;			// 0 - default, 1 - hovered, 2 - pressed.
-	bool checkable = false;
+	bool checkable = false;										// true - when button is clicked, it stays clicked until it won't be unclicked.
 
-	int actionId = -1;
-	void(*actionFunc)(int) = NULL;
+	int actionId = -1;											// holds action type, that is defined in external code.
+	void(*actionFunc)(int) = NULL;								// calls when button state is changing.
 };

@@ -46,6 +46,8 @@ void BlastWaveObject::update(float delta)
 {
 	GameObject::update(delta);
 
+	// if self destroying timer is complete, send appropriate message to the sender
+	// and clear all connections with it.
 	if (selfDestroyTime <= 0.0f)
 	{
 		if (pSender)
@@ -79,6 +81,7 @@ void BlastWaveObject::setSender(GameObject* sender)
 void BlastWaveObject::startSelfDestroying(bool start)
 {
 	selfDestroying = start;
+	// plays explosion sound when self destroying was started.
 	if (explosionSoundName.compare("") && !isOffTheScreen(pLevel->getRenderer()->getCurrentScreenDimensions()))
 	{
 		pLevel->playSound(explosionSoundName, false);

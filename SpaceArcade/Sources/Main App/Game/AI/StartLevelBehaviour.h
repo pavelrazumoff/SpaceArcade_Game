@@ -2,12 +2,12 @@
 /*
 	StartLevelBehaviour.h
 	This class is derived from LevelBehaviour. It presents basic level
-	with alternating level modes one by one. Base level objects here 
-	are playerCraft, enemyCraft and meteorites.
+	with alternating level modes one by one.
 */
 
 #include "LevelBehaviour.h"
 
+// enumeration of different level modes.
 enum StartLevelMode
 {
 	Introducing = 0,
@@ -27,6 +27,7 @@ enum StartLevelMode
 	End
 };
 
+// holds several level data to control level complexity.
 struct StartLevelData
 {
 	// player's data.
@@ -151,9 +152,6 @@ public:
 
 	virtual void teleport(GameObject* object);
 
-	void setFinishLevelCallback(void(*actionCallback)(void));
-	void setIterateLevelCallback(void(*actionCallback)(void));
-	void setTeleportPlayerCallback(void(*actionCallback)(GameObject*, LevelBehaviour*));
 	void setShowEnemyBarCallback(void(*actionCallback)(bool));
 
 protected:
@@ -167,8 +165,7 @@ protected:
 	// level's data.
 	StartLevelData levelData;
 
-	void(*finishLevelCallback)(void) = NULL;
-	void(*updateLevelIterationCallback)(void) = NULL;
-	void(*teleportPlayerCallback)(GameObject*, LevelBehaviour*) = NULL;
+	// these callback functions is used to send some data or commands into external code.
+	// calls when enemy boss is appearing to visualize it's health status.
 	void(*showEnemyBarCallback)(bool) = NULL;
 };
