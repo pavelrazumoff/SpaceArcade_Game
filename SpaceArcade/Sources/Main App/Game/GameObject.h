@@ -96,6 +96,7 @@ public:
 	void setUseBackAndForthAnimation(bool backForth);
 	void setAnimationOrder(bool order);
 	void setAnimationDuration(float duration);
+	void setAnimationStartTime(float startTime);
 	void setImpulseFactor(float impulse);
 	void applyImpulse(float impulse, bool free = false);
 	void setScoreContribution(int score);
@@ -120,6 +121,7 @@ public:
 	bool isUseBackAndForthAnimation();
 	bool getAnimationOrder();
 	float getAnimationDuration();
+	float getAnimationCurrentTime();
 	float getImpulseFactor();
 	int getScoreContribution();
 

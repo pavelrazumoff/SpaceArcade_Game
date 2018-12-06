@@ -623,6 +623,11 @@ void GameObject::setAnimationDuration(float duration)
 		animationTimeStep = animationDuration / Sprite->numOfFrames;
 }
 
+void GameObject::setAnimationStartTime(float startTime)
+{
+	animationTime = startTime;
+}
+
 void GameObject::setImpulseFactor(float impulse)
 {
 	impulseFactor = impulse;
@@ -744,6 +749,11 @@ bool GameObject::getAnimationOrder()
 float GameObject::getAnimationDuration()
 {
 	return animationDuration;
+}
+
+float GameObject::getAnimationCurrentTime()
+{
+	return animationTime;
 }
 
 float GameObject::getImpulseFactor()

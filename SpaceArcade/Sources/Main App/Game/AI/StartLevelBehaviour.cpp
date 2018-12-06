@@ -29,9 +29,11 @@ void StartLevelBehaviour::init()
 
 void StartLevelBehaviour::startBehaviour()
 {
+	// Here we have to set initial state of level.
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = screenDimensions / pLevel->getRenderer()->getInitialScreenDimensions();
 
+	// first we need to create player controlled craft with all children objects of it.
 	SpacecraftObject* pPlayerCraft = new SpacecraftObject();
 	GameObject* pLaserRay = pPlayerCraft->getLaserRay();
 
@@ -66,6 +68,7 @@ void StartLevelBehaviour::startBehaviour()
 	holeSize.x *= screenRatio.x;
 	holeSize.y = holeSize.x / holeRatio;
 
+	// this will be available after player will get secret detail.
 	BlackHoleObject* blackHole = new BlackHoleObject();
 	blackHole->init(pLevel, glm::vec2(0, 0), holeSize, pResourceManager->GetTexture("blackHole1"), glm::vec2(0.0f, 40.0f));
 	blackHole->setDamage(0.0f);
@@ -79,6 +82,7 @@ void StartLevelBehaviour::startBehaviour()
 
 	pPlayerCraft->setBlackHole(blackHole);
 
+	// this will be available after player buys it on secret level.
 	GameObject* ionWeapon = new GameObject();
 	ionWeapon->setObjectType(ObjectTypes::Basic);
 	ionWeapon->init(pLevel, glm::vec2(0, 0), glm::vec2(46, 47), pResourceManager->GetTexture("ionWeapon"), glm::vec2(0.0f, 0.0f), true);
@@ -96,17 +100,22 @@ void StartLevelBehaviour::startBehaviour()
 
 	pPlayerCraft->setIonCharge(ionCharge);
 
+	// here we set starting positions of rockets relatively to craft.
 	pPlayerCraft->setRocketRelativePosition(glm::vec2(42, 12), 0);
 	pPlayerCraft->setRocketRelativePosition(glm::vec2(3, 12), 1);
 	pPlayerCraft->setRocketRelativePosition(glm::vec2(21, -5), 2);
 
+	// set here player's starting position on level.
 	pPlayerCraft->Position = glm::vec2(screenDimensions.x / 2 - pPlayerCraft->Size.x / 2, screenDimensions.y + 50);
 	pPlayerCraft->setHealth(pPlayerCraft->getHealth());
+	// player will have 0 rockets on level start.
 	pPlayerCraft->setRocketDetail(0);
 
 	//pPlayerCraft->setCoins(4000);
 
+	// set this craft as player's object.
 	setPlayerObject(pPlayerCraft);
+	// also plays some music.
 	levelMusic = pLevel->playSound("BackgroundSound", true);
 }
 
@@ -124,12 +133,14 @@ void StartLevelBehaviour::resumeBehaviour()
 
 void StartLevelBehaviour::finishBehaviour()
 {
+	// calls when player lost.
 	if (finishLevelCallback)
 		finishLevelCallback();
 }
 
 void StartLevelBehaviour::resetBehaviour()
 {
+	// this will be called if player choosed Play Again.
 	LevelBehaviour::resetBehaviour();
 	playerCraft = NULL;
 	pFinalBoss = NULL;
@@ -360,7 +371,7 @@ void StartLevelBehaviour::updateEnergyBarriersShowMode(float delta)
 {
 	int numOfBarriers = pLevel->getObjectsSizeByType(ObjectTypes::EnergyBarrier);
 
-	// show all ai controlled objects when all meteorites was destroyed or simply gone away.
+	// show all ai controlled objects when all barriers was destroyed or simply gone away.
 	if (numOfBarriers == 0)
 	{
 		// change to the next level mode.
@@ -371,13 +382,16 @@ void StartLevelBehaviour::updateEnergyBarriersShowMode(float delta)
 
 void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 {
-	// In this mode we simply introducing all ai controlled spacecrafts on the screen.
+	// In this mode we simply introducing boss spacecraft on the screen.
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
+	// this will handle only once if boss enemy wasn't created.
 	spawnEnemyBoss(delta);
+	// if true - enemy boss had been introduced.
 	bool updateLevel = true;
 
+	// if enemy boss health bar wasn't shown, show it.
 	if (!bossEnemyBarWasShown && showEnemyBarCallback)
 	{
 		showEnemyBarCallback(true);
@@ -397,6 +411,7 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 				levelData.introduceBegins = true;
 			}
 
+			// move boss enemy slightly downwards.
 			if (spacecraft->Position.y < (screenDimensions.y / 3 - spacecraft->Size.y / 2))
 			{
 				spacecraft->Velocity.y = -50.0f * screenRatio.y;
@@ -406,6 +421,7 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 			}
 			else
 			{
+				// stop it when it reached desired position. Also release user input.
 				spacecraft->Velocity.y = 0.0f;
 				spacecraft->setUsePhysics(true);
 				spacecraft->enableShield(true);
@@ -416,23 +432,26 @@ void StartLevelBehaviour::updateBossSpaceCraftIntroduceMode(float delta)
 		}
 	}
 
+	// if enemy boss has reached desired position, increment level mode.
 	if (updateLevel)
 		levelMode++;
 }
 
 void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 {
-	// In this mode a battle between player's spacecraft and enemies happens.
+	// In this mode a battle between player's spacecraft and boss enemy happens.
 	bool isBossAlive = false;
 	for (int i = 0; i < pLevel->getObjectsSizeByType(ObjectTypes::BossSpaceCraft); ++i)
 	{
 		BossSpacecraftObject* spacecraft = (BossSpacecraftObject*)pLevel->getObjectByTypeIndex(ObjectTypes::BossSpaceCraft, i);
 		if (spacecraft->getAIController())
 		{
+			// if boss enemy health is more than specified threshold, it can fight with player, else move him back upwards.
 			if (spacecraft->getHealth() > levelData.bossHealthThreshold)
 			{
 				if (!spacecraft->isShieldEnabled())
 				{
+					// if this is the time to enable shield, do it.
 					if (levelData.timeWithoutShield >= levelData.maxTimeWithoutShield)
 					{
 						spacecraft->enableShield(true);
@@ -445,6 +464,7 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 			}
 			else
 			{
+				// move boss enemy back upwards with enabled shield to protect it from spawned lasers.
 				if (spacecraft->getHealth() > 0.0f)
 				{
 					isBossAlive = true;
@@ -452,6 +472,7 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 						spacecraft->enableShield(true);
 				}
 
+				// decrease enemy boss health threshold.
 				levelData.bossHealthThreshold -= levelData.bossHealthThresholdStep;
 				if (levelData.bossHealthThreshold < 0.0f)
 					levelData.bossHealthThreshold = 0.0f;
@@ -468,13 +489,15 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 	else
 	{
 		levelData.numOfBossEnemies = 0;
-		// 11.
+		// if level iteration is less than desired, end current level mode and iterate level,
+		// else open new level mode.
 		if (levelIteration < 11)
 			levelMode = StartLevelMode::End;		// skip boss leaving mode.
 		else
 			levelMode = StartLevelMode::DebrisFighting;
 	}
 
+	// if enemy boss health bar was shown, hide it.
 	if (bossEnemyBarWasShown && showEnemyBarCallback)
 	{
 		showEnemyBarCallback(false);
@@ -484,7 +507,7 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 
 void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
 {
-	// In this mode we simply introducing all ai controlled spacecrafts on the screen.
+	// In this mode we simply move boss enemy upwards.
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
@@ -518,10 +541,10 @@ void StartLevelBehaviour::updateBossSpaceCraftLeaveMode(float delta)
 
 void StartLevelBehaviour::updateDebrisMode(float delta)
 {
-	// In this mode we have to check, if all meteorites was destroyed or gone behind sreen dimensions (not above the screen).
+	// In this mode we have to check, if all debris was destroyed or gone behind sreen dimensions (not above the screen).
 	int numOfDebris = pLevel->getObjectsSizeByType(ObjectTypes::Debris);
 
-	// show all ai controlled objects when all meteorites was destroyed or simply gone away.
+	// show all ai controlled objects when all debris was destroyed or simply gone away.
 	if (numOfDebris == 0)
 	{
 		// change to the next level mode.
@@ -537,7 +560,7 @@ void StartLevelBehaviour::updateDebrisMode(float delta)
 
 void StartLevelBehaviour::updateFinalBossSpaceCraftIntroduceMode(float delta)
 {
-	// In this mode we simply introducing all ai controlled spacecrafts on the screen.
+	// In this mode we simply introducing final boss enemy on the screen.
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
@@ -574,6 +597,8 @@ void StartLevelBehaviour::updateFinalBossSpaceCraftIntroduceMode(float delta)
 		unblockUserInput();
 		levelData.introduceBegins = false;
 
+		// if player's health is less than specified and battle wasn't started yet, block boss ai.
+		// this will open opportunity to player to leave this battle on current level iteration.
 		if (playerCraft->getHealth() / playerCraft->getMaxHealth() < 0.3f && !levelData.battleStarted)
 		{
 			if (playerCraft->getTimeWithoutMoving() > 2.0f)
@@ -587,11 +612,13 @@ void StartLevelBehaviour::updateFinalBossSpaceCraftIntroduceMode(float delta)
 
 void StartLevelBehaviour::updateFinalBossSpaceCraftFightMode(float delta)
 {
-	// In this mode a battle between player's spacecraft and enemies happens.
+	// In this mode a battle between player's spacecraft and final boss enemy happens.
 	if (pFinalBoss->getHealth() > 0.0f)
 	{
+		// if player's health is less than specified and battle wasn't started yet
 		if (playerCraft->getHealth() / playerCraft->getMaxHealth() < 0.3f && !levelData.battleStarted)
 		{
+			// if player is not moving for a long time, iterate level mode and let player leave fight with boss.
 			if (playerCraft->getTimeWithoutMoving() >= 10.0f)
 			{
 				levelMode++;
@@ -599,6 +626,7 @@ void StartLevelBehaviour::updateFinalBossSpaceCraftFightMode(float delta)
 				levelData.battleStarted = false;
 			}
 
+			// else if player was moved somehow, unblock boss enemy and let the battle begins.
 			if (playerCraft->getTimeWithoutMoving() < 2.0f)
 			{
 				pFinalBoss->getAIController()->unblockAI();
@@ -627,7 +655,7 @@ void StartLevelBehaviour::updateFinalBossSpaceCraftFightMode(float delta)
 
 void StartLevelBehaviour::updateFinalBossSpaceCraftLeaveMode(float delta)
 {
-	// In this mode we simply introducing all ai controlled spacecrafts on the screen.
+	// In this mode we simply move final boss enemy upwards.
 	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = pLevel->getRenderer()->getCurrentScreenDimensions() / pLevel->getRenderer()->getInitialScreenDimensions();
 
@@ -683,6 +711,7 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 	if (meteoriteDiff <= 0)
 		return;
 
+	// this will need for spawning some rocket details when meteorites get destroyed.
 	glm::vec2 detailSizes[] = {
 		glm::vec2(15, 37),
 		glm::vec2(24, 28),
@@ -693,6 +722,7 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 	rocketKit.rocketDetail = 40;
 	rocketKit.useRocketDetail = true;
 
+	// spawn meteorites by groups, not all in the same time to optimize that.
 	int numOfMeteorites = 5;
 	if (meteoriteDiff < numOfMeteorites)
 		numOfMeteorites = meteoriteDiff;
@@ -708,7 +738,6 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 		asteroid->setUsePhysics(true);
 		asteroid->setObjectType(ObjectTypes::Meteorite);
 		asteroid->setExplosionSoundName("ExplosionEffect2");
-		//asteroid->hideFromLevel(true);
 
 		asteroid->init(pLevel, glm::vec2(rand() % ((int)screenDimensions.x - 100 + 1) + 50,
 			rand() % (int)(levelData.meteoritesZone.x - levelData.meteoritesZone.y + 1) + levelData.meteoritesZone.y), glm::vec2(50, 50),
@@ -720,7 +749,8 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 
 		asteroid->resize();
 
-		if (rand() % levelData.meteorRandomSeed == 1)
+		// spawn rocket detail with this asteroid if random value is equal to specified.
+		if ((rand() % levelData.meteorRandomSeed) == 1)
 		{
 			ImprovementBoxObject* rocketDetail = new ImprovementBoxObject();
 
@@ -747,6 +777,7 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 			asteroid->addPostDeathObject(rocketDetail);
 		}
 
+		// also spawn some coins.
 		if (rand() % levelData.coinRandomSeed == 1)
 			spawnCoinWithObject(asteroid, 1);
 	}
@@ -756,7 +787,7 @@ void StartLevelBehaviour::spawnMeteorites(float delta)
 
 void StartLevelBehaviour::spawnHealthKits(float delta)
 {
-	// Spawn Health Kits every healthKitsFreq time.
+	// spawn Health Kits every healthKitsFreq time.
 	levelData.currentHealthKitsTime += delta;
 
 	if (levelData.currentHealthKitsTime >= levelData.healthKitsFreq)
@@ -868,9 +899,6 @@ void StartLevelBehaviour::spawnEnemies(float delta)
 		if (levelMode == StartLevelMode::TeamCraftEnemyIntroducing)
 			teamController->addController(spacecraftAI);
 
-		// resize it just before setting actual position.
-		//enemySpaceCraft->resize();
-
 		// show ai controlled spacecraft and position it a little above the screen.
 		enemySpaceCraft->Position = glm::vec2(zoneWidth / 2 + i * zoneWidth - 42, -100.0f);
 		if (levelMode == StartLevelMode::SpaceCraftEnemyIntroducing)
@@ -941,9 +969,6 @@ void StartLevelBehaviour::spawnEnemyBoss(float delta)
 	energyShield->init(pLevel, glm::vec2(0, 0), glm::vec2(289, 249), pResourceManager->GetTexture("energyShield"), glm::vec2(0.0f, 0.0f));
 
 	bossSpaceCraft->setEnergyShield(energyShield);
-
-	// resize it just before setting actual position.
-	//bossSpaceCraft->resize();
 
 	// show ai controlled spacecraft and position it a little above the screen.
 	bossSpaceCraft->getAIController()->setTargetEnemy(playerCraft);
@@ -1024,6 +1049,9 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 	glm::vec2 currentScreenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
 	glm::vec2 screenRatio = (currentScreenDimensions / initialScreenDimensions);
 
+	// here we have to determine shifting on y to properly positioning all barriers.
+	// 16 - is number of one unique group of barriers.
+	// 7 - is number of rows.
 	int denom = (7 * barriersDiff / 16);
 	if (denom == 0)
 		denom = 7;
@@ -1073,9 +1101,11 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 
 	for (int i = 0; i < barriersDiff; ++i)
 	{
+		// if one unique group was passed, increment posesDecrement to propely get next barriers poses.
 		if (i > 0 && i / 16 > 0 && i % 16 == 0)
 			posesDecrement += 16;
 
+		// if this is the new row, increment shifting.
 		if (currentPosY != barrierPoses[i - posesDecrement].y)
 		{
 			currentShift += -(rand() % (int)(yShift - yShift / 1.5f + 1) + yShift / 1.5f);
@@ -1087,6 +1117,7 @@ void StartLevelBehaviour::spawnEnergyBarriers(float delta)
 		barrier->init(pLevel, glm::vec2(barrierPoses[i - posesDecrement].x, currentShift), barrierSize,
 			pResourceManager->GetTexture("energyBarrier"), glm::vec2(0.0f, levelData.barriersSpeed * screenRatio.y));
 		barrier->setAnimationDuration(0.5f);
+		barrier->setAnimationStartTime((float)(rand() % (50)) / 100.0f);
 		barrier->setGeneratorSoundName("GeneratorEffect");
 		barrier->setScoreContribution(0);
 
@@ -1192,6 +1223,7 @@ void StartLevelBehaviour::spawnDebris(float delta)
 			spawnCoinWithObject(wreck, 1);
 	}
 
+	// create secret detail if it wasn't created yet.
 	if (!levelData.secretWreckCreated)
 	{
 		ImprovementBoxObject* secretWreck = new ImprovementBoxObject();

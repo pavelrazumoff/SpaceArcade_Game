@@ -146,10 +146,10 @@ void SecretLevelBehaviour::updateIntroduceMode(float delta)
 
 void SecretLevelBehaviour::updateBlackHolesMode(float delta)
 {
-	// In this mode we have to check, if all meteorites was destroyed or gone behind sreen dimensions (not above the screen).
+	// In this mode we have to check, if all black holes was destroyed or gone behind sreen dimensions (not above the screen).
 	int numOfBlackHoles = pLevel->getObjectsSizeByType(ObjectTypes::BlackHole);
 
-	// show all ai controlled objects when all meteorites was destroyed or simply gone away.
+	// show all ai controlled objects when all holes was destroyed or simply gone away.
 	if (numOfBlackHoles == 0)
 	{
 		// change to the next level mode.
@@ -197,7 +197,6 @@ void SecretLevelBehaviour::updateParallelEvents(float delta)
 void SecretLevelBehaviour::spawnBlackHoles(float delta)
 {
 	// create some black holes by groups.
-
 	int holesDiff = levelData.maxNumOfBlackHoles - levelData.numOfCreatedBlackHoles;
 	if (holesDiff <= 0)
 		return;

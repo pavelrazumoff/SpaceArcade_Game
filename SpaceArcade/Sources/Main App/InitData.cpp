@@ -367,7 +367,7 @@ void MainApp::initGUI()
 		"Programming: Paul Razumov",
 		"Game Sprites were taken from the Web",
 		"GUI Sprites: Paul Razumov",
-		"Main Music Theme by Paul Razumov",
+		"Main Music Themes by Paul Razumov",
 		"Tesla Roadster is a property of Tesla, Inc",
 		"Starman suit is a property of Space Exploration Technologies Corp"
 	};
