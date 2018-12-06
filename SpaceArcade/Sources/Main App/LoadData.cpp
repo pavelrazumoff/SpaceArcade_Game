@@ -20,6 +20,7 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//SpaceShipBoss.png", "spacecraftBoss", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//SpaceShipBoss2.png", "spacecraftBoss2", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//roadster.png", "roadster", useGammaCorrection, &gameObjectsParams);
+	res_manager->LoadTexture("Images//starmanSpace.png", "starman", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//laser_ray.png", "laserRayBlue", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//laser_rayEnemy.png", "laserRayRed", useGammaCorrection, &gameObjectsParams);
 	res_manager->LoadTexture("Images//asteroid.png", "asteroid", useGammaCorrection, &gameObjectsParams);

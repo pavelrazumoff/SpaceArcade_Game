@@ -1055,6 +1055,8 @@ void MainApp::resetInitialSceneData()
 	behavior->setShowEnemyBarCallback(showEnemyBar);
 
 	StartLevelData levelData = behavior->getLevelData();
+	levelData.starmanLevel = rand() % (8 - 5) + 5;
+
 	levelData.maxNumOfMeteorites = 30;
 	levelData.maxNumOfDebris = 50;
 	levelData.maxNumOfHealthKits = 2;

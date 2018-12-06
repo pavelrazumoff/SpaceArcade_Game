@@ -32,6 +32,7 @@ struct StartLevelData
 {
 	// player's data.
 	glm::vec2 playerSpeed = glm::vec2(200.0f, 100.0f);
+	int starmanLevel = 5;
 
 	// meteorites data.
 	int maxNumOfMeteorites = 0;
@@ -136,6 +137,7 @@ public:
 	void spawnEnemyBoss(float delta);
 	void spawnFinalBoss(float delta);
 	void spawnDebris(float delta);
+	void showStarman(float delta);
 
 	void spawnCoinWithObject(GameObject* obj, int numOfCoins);
 
@@ -159,6 +161,7 @@ protected:
 	std::vector<AIController*> aiControllers;
 	LevelBehaviour* pSecretBehaviour = NULL;
 	BossSpacecraftObject* pFinalBoss = NULL;
+	GameObject* flyingStarman = NULL;
 
 	bool bossEnemyBarWasShown = false;
 

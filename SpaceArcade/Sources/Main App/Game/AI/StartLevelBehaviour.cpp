@@ -117,6 +117,11 @@ void StartLevelBehaviour::startBehaviour()
 	setPlayerObject(pPlayerCraft);
 	// also plays some music.
 	levelMusic = pLevel->playSound("BackgroundSound", true);
+
+	flyingStarman = new GameObject();
+	flyingStarman->setObjectType(ObjectTypes::None);
+	flyingStarman->init(pLevel, glm::vec2(0, 0), glm::vec2(67, 29), pResourceManager->GetTexture("starman"), glm::vec2(80.0f * screenRatio.x, 0.0f));
+	flyingStarman->hideFromLevel(true);
 }
 
 void StartLevelBehaviour::pauseBehaviour()
@@ -489,6 +494,7 @@ void StartLevelBehaviour::updateBossSpaceCraftFightMode(float delta)
 	else
 	{
 		levelData.numOfBossEnemies = 0;
+		levelData.timeWithoutShield = 0.0f;
 		// if level iteration is less than desired, end current level mode and iterate level,
 		// else open new level mode.
 		if (levelIteration < 11)
@@ -687,6 +693,7 @@ void StartLevelBehaviour::updateParallelEvents(float delta)
 	// it updates all events that are parallel to the current mode.
 	spawnMeteorites(delta);
 	spawnHealthKits(delta);
+	showStarman(delta);
 
 	if(levelMode == StartLevelMode::DebrisFighting)
 		spawnDebris(delta);
@@ -1260,6 +1267,26 @@ void StartLevelBehaviour::spawnDebris(float delta)
 	}
 
 	levelData.numOfCreatedDebris += numOfDebris;
+}
+
+void StartLevelBehaviour::showStarman(float delta)
+{
+	if (levelIteration < levelData.starmanLevel || !flyingStarman)
+		return;
+
+	glm::vec2 screenDimensions = pLevel->getRenderer()->getCurrentScreenDimensions();
+
+	if (!flyingStarman->isHiddenFromLevel())
+	{
+		if (flyingStarman->Position.x < screenDimensions.x)
+			flyingStarman->setHealth(100.0f);
+		else
+			flyingStarman = NULL;
+		return;
+	}
+
+	flyingStarman->hideFromLevel(false);
+	flyingStarman->Position = glm::vec2(-100.0f, screenDimensions.y / 2 - flyingStarman->Size.y / 2);
 }
 
 void StartLevelBehaviour::spawnCoinWithObject(GameObject* obj, int numOfCoins)
