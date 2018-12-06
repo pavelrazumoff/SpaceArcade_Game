@@ -1,8 +1,11 @@
 # Space Arcade 2D Game
 This is my first 2D game on OpenGL.
+![screenshot](SpaceArcade/game_preview1_0.jpg)
+![screenshot](SpaceArcade/game_preview1_1.jpg)
+![screenshot](SpaceArcade/game_preview1_2.jpg)
 
 This game is a simple old-style arcade, where player controlled spacecraft must face various obstacles,
-such as asteroids, space debris, another spacecrafts and etc.
+such as asteroids, space debris, another spacecrafts and etc. It is recommended to play it with 1920 x 1080 resolution as intended, but you still can resize it as you want (best experience isn't expected then).
 
 ## How to build the game
 These instructions will help you to build this project and run it on your local machine for development and testing purposes.
