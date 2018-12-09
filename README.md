@@ -53,6 +53,9 @@ Visual Studio or XCode, CMake, OpenGL, GLFW, GLAD, GLM, FreeType, irrKlang.
       
 5. To include irrKlang to your project, first you have to get it from [here](https://www.ambiera.com/irrklang/downloads.html). Second, put include path from download folder to your Project Settings as we did earlier. After that find the `bin/macosx-gcc` directory of that folder and add this path to your lib paths. In your **Build Phases** add **libirrklang.dylib** and **ikpMP3.dylib** libraries from that directory as we did earlier. Finally, to be able to run this game, you have to go to `usr/local/lib` directory and copy there that two libs. Also rename **ikpMP3.dylib** to the **libikpMP3.dylib**.
 
+
+6. Finally, you have to link the following frameworks inside **Link Binary With Libraries**: ***Cocoa***, ***CoreVideo***, ***IOKit*** and ***OpenGL***.
+
 ## Authors
 * **Paul Razumov** - [pavelrazumoff](https://github.com/pavelrazumoff)
 
