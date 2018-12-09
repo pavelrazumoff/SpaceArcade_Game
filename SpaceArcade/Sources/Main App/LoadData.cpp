@@ -1,3 +1,26 @@
+/*
+	* Space Arcade Game
+	* Copyright (C) 2018 Paul Razumov.
+	
+	Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+	and associated documentation files (the "Software"), to deal in the Software without restriction,
+	including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+	and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+	subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+	LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+	OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	* Source:
+	*  https://github.com/pavelrazumoff/SpaceArcade_Game
+*/
+
 #include "MainApp.h"
 
 void MainApp::loadShaders()
@@ -7,6 +30,34 @@ void MainApp::loadShaders()
 	res_manager->LoadShader("Shaders//Screen//ScreenShaderVS.glsl", "Shaders//Screen//FinalShaderFS.glsl", "Final");
 	res_manager->LoadShader("Shaders//Blur//BlurShaderVS.glsl", "Shaders//Blur//BlurShaderFS.glsl", "Blur");
 	res_manager->LoadShader("Shaders//Sprite//SpriteShaderVS.glsl", "Shaders//Sprite//SpriteShaderFS.glsl", "Sprite");
+
+	//font.
+	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");
+}
+
+void MainApp::loadTextures()
+{
+	std::vector<const GLchar*> facesBlue = {
+		"Images//Skybox//blue//bkg1_right.png",
+		"Images//Skybox//blue//bkg1_left.png",
+		"Images//Skybox//blue//bkg1_top.png",
+		"Images//Skybox//blue//bkg1_bot.png",
+		"Images//Skybox//blue//bkg1_front.png",
+		"Images//Skybox//blue//bkg1_back.png"
+	};
+
+	res_manager->LoadCubemap(facesBlue, "BlueSpace", useGammaCorrection);
+
+	std::vector<const GLchar*> facesNebula = {
+		"Images//Skybox//nebula//bkg1_right.png",
+		"Images//Skybox//nebula//bkg1_left.png",
+		"Images//Skybox//nebula//bkg1_top.png",
+		"Images//Skybox//nebula//bkg1_bot.png",
+		"Images//Skybox//nebula//bkg1_front.png",
+		"Images//Skybox//nebula//bkg1_back.png"
+	};
+
+	res_manager->LoadCubemap(facesNebula, "NebulaSpace", useGammaCorrection);
 
 	//textures.
 	// use this params for non-resized objects (not maximized mostly).
@@ -90,19 +141,6 @@ void MainApp::loadShaders()
 	tex->numOfRows = 8;
 	tex->numOfFrames = 64;
 
-	// sounds.
-	res_manager->addSound("Sounds//sound1_0.mp3", "BackgroundSound");
-	res_manager->addSound("Sounds//sound1_1.mp3", "BackgroundSound2");
-	res_manager->addSound("Sounds//laser_effect.mp3", "LaserSound");
-	res_manager->addSound("Sounds//rocketFire_effect.wav", "RocketSound");
-	res_manager->addSound("Sounds//laser_effectEnemy.mp3", "LaserEnemySound");
-	res_manager->addSound("Sounds//ionCharge_effect.wav", "IonChargeEffect");
-	res_manager->addSound("Sounds//explosion_effect1_0.mp3", "ExplosionEffect");
-	res_manager->addSound("Sounds//explosion_effect1_1.mp3", "ExplosionEffect2");
-	res_manager->addSound("Sounds//electricExplosion_effect.mp3", "ElectricExplosionEffect");
-	res_manager->addSound("Sounds//generator_effect.wav", "GeneratorEffect");
-	res_manager->addSound("Sounds//click_effect.wav", "ClickEffect");
-
 	// gui.
 	res_manager->LoadTexture("Images//Interface//gameCaption.png", "gameCaption", false);
 
@@ -169,32 +207,20 @@ void MainApp::loadShaders()
 	res_manager->LoadTexture("Images//Interface//healthFillButtonHovered.png", "healthFillButtonHovered", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//healthFillButtonPressed.png", "healthFillButtonPressed", false, &gameObjectsParams);
 	res_manager->LoadTexture("Images//Interface//coinIcon.png", "coinIcon", false, &gameObjectsParams);
-
-	//font.
-	font_shader.load("Shaders//Font//FontShaderVS.glsl", "Shaders//Font//FontShaderFS.glsl");
 }
 
-void MainApp::loadTextures()
+void MainApp::loadSounds()
 {
-	std::vector<const GLchar*> facesBlue = {
-		"Images//Skybox//blue//bkg1_right.png",
-		"Images//Skybox//blue//bkg1_left.png",
-		"Images//Skybox//blue//bkg1_top.png",
-		"Images//Skybox//blue//bkg1_bot.png",
-		"Images//Skybox//blue//bkg1_front.png",
-		"Images//Skybox//blue//bkg1_back.png"
-	};
-
-	res_manager->LoadCubemap(facesBlue, "BlueSpace", useGammaCorrection);
-
-	std::vector<const GLchar*> facesNebula = {
-		"Images//Skybox//nebula//bkg1_right.png",
-		"Images//Skybox//nebula//bkg1_left.png",
-		"Images//Skybox//nebula//bkg1_top.png",
-		"Images//Skybox//nebula//bkg1_bot.png",
-		"Images//Skybox//nebula//bkg1_front.png",
-		"Images//Skybox//nebula//bkg1_back.png"
-	};
-
-	res_manager->LoadCubemap(facesNebula, "NebulaSpace", useGammaCorrection);
+	// sounds.
+	res_manager->addSound("Sounds//sound1_0.mp3", "BackgroundSound");
+	res_manager->addSound("Sounds//sound1_1.mp3", "BackgroundSound2");
+	res_manager->addSound("Sounds//laser_effect.mp3", "LaserSound");
+	res_manager->addSound("Sounds//rocketFire_effect.wav", "RocketSound");
+	res_manager->addSound("Sounds//laser_effectEnemy.mp3", "LaserEnemySound");
+	res_manager->addSound("Sounds//ionCharge_effect.wav", "IonChargeEffect");
+	res_manager->addSound("Sounds//explosion_effect1_0.mp3", "ExplosionEffect");
+	res_manager->addSound("Sounds//explosion_effect1_1.mp3", "ExplosionEffect2");
+	res_manager->addSound("Sounds//electricExplosion_effect.mp3", "ElectricExplosionEffect");
+	res_manager->addSound("Sounds//generator_effect.wav", "GeneratorEffect");
+	res_manager->addSound("Sounds//click_effect.wav", "ClickEffect");
 }
